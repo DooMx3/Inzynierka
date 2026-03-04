@@ -2,8 +2,14 @@
 %texlive-latex-extra
 \documentclass[twoside,12pt]{article}
 %\documentclass[12pt]{article}
-\usepackage{polski}
-\usepackage[utf8]{inputenc}    
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[english]{babel}
+\usepackage{xcolor}
+\usepackage{url}
+
+\usepackage{todonotes}
 
 \textwidth 16cm
 \textheight 24cm
@@ -18,27 +24,6 @@
 \usepackage{graphicx}
 \usepackage{wrapfig}
 \usepackage[table]{xcolor}
-
-%do literatury i linków
-\usepackage{cite}
-\usepackage{hyperref}
-\hypersetup{
-    colorlinks=true,
-    allcolors=black,
-    citecolor=blue,
-    urlcolor=blue,
-}
-
-%zmiana nazwy Litaratura na Bibliografia
-%\renewcommand{\refname}{Bibliografia}
-
-%nagłówki i stopki
-\usepackage{fancyhdr}
-\pagestyle{fancy}
-\fancyhead{}
-\fancyfoot{}
-\renewcommand{\headrulewidth}{1.0pt}
-\renewcommand{\footrulewidth}{1.0pt}
 
 %texlive-science
 \usepackage{algorithmic}
@@ -86,9 +71,6 @@
 
 \begin{document}
 
-\fancyfoot[CE,CO]{\thepage}
-
-
 \thispagestyle{empty}
 \vspace*{-1cm}
 
@@ -96,82 +78,52 @@
 \linespread{1.0}
 %\renewcommand{\baselineskip}{1.0}
 \huge
-\textsc{POLITECHNIKA LUBELSKA}\\[0.2cm] 
-Wydział Elektrotechniki i Informatyki\\
-Kierunek Informatyka\\
+\textsc{Lublin University of Technology}\\[0.2cm] 
 \vspace*{1cm}
 \includegraphics[width=5cm]{logo_weii.jpg} \\[1.0cm]
-\textsc{PRACA MAGISTERSKA}\\
+\textsc{Engineering Thesis}\\
 \vspace*{1.5cm}
-Temat pracy\\
-English version
+English version\\
+Temat pracy
 \vspace{4.5cm}
 
 \normalsize
 {\renewcommand{\arraystretch}{1.1}
 \begin{tabular}{p{8cm}p{8cm}}
- Dyplomant: & Promotor:\\
- Arkadiusz Kowalski & dr hab. Tomasz Zientarski\\
- nr albumu: 22334 &    \\
- Arkadiusz Kowalski &  \\
- nr albumu: 22334 &    
+ Authors: & Promoter:\\
+ Adrian Szwajgier & Grzegorz Kozieł, PhD\\
+ Album no: \textcolor{red}{IDK} &    \\
+ Karol Solecki &  \\
+ Album no: 101668 & \\
+ Michał Strojek &  \\
+ Album no: \textcolor{red}{IDK} &    
 \end{tabular}
 }
 
 \vspace{1cm}
 
- Lublin 2020
+ Lublin 2026
 \end{center}
 
-
-\clearpage
-\thispagestyle{empty}
-~\\
-%\vspace*{-3cm}
-%\hspace*{-2cm}\includegraphics[width=10cm]{logo_fine_weii.pdf} 
-\clearpage
-
-
-
 \setcounter{page}{1}
-\fancyhead[RE,RO]{\sc\contentsname}
 \tableofcontents
 \clearpage
+\section{Introduction}
+\todo[inline]{Czy można nazwy rozdziałów i podrozdziałów pożyczyć z innej pracy?}
+\subsection{Puropose of work}
+\subsection{Scope of work}
+\subsection{Division of work}
+\section{System design}
+\subsection{Market analysis}
+\subsection{Functional and non-functional requirements}
 
-%\addtocounter{page}{-10}
-
-
-\section{Pierwszy rozdział x1} 
-\label{roz1}
-\fancyhead[RE,RO]{\sc Pierwszy rozdział x1}
-
-\begin{thebibliography}{99}
-
-
-
-\bibitem{basinski_1971}
-Basinski Z.S.,  Duesberry M.S., Taylor R.,  Influence of shear stress on screw dislocations in a model sodium lattice, Can. J. Phys. 49 (1971) 2160--2180.
-
-\bibitem{eason_1955}
-Eason G.,  Noble B.,  Sneddon I. N., On certain integrals of Lipschitz-Hankel type involving products of Bessel functions, Phil. Trans. Roy. Soc. London A247 (1955) 529--551.
-
-\bibitem{gennes1979}
- de Gennes P.G., Scaling Concepts in Polymer Physics, Cornell University Press, London, 1979.
-
-
-\bibitem{opticexp2012hsu}
-Hsu J.,  Fuentes-Hernandez C,, Ernst A.R., Hales J.M.,  Perry J.W., Kippelen B., Linear and nonlinear optical properties of Ag/Au bilayer thin films, Optics Express 20 (2012) 8629--8640.
-
-\bibitem{strona1_2015}
-Konieczny kilkuwyrazowy opis czego dotyczy link, np. Język \TeX--podstawy, \url{https://en.wikibooks.org/wiki/LaTeX/Plain_TeX}, [23.01.2015].
-
-\bibitem{nesterenko2012}
-Nesterenko D.V., Surface plasmon sensing with different metals in single and double layer configurations, Appl. Opt. 51(27) (2012) 6673--6682, \url{http://dx.doi.org/10.1007/s11468-013-9575-1}.
-
-\bibitem{zientarski2015}
-Zientarski T.,  Chocyk D., Structure and stress in Cu/Au and Fe/Au systems: A molecular dynamics study, Thin Solid Films  562  (2014) 347--352.
-
-\end{thebibliography}
+%\begin{thebibliography}{99}
+%
+%\bibitem{basinski_1971}
+%Basinski Z.S.,  Duesberry M.S., Taylor R.,  Influence of shear stress on screw dislocations in a model sodium lattice, Can. J. Phys. 49 (1971) 2160--2180.
+%
+%
+%\end{thebibliography}
 
 
 \end{document}
