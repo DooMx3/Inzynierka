@@ -112,6 +112,23 @@ System wspomagający prowadzenie winnicy i\,winiarni
 \subsection{Puropose of work}
 \subsection{Scope of work}
 \subsection{Division of work}
+\begin{table}[th]
+\caption{Division of work}
+\vspace{0.5cm}
+\begin{tabular}{l|ccc|}
+\cline{2-4}
+                                                  & \multicolumn{1}{c|}{Adrian Szwajgier} & \multicolumn{1}{c|}{Karol Solecki} & Michał Strojek \\ \cline{2-4} 
+                                                  & \multicolumn{3}{c|}{Introduction}                                                           \\ \hline
+\multicolumn{1}{|l|}{Purpose of work}             & \multicolumn{1}{c|}{}                 & \multicolumn{1}{c|}{}              & X              \\ \hline
+\multicolumn{1}{|l|}{Scope of work}               & \multicolumn{1}{c|}{}                 & \multicolumn{1}{c|}{}              & X              \\ \hline
+\multicolumn{1}{|l|}{Division of work}            & \multicolumn{1}{c|}{}                 & \multicolumn{1}{c|}{X}             &                \\ \hline
+                                                  & \multicolumn{3}{c|}{System design}                                                          \\ \hline
+\multicolumn{1}{|l|}{Market analysis}             & \multicolumn{1}{c|}{}                 & \multicolumn{1}{c|}{}              & X              \\ \hline
+\multicolumn{1}{|l|}{Functional requirements}     & \multicolumn{1}{c|}{X}                & \multicolumn{1}{c|}{}              &                \\ \hline
+\multicolumn{1}{|l|}{Non-functional requirements} & \multicolumn{1}{c|}{}                 & \multicolumn{1}{c|}{X}             &                \\ \hline
+\end{tabular}
+\centering
+\end{table}
 \section{System design}
 This section discusses the application design process. The primary focus is on the requirements that must be met. A market analysis was conducted with regard to the required functions.
 \subsection{Market analysis}
@@ -141,7 +158,17 @@ The system shall provide the following functionalities, categorized by users. Th
     \item the ability to enter, view, and edit data for each stage of production and bottling
 \end{itemize}
 \subsection{Non-functional requirements}
-
+    Application described in this work should implement the following cryteria:
+    \begin{itemize}
+        \item Backend needs to be done in Java framework Spring Boot,
+        \item Database have to be relational, preferably PostgreSQL,
+        \item User's password should be stored in Argon2 hash,
+        \item Frontend must be written in Vue.js or Svelte,
+        \item Application have to work properly on Google Chrome 144 or later and Firefox 148 or later
+        \item Application needs to be accesible from mobile devices
+        \item Frontend must communicate with backend using GraphQL
+        \item All part of the system are to be conteinerized
+    \end{itemize}
 
 %\begin{thebibliography}{99}
 %
