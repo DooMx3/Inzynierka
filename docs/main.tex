@@ -135,11 +135,13 @@ This section discusses the application design process. The primary focus is on t
 \subsection{Functional requirements}
 The system shall provide the following functionalities, categorized by users. This approach is consistent with the standard definition of functional requirements \cite{sommerville2017}.
 \subsubsection{Guest User:}
+\todo[inline]{Czy gościowi na pewno potrzebne jest konto żeby zobaczyć ofertę?}
 \begin{itemize}
     \item the ability to register an account,
     \item the ability to review current offerings.
 \end{itemize}
 \subsubsection{Owner:}
+\todo[inline]{Czy na pewno chcemy się bawić w budżet w tym projekcie?}
 \begin{itemize}
     \item the ability to generate and review reports,
     \item the ability to plan a budget,
@@ -148,14 +150,16 @@ The system shall provide the following functionalities, categorized by users. Th
 \end{itemize}
 \subsubsection{Vineyard Worker:}
 \begin{itemize}
-    \item the ability to record completed gardening tasks
-    \item the ability to add information about observed pests or plant diseases, with the option to attach a photo
-    \item the ability to view the task schedule for the day
+    \item the ability to record completed gardening tasks,
+    \item the ability to view, edit and add plants information in specific vineyard,
+    \item the ability to add information about observed pests or plant diseases, with the option to attach a photo,
+    \item the ability to view the task schedule for the day,
+    \item the ability to enter amount of grapes hervested from specific vineyard with specific type.
 \end{itemize}
 \subsubsection{Oenologist:}
 \begin{itemize}
-    \item the ability to record chemical parameters (sugar, acidity, pH, temperature) at every stage of production.
-    \item the ability to enter, view, and edit data for each stage of production and bottling
+    \item the ability to record chemical parameters (sugar, acidity, pH, temperature) at every stage of production,
+    \item the ability to enter, view, and edit data for each stage of production and bottling.
 \end{itemize}
 \subsection{Non-functional requirements}
     Application described in this work should implement the following cryteria:
@@ -164,10 +168,10 @@ The system shall provide the following functionalities, categorized by users. Th
         \item Database have to be relational, preferably PostgreSQL,
         \item User's password should be stored in Argon2 hash,
         \item Frontend must be written in Vue.js or Svelte,
-        \item Application have to work properly on Google Chrome 144 or later and Firefox 148 or later
-        \item Application needs to be accesible from mobile devices
-        \item Frontend must communicate with backend using GraphQL
-        \item All part of the system are to be conteinerized
+        \item Application have to work properly on Google Chrome 144 or later and Firefox 148 or later,
+        \item Application needs to be accesible from mobile devices,
+        \item Frontend must communicate with backend using GraphQL,
+        \item All part of the system are to be conteinerized.
     \end{itemize}
 
 %\begin{thebibliography}{99}
