@@ -9,6 +9,7 @@
 \usepackage{url}
 
 \usepackage{todonotes}
+\usepackage{float}
 
 \textwidth 16cm
 \textheight 24cm
@@ -116,7 +117,7 @@ Our goal is to create an app that offers a simple and intuitive way to manage a 
 \subsection{Scope of work}
 
 \begin{itemize}
-\todo[inline]{Raczej na razie placeholder? To chyba napiszemy w momencie jak będzie więcej tekstu, jeśli dobrze to rozumiem}
+%\todo[inline]{Raczej na razie placeholder? To chyba napiszemy w momencie jak będzie więcej tekstu, jeśli dobrze to rozumiem}
 	\item Analysis of existing market solutions.
 	
 	\item Design of the database architecture and UI.
@@ -129,7 +130,7 @@ Our goal is to create an app that offers a simple and intuitive way to manage a 
 \end{itemize}
 
 \subsection{Division of work}
-\begin{table}[th]
+\begin{table}[H]
 \caption{Division of work}
 \vspace{0.5cm}
 \begin{tabular}{l|ccc|}
@@ -169,16 +170,13 @@ As you can see, the apps currently available on the market are primarily designe
 \subsection{Functional requirements}
 The system shall provide the following functionalities, categorized by users. This approach is consistent with the standard definition of functional requirements \cite{sommerville2017}.
 \subsubsection{Guest User:}
-\todo[inline]{Czy gościowi na pewno potrzebne jest konto żeby zobaczyć ofertę?}
 \begin{itemize}
     \item the ability to register an account,
     \item the ability to review current offerings.
 \end{itemize}
 \subsubsection{Owner:}
-\todo[inline]{Czy na pewno chcemy się bawić w budżet w tym projekcie?}
 \begin{itemize}
     \item the ability to generate and review reports,
-    \item the ability to plan a budget,
     \item the ability to view, create and delete users in the organization,
     \item the ability to assign and revoke roles to other users in the organization.
 \end{itemize}
