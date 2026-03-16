@@ -116,9 +116,8 @@ System wspomagający prowadzenie winnicy i\,winiarni
 Our goal is to create an app that offers a simple and intuitive way to manage a vineyard, in order to support producers and provide consumers with detailed information about the products they choose.
 
 \subsection{Scope of work}
-
-\begin{itemize}
 %\todo[inline]{Raczej na razie placeholder? To chyba napiszemy w momencie jak będzie więcej tekstu, jeśli dobrze to rozumiem}
+\begin{itemize}
 	\item Analysis of existing market solutions.
 	
 	\item Design of the database architecture and UI.
@@ -166,9 +165,13 @@ The market for vineyard management apps is quite niche, and most apps offer uniq
 	\cite{evineyard}
 	\item wine.ms is another comprehensive solution that, in addition to its core features, also offers integration with select accounting systems.
 	\cite{wine.ms}
+	\item Mistrzwina is a Polish vineyard management system. In addition to managing the production process itself, it also assists with the registration of tax stamps and the distribution process.
+	\cite{mistrzwina}
+	\item Enospace is another Polish system. In addition to the features found in other competing systems, it includes a module that sends reminders about KOWR deadlines and a system for generating QR codes for bottle labels, allowing users to access information about the wines they’ve selected.
+	\cite{enospace}
 \end{itemize}
 
-As you can see, the apps currently available on the market are primarily designed to assist producers. In our opinion, supporting producers can be combined with increasing transparency for consumers. This solution involves creating QR codes that can be used both on equipment at the vineyard—which would help producers manage the production chain—and on bottles, which would allow consumers to trace the entire process by which their wine was made.
+As you can see, the apps currently available on the market are primarily designed to assist producers. In our opinion, supporting producers can be combined with increasing transparency for consumers. This solution involves creating QR codes that can be used both on equipment at the vineyard—which would help producers manage the production chain—and on bottles, which would allow consumers to trace the entire process by which their wine was made. Unlike EnoSpace’s solution, the QR code will link to a page containing not only basic information about the selected wine, but also more detailed information, such as the harvest date and location, the date the wine was placed in the barrel, and the bottling date.
 
 \subsection{Functional requirements}
 The system shall provide the following functionalities, categorized by users. This approach is consistent with the standard definition of functional requirements \cite{sommerville2017}.
@@ -209,13 +212,6 @@ The system shall provide the following functionalities, categorized by users. Th
         \item All part of the system are to be conteinerized.
     \end{itemize}
 
-%\begin{thebibliography}{99}
-%
-%\bibitem{basinski_1971}
-%Basinski Z.S.,  Duesberry M.S., Taylor R.,  Influence of shear stress on screw dislocations in a model sodium lattice, Can. J. Phys. 49 (1971) 2160--2180.
-%
-%
-%\end{thebibliography}
 \bibliographystyle{plain} % Ustala styl numeracji
 \bibliography{literature}
 
