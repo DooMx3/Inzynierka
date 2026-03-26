@@ -224,14 +224,18 @@ The system shall provide the following functionalities, categorized by users. Th
 \subsection{Non-functional requirements}
     Application described in this work should implement the following cryteria:
     \begin{itemize}
-        \item Backend needs to be done in Java framework Spring Boot,
-        \item Database have to be relational, preferably PostgreSQL,
-        \item User's password should be stored in Argon2 hash,
-        \item Frontend must be written in Vue.js or Svelte,
-        \item Application have to work properly on Google Chrome 144 or later and Firefox 148 or later,
-        \item Application needs to be accesible from mobile devices,
-        \item Frontend must communicate with backend using GraphQL,
-        \item All part of the system are to be conteinerized.
+        \item backend needs to be done in Java framework Spring Boot,
+        \item database have to be relational, preferably PostgreSQL,
+        \item user's password should be stored in Argon2 hash,
+        \item frontend must be written in Vue.js or Svelte,
+        \item application have to work properly on Google Chrome 144 or later and Firefox 148 or later,
+        \item application needs to be accesible from mobile devices,
+        \item frontend must communicate with backend using GraphQL,
+        \item all part of the system are to be conteinerized,
+		\item the app will be available on a monthly or annual subscription plan - the plan renews automatically,
+		\item the system will run on an external server with a minimum uptime of 99%,
+		\item the app can be used offline, and data will be synchronized once the connection is restored,
+		\item security patches will be released as needed,
     \end{itemize}
 
 \bibliographystyle{plain} % Ustala styl numeracji
