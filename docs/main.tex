@@ -180,14 +180,17 @@ The system shall provide the following functionalities, categorized by users. Th
 	\item the ability to log in,
 	\item the ability to view information about batch of wine using qr code from the bottle.
 \end{itemize}
-\subsubsection{Owner:}
+\subsubsection{Logged-in user:}
 \begin{itemize}
-    \item the ability to generate and review reports,
-    \item the ability to view, create and delete users in the organization,
-    \item the ability to assign and revoke roles to other users in the organization.
+	\item all of the guest user abilities,
+	\item the ability to log out,
+	\item the ability to recover password,
+	\item the ability to change user details,
+	\item the ability to delete user account.
 \end{itemize}
 \subsubsection{Vineyard Worker:}
 \begin{itemize}
+	\item all of the logged-in user abilities,
     \item the ability to record completed gardening tasks,
     \item the ability to view, edit and add plants information in specific vineyard,
     \item the ability to add information about observed pests or plant diseases, with the option to attach a photo,
@@ -196,8 +199,27 @@ The system shall provide the following functionalities, categorized by users. Th
 \end{itemize}
 \subsubsection{Oenologist:}
 \begin{itemize}
+	\item all of the logged-in abilities,
     \item the ability to record chemical parameters (sugar, acidity, pH, temperature) at every stage of production,
     \item the ability to enter, view, and edit data for each stage of production and bottling.
+\end{itemize}
+\subsubsection{Owner:}
+\begin{itemize}
+	\item all of the vineyard worked and oenologist abilities,
+	\item the ability to generate and review reports such as,
+		\begin{itemize}
+			\item production efficiency,
+			\item graft diversity,
+			\item sales of individual products,
+			\item working hours.
+		\end{itemize}
+	\item the ability to view and add users to organization,
+	\item the ability to assign and revoke roles to other users in the organization.
+\end{itemize}
+\subsubsection{Administrator: }
+\begin{itemize}
+	\item all of the owner abilities,
+	\item TODO.
 \end{itemize}
 \subsection{Non-functional requirements}
     Application described in this work should implement the following cryteria:
