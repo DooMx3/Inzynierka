@@ -59,6 +59,9 @@
 \@afterindenttrue
 \makeatother
 
+%usunięcie 3 poziomu numerowania
+\setcounter{secnumdepth}{2}
+
 %numery obiektów połączone z numerami rozdziałów
 \renewcommand{\thefigure}{\arabic{section}.\arabic{figure}}
 \renewcommand{\thetable}{\arabic{section}.\arabic{table}}
@@ -249,7 +252,11 @@ The system shall provide the following functionalities, categorized by users. Th
 	\item the ability to reset a user's password if they lose access to their email,
 	\item the ability to change a user's first and last name.
 \end{itemize}
+
+
 \subsection{Non-functional requirements}
+	
+
     Application described in this work should implement the following cryteria:
     \begin{itemize}
         \item Backend needs to be done in Java framework Spring Boot,
