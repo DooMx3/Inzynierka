@@ -106,6 +106,67 @@ Application described in this work should implement the following criteria:
 User stories are a collection of features described from the perspective of the application’s user \cite{cohn2004}. Unlike functional requirements, they provide a better understanding of the needs of non-technical users. This approach ensures that the application will be better aligned with business needs.
 \subsubsection{Guest User:}
 \subsubsection{Logged-in user:}
+
+\begin{enumerate}
+	\item As a logged-in user I can log out of the system so that my account is secure and no one can use it without my knowledge.
+	Definition of done:
+	\begin{itemize}
+		\item the "log out" button is easily accessible in the user interface,
+		\item after clicking the "log out" button, the user is logged out of the system, session token is invalidated on the backend,
+		\item after logging out, user is redirected to the login page.
+	\end{itemize}
+	\item As a logged-in user I can change my password so that I can maintain the security of my account.
+	Definition of done:
+	\begin{itemize}
+		\item the "change password" option is available in the profile settings,
+		\item the user is required to provide their current password and the new password twice for confirmation,
+		\item after successfully changing the password, the user receives a confirmation pop-up and is asked to log in again using the new password,
+		\item the password hash is updated in the database.
+	\end{itemize}
+	\item As a logged-in user I can change my email address so that I can keep my personal information up to date.
+	Definition of done:
+	\begin{itemize}
+		\item the "change email" option is available in the profile settings,
+		\item the user is required to provide new email address and confirm the operation,
+		\item after successfully changing the email address, the user receives a confirmation pop-up and is asked to log in again using the new email and password,
+		\item the email address is updated in the database.
+	\end{itemize}
+	\item As a logged-in user I can change my phone number so that I can keep my personal information up to date.
+	Definition of done:
+	\begin{itemize}
+		\item the "change phone number" option is available in the profile settings,
+		\item the user is required to provide new phone number and confirm the operation,
+		\item after successfully changing the phone number, the user receives a confirmation pop-up,
+		\item the phone number is updated in the database.
+	\end{itemize}
+	\item As a logged-in user I can delete my account so that I can remove all my personal data from the system in case I no longer want to use the application.
+	Definition of done:
+	\begin{itemize}
+		\item the "delete account" option is available in the profile settings,
+		\item the user is required to enter their password and confirm the action,
+		\item after successfully deleting the account, the user receives a confirmation pop-up and is redirected to the login page,
+		\item all personal data is removed from the database.
+	\end{itemize}
+	\item As a logged-in user who is not a part of any organization I can create an organization and become its owner so that I can manage my vineyard and winery operations effectively.
+	Definition of done:
+	\begin{itemize}
+		\item validation prevents creation if user already has an organization,
+		\item the "create organization" option is available in the user dashboard,
+		\item the user is required to provide the organization details and confirm the action,
+		\item after successfully creating the organization, the user receives a confirmation pop-up and is redirected to the organization management page,
+		\item the user is assigned the role of "owner" in the newly created organization,
+		\item the organization is added to the database and associated with the user's account.
+	\end{itemize}
+	\item As a logged-in user I want to join an existing organization so that I can contribute to the management of the vineyard.
+	Definition of done:
+	\begin{itemize}
+		\item the user email is visible in user dashboard so that the Vineyard Owner can easily add account to the organization,
+		\item after the owner adds the user to the organization, the user receives a notification with an option to confirm,
+		\item after confirming, the user is redirected to the organization dashboard and can access the features based on their assigned role,
+		\item the user is associated with the organization in the database.
+	\end{itemize}
+\end{enumerate}
+
 \subsubsection{Vineyard Worker:}
 \subsubsection{Oenologist:}
 \subsubsection{Vineyard Owner:}
