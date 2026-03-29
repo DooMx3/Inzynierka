@@ -23,7 +23,6 @@ The market for vineyard management apps is quite niche, and most apps offer uniq
 Current market analysis reveals that available applications are primarily designed to assist producers. However, supporting producers can be effectively integrated with increasing transparency for consumers. This solution involves creating QR codes that can be used both on equipment at the vineyard—which would help producers manage the production chain—and on bottles, which would allow consumers to trace the entire process by which their wine was made. Unlike EnoSpace’s solution, the QR code will link to a page containing not only basic information about the selected wine, but also more detailed information, such as the harvest date and location, the date the wine was placed in the barrel, and the bottling date.
 
 \subsection{User stories}
-\todo[inline]{Dodać jakiś tekst najlepiej z jakąś fancy książką}
 \subsubsection{Guest User:}
 \subsubsection{Logged-in user:}
 \subsubsection{Vineyard Worker:}
@@ -36,7 +35,15 @@ The system shall provide the following functionalities, categorized by users. Th
 \begin{itemize}
 	\item the ability to review current offerings,
 	\item the ability to log in,
-	\item the ability to view information about batch of wine using qr code from the bottle.
+	\item the ability to view information about batch of wine using qr code from the bottle including:
+	\begin{itemize}
+		\item final wine parameters(sugar level, acidity, pH and alcohol content),
+		\item information about type of grape used for production,
+		\item when was grape harvested,
+		\item how long it spend in barrel if maturated,
+		\item when it was bottled.
+		\todo[inline]{ \textuparrow\, Tu kropka czy przecinek na końcu?}
+	\end{itemize}
 \end{itemize}
 \subsubsection{Logged-in user:}
 \begin{itemize}
@@ -53,25 +60,25 @@ The system shall provide the following functionalities, categorized by users. Th
 	\item all of the logged-in user abilities,
 	\item the ability to record completed gardening tasks,
 	\item the ability to view, edit and add plants information in specific vineyard,
-	\item the ability to add information about observed pests or plant diseases, with the option to attach a photo,
-	\item the ability to view the task schedule for the day,
-	\item the ability to enter amount of grapes hervested from specific vineyard with specific type.
+	\item the ability to add data about observed pests or plant diseases,
+	\item the ability to enter amount of grapes harvested from specific vineyard with particular type.
 \end{itemize}
 \subsubsection{Oenologist:}
 \begin{itemize}
 	\item all of the logged-in abilities,
-	\item the ability to record chemical parameters (sugar, acidity, pH, temperature) at every stage of production,
+	\item the ability to record chemical parameters (sugar level, acidity, pH, temperature and alcohol content) at every stage of production,
 	\item the ability to enter, view, and edit data for each stage of production and bottling.
 \end{itemize}
 \subsubsection{Vineyard Owner:}
 \begin{itemize}
 	\item all of the vineyard worker and oenologist abilities,
-	\item the ability to generate and review reports such as,
+	\item the ability to generate and review reports such as:
 	\begin{itemize}
 		\item production efficiency,
 		\item diversity of grapevine varieties,
 		\item sales of individual products,
 		\item working hours.
+		\todo[inline]{ \textuparrow\, Tu kropka czy przecinek na końcu?}
 	\end{itemize}
 	\item the ability to view and add users to organization,
 	\item the ability to assign and revoke roles to other users in the organization.
@@ -86,14 +93,14 @@ The system shall provide the following functionalities, categorized by users. Th
 \subsection{Non-functional requirements}
 
 
-Application described in this work should implement the following cryteria:
+Application described in this work should implement the following criteria:
 \begin{itemize}
 	\item Backend needs to be done in Java framework Spring Boot,
 	\item Database have to be relational, preferably PostgreSQL,
 	\item User's password should be stored in Argon2 hash,
 	\item Frontend must be written in Vue.js or Svelte,
 	\item Application have to work properly on Google Chrome 144 or later and Firefox 148 or later,
-	\item Application needs to be accesible from mobile devices,
+	\item Application needs to be accessible from mobile devices,
 	\item Frontend must communicate with backend using GraphQL,
 	\item All part of the system are to be conteinerized.
 \end{itemize}
