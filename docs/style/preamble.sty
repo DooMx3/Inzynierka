@@ -1,0 +1,66 @@
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% Set langage to english so sections like Table of content are labeled correctly:
+% If you want to use polish change "english" to "polish" there
+\usepackage[english]{babel}
+
+% Proper formating of urls:
+\usepackage{url}
+
+ % FloatBarrier:
+\usepackage{placeins}
+
+% Todo notes to be used like:
+% \todo[inline]{text}
+\usepackage{todonotes}
+\usepackage{float}
+
+\textwidth 16cm
+\textheight 24cm
+\topmargin -2cm
+\evensidemargin 0.0cm
+\oddsidemargin 1.0cm %niep
+\linespread{1.5} %odstęp pomiedzy wierszami 1.5 
+
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+
+%zamiana formatu na potrzeby pracy inżynierskiej/magisterskiej POLLUB
+\makeatletter
+\renewcommand{\@makecaption}[2]{%
+	\vspace{\abovecaptionskip}%
+	\sbox{\@tempboxa}{#1. #2}
+	\ifdim \wd\@tempboxa >\hsize
+	#1. #2\par
+	\else
+	\global\@minipagefalse
+	\hbox to \hsize {\hfil #1. #2\hfil}%
+	\fi
+	\vspace{\belowcaptionskip}}
+\makeatother
+%robi wcięcie dla pierwszego akapitu
+%\usepackage{indentfirst}
+%\let\@afterindentfalse\@afterindenttrue
+%\@afterindenttrue
+\makeatletter
+\let\@afterindentfalse\@afterindenttrue
+\@afterindenttrue
+\makeatother
+
+% Remove subsubsection numbering and not include it in table of content:
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+
+% Add dot after section number:
+\renewcommand{\thesubsection}{\thesection\arabic{subsection}.}
+\renewcommand{\thesection}{\arabic{section}.}
+
+% Add section number before figure/table number:
+\renewcommand{\thefigure}{\arabic{section}.\arabic{figure}}
+\renewcommand{\thetable}{\arabic{section}.\arabic{table}}
+
+% Set bibliography style to match non stadnard Pollub requirements:
+\bibliographystyle{plain}

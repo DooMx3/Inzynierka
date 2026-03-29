@@ -1,76 +1,7 @@
-%texlive-lang-polish
-%texlive-latex-extra
+% Book style document with font-size 12pt
 \documentclass[twoside,12pt]{article}
-%\documentclass[12pt]{article}
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage{lmodern}
-\usepackage[english]{babel}
-\usepackage{url}
-\usepackage{placeins} % FloatBarrier
 
-\usepackage{todonotes}
-\usepackage{float}
-
-\textwidth 16cm
-\textheight 24cm
-\topmargin -2cm
-\evensidemargin 0.0cm
-\oddsidemargin 1.0cm %niep
-\linespread{1.5} %odstęp pomiedzy wierszami 1.5 
-
-\usepackage{lipsum}
-%\pretolerance 10000
-\usepackage{booktabs}
-\usepackage{graphicx}
-\usepackage{wrapfig}
-%\usepackage[table]{xcolor}
-
-%texlive-science
-\usepackage{algorithmic}
-\usepackage[ruled]{algorithm2e}
-\SetAlgorithmName{\rm Algorytm}{Spis algorytmów}{Spis algorytmów}%
-
-
-%kropki w rozdziałach
-\renewcommand{\thesubsubsection}{\thesubsection\arabic{subsubsection}.}
-\renewcommand{\thesubsection}{\thesection\arabic{subsection}.}
-\renewcommand{\thesection}{\arabic{section}.}
-    
-%zamiana formatu na potrzeby pracy inżynierskiej/magisterskiej POLLUB
-\makeatletter
-\renewcommand{\@makecaption}[2]{%
-\vspace{\abovecaptionskip}%
-\sbox{\@tempboxa}{#1. #2}
-\ifdim \wd\@tempboxa >\hsize
-#1. #2\par
-\else
-\global\@minipagefalse
-\hbox to \hsize {\hfil #1. #2\hfil}%
-\fi
-\vspace{\belowcaptionskip}}
-\makeatother
-%robi wcięcie dla pierwszego akapitu
-%\usepackage{indentfirst}
-%\let\@afterindentfalse\@afterindenttrue
-%\@afterindenttrue
-\makeatletter
-\let\@afterindentfalse\@afterindenttrue
-\@afterindenttrue
-\makeatother
-
-%usunięcie 3 poziomu numerowania
-\setcounter{secnumdepth}{2}
-\setcounter{tocdepth}{2}
-
-%numery obiektów połączone z numerami rozdziałów
-\renewcommand{\thefigure}{\arabic{section}.\arabic{figure}}
-\renewcommand{\thetable}{\arabic{section}.\arabic{table}}
-\renewcommand{\thealgocf}{\arabic{section}.\arabic{algocf}}
-\SetAlgoCaptionSeparator{{\rm.}} 
-
-\newcommand{\itbf}[1]{\textit{\textbf{#1}}}
-
+\usepackage{style/preamble}
 
 \begin{document}
 
@@ -78,14 +9,11 @@
 
 \include{chapters/abstract}
 
-
 \clearpage
-
 
 \include{chapters/intro}
 \include{chapters/system_design}
 
-\bibliographystyle{plain} % Ustala styl numeracji
 \bibliography{literature}
 
 \end{document}
