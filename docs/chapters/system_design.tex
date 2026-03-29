@@ -1,0 +1,84 @@
+\section{System design}
+This section discusses the application design process. The primary focus is on the requirements that must be met. A market analysis was conducted with regard to the required functions.
+\subsection{Market analysis}
+
+The market for vineyard management apps is quite niche, and most apps offer unique features. Below is a list of a few selected systems currently available on the market:
+
+\begin{itemize}
+	%\item VineInfo is a vineyard management app designed to help growers cultivate the highest-quality grapes in order to produce the best possible wine
+	\item Vintrace is a cloud-based application designed to monitor and manage the entire wine production process—from the vineyard, through production and bottling, to the management of the entire supply chain. This solution ensures accessibility from anywhere, offering both a web-based application and a mobile app
+	\cite{vintrace}.
+	\item Vintegrate is an application designed to manage both the entire wine production process and related activities, such as direct sales to private customers or running a sommelier club
+	\cite{vintegrate}.
+	\item Like the solutions mentioned above, eVineyard provides systems that assist in managing the entire wine production process and also allows for the management of agricultural equipment
+	\cite{evineyard}.
+	\item wine.ms is another comprehensive solution that, in addition to its core features, also offers integration with select accounting systems
+	\cite{wine.ms}.
+	\item Mistrzwina is a Polish vineyard management system. In addition to managing the production process itself, it also assists with the registration of tax stamps and the distribution process
+	\cite{mistrzwina}.
+	\item Enospace is another Polish system. In addition to the features found in other competing systems, it includes a module that sends reminders about KOWR deadlines and a system for generating QR codes for bottle labels, allowing users to access information about the wines they’ve selected
+	\cite{enospace}.
+\end{itemize}
+
+Current market analysis reveals that available applications are primarily designed to assist producers. However, supporting producers can be effectively integrated with increasing transparency for consumers. This solution involves creating QR codes that can be used both on equipment at the vineyard—which would help producers manage the production chain—and on bottles, which would allow consumers to trace the entire process by which their wine was made. Unlike EnoSpace’s solution, the QR code will link to a page containing not only basic information about the selected wine, but also more detailed information, such as the harvest date and location, the date the wine was placed in the barrel, and the bottling date.
+
+\subsection{User stories}
+\todo[inline]{Dodać jakiś tekst najlepiej z jakąś fancy książką}
+\subsubsection{Guest User:}
+\subsubsection{Logged-in user:}
+\subsubsection{Vineyard Worker:}
+\subsubsection{Oenologist:}
+\subsubsection{Vineyard Owner:}
+\subsubsection{Administrator: }
+\subsection{Functional requirements}
+The system shall provide the following functionalities, categorized by users. This approach is consistent with the standard definition of functional requirements \cite{sommerville2017}.
+\subsubsection{Guest User:}
+\begin{itemize}
+	\item the ability to review current offerings,
+	\item the ability to log in,
+	\item the ability to view information about batch of wine using qr code from the bottle.
+\end{itemize}
+\subsubsection{Logged-in user:}
+\begin{itemize}
+	\item all of the guest user abilities,
+	\item the ability to log out,
+	\item the ability to recover password,
+	\item the ability to change password,
+	\item the ability to change email,
+	\item the ability to change phone number,
+	\item the ability to delete user account.
+\end{itemize}
+\subsubsection{Vineyard Worker:}
+\begin{itemize}
+	\item all of the logged-in user abilities,
+	\item the ability to record completed gardening tasks,
+	\item the ability to view, edit and add plants information in specific vineyard,
+	\item the ability to add information about observed pests or plant diseases, with the option to attach a photo,
+	\item the ability to view the task schedule for the day,
+	\item the ability to enter amount of grapes hervested from specific vineyard with specific type.
+\end{itemize}
+\subsubsection{Oenologist:}
+\begin{itemize}
+	\item all of the logged-in abilities,
+	\item the ability to record chemical parameters (sugar, acidity, pH, temperature) at every stage of production,
+	\item the ability to enter, view, and edit data for each stage of production and bottling.
+\end{itemize}
+\subsubsection{Vineyard Owner:}
+\begin{itemize}
+	\item all of the vineyard worker and oenologist abilities,
+	\item the ability to generate and review reports such as,
+	\begin{itemize}
+		\item production efficiency,
+		\item diversity of grapevine varieties,
+		\item sales of individual products,
+		\item working hours.
+	\end{itemize}
+	\item the ability to view and add users to organization,
+	\item the ability to assign and revoke roles to other users in the organization.
+\end{itemize}
+\subsubsection{Administrator: }
+\begin{itemize}
+	\item all of the vineyard owner abilities,
+	\item the ability to reset a user's password if they lose access to their email,
+	\item the ability to change a user's first and last name.
+\end{itemize}
