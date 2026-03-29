@@ -53,10 +53,10 @@ The system shall provide the following functionalities, categorized by users. Th
 \subsubsection{Vineyard Worker:}
 \begin{itemize}
 	\item all of the logged-in user abilities,
-	\item the ability to record completed gardening tasks,
-	\item the ability to view, edit and add plants information in specific vineyard,
-	\item the ability to add data about observed pests or plant diseases,
-	\item the ability to enter amount of grapes harvested from specific vineyard with particular type.
+	\item the ability to view, edit, delete and add complete gardening tasks,
+	\item the ability to view, edit, delete and add plants information in specific vineyard,
+	\item the ability to view, edit, delete and add data about observed pests or plant diseases,
+	\item the ability to view, edit, delete and add  amount of grapes harvested from specific vineyard with particular type.
 \end{itemize}
 \subsubsection{Oenologist:}
 \begin{itemize}
@@ -90,7 +90,7 @@ The system shall provide the following functionalities, categorized by users. Th
 \begin{itemize}
 	\item all of the vineyard owner abilities,
 	\item the ability to reset a user's password if they lose access to their email,
-	\item the ability to change a user's first and last name.
+	\item the ability to change an user's personal details.
 \end{itemize}
 
 \subsection{Non-functional requirements}
@@ -111,6 +111,7 @@ Application described in this work should implement the following criteria:
 
 \subsection{User stories}
 User stories are a collection of features described from the perspective of the application’s user \cite{cohn2004}. Unlike functional requirements, they provide a better understanding of the needs of non-technical users. This approach ensures that the application will be better aligned with business needs.
+\todo[inline]{Czy powinny być w tym samy stylu wszystkie czy może być jak jest?}
 \subsubsection{Guest User:}
 
 \begin{enumerate}
@@ -212,6 +213,36 @@ User stories are a collection of features described from the perspective of the 
 \end{enumerate}
 
 \subsubsection{Vineyard Worker:}
+\begin{enumerate}
+	\item As an vineyard worker I would like to be able to view, store, edit and delete information about what was done on vineyard in order to be able to view them  in the future if needed. Definition of done:
+	\begin{itemize}
+		\item list of done tasks on specific parcel is visible to vineyard worker,
+		\item vineyard worker is able to edit tasks,
+		\item vineyard worker can delete task,
+		\item confirmation is required before removal,
+	\end{itemize}
+	\item As an vineyard worker I would like to be able to view, store, edit and delete information about plants on vineyard in order to be able to view them in the future if needed. Definition of done:
+	\begin{itemize}
+		\item list of information about plants on vineyard is visible to vineyard worker,
+		\item  vineyard worker is able to edit information about plants on vineyard,
+		\item vineyard worker can delete information about plants on vineyard,
+		\item confirmation is required before removal,
+	\end{itemize}
+	\item As an vineyard worker I would like to be able to view, store, edit and delete information about pests and plant diseases on vineyard in order to be able to view them in the future if needed. Definition of done:
+	\begin{itemize}
+		\item list of information about pests and plant diseases is visible to vineyard worker,
+		\item  vineyard worker is able to edit information about pests and plant diseases,
+		\item vineyard worker can delete information about pests and plant diseases,
+		\item confirmation is required before removal,
+	\end{itemize}
+	\item As an vineyard worker I would like to be able to view, store, edit and delete information about about amount of grapes harvested  on vineyard in order to be able to view them in the future if needed. Definition of done:
+	\begin{itemize}
+		\item list of information about about amount of grapes harvested on specific parcel is visible to vineyard worker,
+		\item  vineyard worker is able to edit information about about amount of grapes harvested,
+		\item vineyard worker can delete information about about amount of grapes harvested,
+		\item confirmation is required before removal,
+	\end{itemize}
+\end{enumerate}
 \subsubsection{Oenologist:}
 
 \begin{enumerate}
@@ -406,7 +437,6 @@ User stories are a collection of features described from the perspective of the 
 \subsubsection{Vineyard Owner:}
 
 \begin{enumerate}
-
 	\item As a vineyard owner, I am able to access vineyard worker and oenologist functionalities in order to manage the vineyard and winery operations effectively.
 	Definition of done:
 	\begin{itemize}
@@ -532,5 +562,25 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 	
 \end{enumerate}
-
 \subsubsection{Administrator: }
+\todo[inline]{Czy pisać histoyjke w stylu \textdownarrow}
+\begin{enumerate}
+	\item As an administrator, I would like to be able to do all that owner can in order to be able to help if needed. Definition of Done:
+	\begin{itemize}
+		\item
+	\end{itemize}
+	\item As an administrator, I would like to reset user's password if they lost access to their email in order to restore their ability to work.  Definition of Done:
+	\begin{itemize}
+		\item the "change users' password" option is available in the admin dashboard settings,
+		\item the user is required to provide their bank info for confirmation of account ownership,
+		\todo[inline]{W jaki sposób? \textuparrow}
+		\item the password hash is updated in the database.
+	\end{itemize}
+	\item As an administrator, I would like to be able to change user's personal detail. Definition of Done:
+	\begin{itemize}
+		\item the admin can access the user management option from the admin dashboard,
+		\item the admin can change all user personal information including: first and last name, address, bank account number,
+		\item all changes are saved in the database and can be reviewed later.
+	\end{itemize}
+		\todo[inline]{A może to trzeba by przenieść do ownera? \textuparrow}
+\end{enumerate}
