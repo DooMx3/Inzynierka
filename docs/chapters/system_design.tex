@@ -29,7 +29,7 @@ The system shall provide the following functionalities, categorized by users. Th
 	\item the ability to review current offerings,
 	\item the ability to recover password,
 	\item the ability to log in,
-	\item the ability to view information about batch of wine using qr code from the bottle including:
+	\item the ability to view information about batch of wine using QR code from the bottle including:
 	\begin{itemize}
 		\item final wine parameters(sugar level, acidity, pH and alcohol content),
 		\item information about type of grape used for production,
@@ -105,6 +105,42 @@ Application described in this work should implement the following criteria:
 \subsection{User stories}
 User stories are a collection of features described from the perspective of the application’s user \cite{cohn2004}. Unlike functional requirements, they provide a better understanding of the needs of non-technical users. This approach ensures that the application will be better aligned with business needs.
 \subsubsection{Guest User:}
+
+\begin{enumerate}
+	\item As a guest user, I can visit the winery's website to check out its offerings.
+	Definition of done:
+	\begin{itemize}
+		\item the winery's “Offer” button is easily accessible on the website,
+		\item after clicking the "Offer" button, the user sees the winery's offer.
+	\end{itemize}
+	\item As a guest user, I can reset my password to regain access to my account and log in.
+	Definition of done:
+	\begin{itemize}
+		\item the login button is easily accessible on the home page,
+		\item after clicking the login button, the user sees the login form,
+		\item the password recovery button is located on the login form and is easily accessible,
+		\item after clicking the password recovery button, a new form opens where the user is required to provide their email address to receive an email containing a link to reset their password,
+		\item the email is sent to the user,
+		\item after receiving the email and clicking the link, the user must enter a new password and confirm it,
+		\item the password hash is updated in the database,
+		\item after successfully changing the password, the user receives a confirmation pop-up and is asked to log in again using the new password.
+	\end{itemize}
+	\item As a guest user, I can securely log in to my profile to access the resources stored there.
+	Definition of done:
+	\begin{itemize}
+		\item the login button is easily accessible on the home page,
+		\item after clicking the login button, the user sees the login form,
+		\item the user is required to enter their email address and password to log in,
+		\item after entering the correct information, the user is redirected to the dashboard.
+	\end{itemize}
+	\item As a user, I want to be able to open a page with detailed information about the wine batch the bottle comes from by scanning a QR code.
+	Definition of done:
+	\begin{itemize}
+		\item the user scans the QR code on the bottle using their mobile device,
+		\item after scanning the code, the user is redirected to a page with detailed information about that particular batch of wine.
+	\end{itemize}
+\end{enumerate}
+
 \subsubsection{Logged-in user:}
 
 \begin{enumerate}
@@ -169,5 +205,7 @@ User stories are a collection of features described from the perspective of the 
 
 \subsubsection{Vineyard Worker:}
 \subsubsection{Oenologist:}
+
+
 \subsubsection{Vineyard Owner:}
 \subsubsection{Administrator: }
