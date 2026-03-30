@@ -1,0 +1,67 @@
+name: Build and publish PDFs from LaTeX
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build LaTeX PDFs and publish to Releases
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get previous tag
+        id: get_previous_tag
+        run: |
+          git fetch --tags
+          echo "prev_tag=$(git describe --tags --abbrev=0 $(git rev-list --tags --skip=1 --max-count=1))" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Generate commits list from previous tag
+        id: generate_commits
+        run: |
+          echo "Automated build including those changes:" > release_body.txt
+          git log ${prev_tag}...HEAD --oneline --pretty=format:"- %s" >> release_body.txt
+
+      - name: Install TeX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            texlive-latex-recommended \
+            texlive-latex-extra \
+            texlive-fonts-recommended \
+            texlive-fonts-extra \
+            texlive-xetex \
+            texlive-lang-polish \
+            latexmk \
+            fontconfig
+
+      - name: Build all .tex files found in the repository
+        run: |
+          set -e
+          mkdir -p build
+          texfiles=*.tex
+          for f in $texfiles; do
+            echo "Building $f"
+            latexmk -pdf -halt-on-error -output-directory=build "$f"
+          done
+
+      - name: Upload PDFs and Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          draft: false
+          prerelease: false
+          artifacts: 'build/*.pdf'
+          bodyFile: ./release_body.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
