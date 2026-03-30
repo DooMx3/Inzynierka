@@ -50,7 +50,7 @@ jobs:
         run: |
           set -e
           mkdir -p build
-          texfiles=*.tex
+          texfiles=docs/*.tex
           for f in $texfiles; do
             echo "Building $f"
             latexmk -pdf -halt-on-error -output-directory=build "$f"
