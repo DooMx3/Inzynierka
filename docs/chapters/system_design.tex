@@ -254,40 +254,6 @@ User stories are a collection of features described from the perspective of the 
 		\item the system updates the information correctly.
 	\end{itemize}
 	
-	\item As a oenologist, I want to be able to scan the QR code displayed on a piece of winery equipment to obtain information about the batch of wine it contains.
-	Definition of done:
-	\begin{itemize}
-		\item the user scans the QR code located on one of the items of equipment in the winery,
-		\item the system links information about a piece of equipment to the batch of wine it contains and displays information about that batch,
-		\item after linking an inventory item to a case of wine, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
-		\item the user can click on a specific measurement, which will expand to display detailed information.
-	\end{itemize}
-	
-	\item As a oenologist, I want to be able to edit information about a batch of wine stored inside a piece of winery equipment after scanning the QR code on it.
-	Definition of done:
-	\begin{itemize}
-		\item the user scans the QR code located on one of the items of equipment in the winery,
-		\item the system links information about a piece of equipment to the batch of wine it contains and displays information about that batch,
-		\item after linking an inventory item to a case of wine, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
-		\item the user can click on a specific measurement, which will expand to display detailed information,
-		\item the button for adding a new measurement is highlighted and easily accessible,
-		\item after clicking the button to enter a new measurement, a form for entering measurement data opens,
-		\item the user enters the data and then confirms it,
-		\item the system saves the information correctly.
-	\end{itemize}
-	
-	\item As a oenologist, I want to be able to add measurement data for a batch of wine after scanning the QR code located on the piece of winery equipment where the batch is stored.
-	Definition of done:
-	\begin{itemize}
-		\item the user scans the QR code located on one of the items of equipment in the winery,
-		\item the system links information about a piece of equipment to the batch of wine it contains and displays information about that batch,
-		\item after linking an inventory item to a case of wine, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
-		\item the button for adding a new measurement is highlighted and easily accessible,
-		\item after clicking the button to enter a new measurement, a form for entering measurement data opens,
-		\item the user enters the data and then confirms it,
-		\item the system saves the information correctly.
-	\end{itemize}
-	
 	\item As a oenologist, I want to be able to start a new production batch.
 	Definition of done:
 	\begin{itemize}
@@ -301,20 +267,6 @@ User stories are a collection of features described from the perspective of the 
 		\item the system automatically generates a batch number.
 	\end{itemize}
 	
-	\item As a oenologist, I want to be able to create a new production batch by scanning the QR code on the piece of equipment where the production batch is to be started.
-	Definition of done:
-	\begin{itemize}
-		\item the user scans the QR code located on one of the items of equipment in the winery,
-		\item the system checks whether a different batch of the product is already present in a given piece of winery equipment,
-		\item a message appears stating that the production facility's equipment item is empty and that a new production batch can be created,
-		\item the user selects the button to create a new production batch,
-		\item a form appears in which the user selects the batch of fruit and the quantity from which the batch is to be produced,
-		\item the user clicks the button to confirm the creation of a new production batch,
-		\item a pop-up appears in which the user confirms their intention to create a new production batch.
-		\item the user clicks the button to confirm that they want to create a new production batch,
-		\item the system automatically generates a batch number.
-	\end{itemize}
-	
 	\item As a oenologist, I want to be able to mark a batch of wine I’ve selected as spoiled.
 	Definition of done:
 	\begin{itemize}
@@ -322,21 +274,6 @@ User stories are a collection of features described from the perspective of the 
 		\item after selecting the section with production batches, all batches are displayed,
 		\item the user selects a specific batch; they can use sorting and filters to help them find the item they're looking for more easily,
 		\item after selecting a specific batch, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
-		\item the button for marking a batch of wine as spoiled is highlighted and easily accessible,
-		\item the user clicks the button to mark the batch of wine as spoiled,
-		\item a form appears where the user can describe the reason for marking a batch of wine as spoiled,
-		\item the user clicks the button to confirm that the information in the form is correct,
-		\item a pop-up appears in which the user confirms their intention to mark selected wine batch as spoiled,
-		\item the user confirms that they wish to confirm the selected batch of wine is spoiled,
-		\item the system updates the information correctly.
-	\end{itemize}
-	
-	\item As a oenologist, I want to be able to mark a batch of wine as spoiled by scanning the QR code located on a piece of vineyard equipment.
-	Definition of done:
-	\begin{itemize}
-		\item the user scans the QR code located on one of the items of equipment in the winery,
-		\item the system checks which batch of wine is inside the winery equipment ,
-		\item after linking an inventory item to a case of wine, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
 		\item the button for marking a batch of wine as spoiled is highlighted and easily accessible,
 		\item the user clicks the button to mark the batch of wine as spoiled,
 		\item a form appears where the user can describe the reason for marking a batch of wine as spoiled,
@@ -362,7 +299,83 @@ User stories are a collection of features described from the perspective of the 
 		\item the system updates the information correctly.
 	\end{itemize}
 	
-	\item As a oenologist, I want to be able to mark a batch of wine as not spoiled by scanning the QR code located on a piece of vineyard equipment.
+	\item As a oenologist, I want to be able to complete a production batch by bottling it.
+	Definition of done:
+	\begin{itemize}
+		\item the section containing the production batches is easily accessible,
+		\item after selecting the section with production batches, all batches are displayed,
+		\item the user selects a specific batch (only those marked as "ready for bottling" or "not spoiled" are eligible),
+		\item the button for finalizing the batch through bottling is highlighted and easily accessible,
+		\item after clicking the bottling button, a form appears where the user enters the number of bottles produced, bottle size, and storage location,
+		\item the user confirms the data and clicks the finalization button,
+		\item a pop-up appears asking for final confirmation to close the production batch,
+		\item the system saves the information, changes the batch status to "completed/bottled", and frees up the winery equipment previously occupied by this batch.
+	\end{itemize}
+	
+		\item As a oenologist, I want to be able to scan the QR code displayed on a piece of winery equipment to obtain information about the batch of wine it contains.
+	Definition of done:
+	\begin{itemize}
+		\item the user scans the QR code located on one of the items of equipment in the winery,
+		\item the system links information about a piece of equipment to the batch of wine it contains and displays information about that batch,
+		\item after linking an inventory item to a case of wine, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
+		\item the user can click on a specific measurement, which will expand to display detailed information.
+	\end{itemize}
+	
+		\item As a oenologist, I want to be able to edit information about a batch of wine stored inside a piece of winery equipment after scanning the QR code on it.
+	Definition of done:
+	\begin{itemize}
+		\item the user scans the QR code located on one of the items of equipment in the winery,
+		\item the system links information about a piece of equipment to the batch of wine it contains and displays information about that batch,
+		\item after linking an inventory item to a case of wine, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
+		\item the user can click on a specific measurement, which will expand to display detailed information,
+		\item the button for adding a new measurement is highlighted and easily accessible,
+		\item after clicking the button to enter a new measurement, a form for entering measurement data opens,
+		\item the user enters the data and then confirms it,
+		\item the system saves the information correctly.
+	\end{itemize}
+	
+		\item As a oenologist, I want to be able to add measurement data for a batch of wine after scanning the QR code located on the piece of winery equipment where the batch is stored.
+	Definition of done:
+	\begin{itemize}
+		\item the user scans the QR code located on one of the items of equipment in the winery,
+		\item the system links information about a piece of equipment to the batch of wine it contains and displays information about that batch,
+		\item after linking an inventory item to a case of wine, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
+		\item the button for adding a new measurement is highlighted and easily accessible,
+		\item after clicking the button to enter a new measurement, a form for entering measurement data opens,
+		\item the user enters the data and then confirms it,
+		\item the system saves the information correctly.
+	\end{itemize}
+	
+		\item As a oenologist, I want to be able to create a new production batch by scanning the QR code on the piece of equipment where the production batch is to be started.
+	Definition of done:
+	\begin{itemize}
+		\item the user scans the QR code located on one of the items of equipment in the winery,
+		\item the system checks whether a different batch of the product is already present in a given piece of winery equipment,
+		\item a message appears stating that the production facility's equipment item is empty and that a new production batch can be created,
+		\item the user selects the button to create a new production batch,
+		\item a form appears in which the user selects the batch of fruit and the quantity from which the batch is to be produced,
+		\item the user clicks the button to confirm the creation of a new production batch,
+		\item a pop-up appears in which the user confirms their intention to create a new production batch.
+		\item the user clicks the button to confirm that they want to create a new production batch,
+		\item the system automatically generates a batch number.
+	\end{itemize}
+	
+		\item As a oenologist, I want to be able to mark a batch of wine as spoiled by scanning the QR code located on a piece of vineyard equipment.
+	Definition of done:
+	\begin{itemize}
+		\item the user scans the QR code located on one of the items of equipment in the winery,
+		\item the system checks which batch of wine is inside the winery equipment ,
+		\item after linking an inventory item to a case of wine, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
+		\item the button for marking a batch of wine as spoiled is highlighted and easily accessible,
+		\item the user clicks the button to mark the batch of wine as spoiled,
+		\item a form appears where the user can describe the reason for marking a batch of wine as spoiled,
+		\item the user clicks the button to confirm that the information in the form is correct,
+		\item a pop-up appears in which the user confirms their intention to mark selected wine batch as spoiled,
+		\item the user confirms that they wish to confirm the selected batch of wine is spoiled,
+		\item the system updates the information correctly.
+	\end{itemize}
+	
+		\item As a oenologist, I want to be able to mark a batch of wine as not spoiled by scanning the QR code located on a piece of vineyard equipment.
 	Definition of done:
 	\begin{itemize}
 		\item the user scans the QR code located on one of the items of equipment in the winery,
@@ -377,20 +390,7 @@ User stories are a collection of features described from the perspective of the 
 		\item the system updates the information correctly.
 	\end{itemize}
 	
-	\item As a oenologist, I want to be able to complete a production batch by bottling it.
-	Definition of done:
-	\begin{itemize}
-		\item the section containing the production batches is easily accessible,
-		\item after selecting the section with production batches, all batches are displayed,
-		\item the user selects a specific batch (only those marked as "ready for bottling" or "not spoiled" are eligible),
-		\item the button for finalizing the batch through bottling is highlighted and easily accessible,
-		\item after clicking the bottling button, a form appears where the user enters the number of bottles produced, bottle size, and storage location,
-		\item the user confirms the data and clicks the finalization button,
-		\item a pop-up appears asking for final confirmation to close the production batch,
-		\item the system saves the information, changes the batch status to "completed/bottled", and frees up the winery equipment previously occupied by this batch.
-	\end{itemize}
-	
-	\item As a oenologist, I want to be able to complete a production batch by bottling it after scanning the QR code on the equipment where the batch is stored.
+		\item As a oenologist, I want to be able to complete a production batch by bottling it after scanning the QR code on the equipment where the batch is stored.
 	Definition of done:
 	\begin{itemize}
 		\item the user scans the QR code located on a piece of winery equipment,
