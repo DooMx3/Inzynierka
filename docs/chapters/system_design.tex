@@ -48,6 +48,7 @@ The system shall provide the following functionalities, categorized by users. Th
 	\item the ability to change phone number,
 	\item the ability to delete user account,
 	\item the ability to create an organization and become its owner (applicable only for users with no organization affiliation),
+	\todo[inline]{ \textuparrow\, Powiadomienie o usunięciu z organizacji / odebraniu uprawnień?}
 \end{itemize}
 \subsubsection{Vineyard Worker:}
 \begin{itemize}
@@ -74,12 +75,14 @@ The system shall provide the following functionalities, categorized by users. Th
 	\begin{itemize}
 		\item production efficiency report,
 		\item diversity of grapevine varieties,
+		\item vineyard operations report,
 		\item historical trend report.
 		\todo[inline]{ \textuparrow\, Tu kropka czy przecinek na końcu?}
 	\end{itemize}
 	\item the ability to view and edit information about the organization,
+	\item the ability to remove the organization from the system, which will also remove all associated data,
 	\item the ability to view, add and delete vineyard fields from the organization along with the grape variety planted there,
-	\item the ability to view, add and delete fermenters from organization,
+	\item the ability to view, add and delete winery equipment from organization,
 	\item the ability to view, add and delete users from organization,
 	\item the ability to assign and revoke roles to other users in the organization.
 \end{itemize}
@@ -182,6 +185,7 @@ User stories are a collection of features described from the perspective of the 
 	\item As a logged-in user I can delete my account so that I can remove all my personal data from the system in case I no longer want to use the application.
 	Definition of done:
 	\begin{itemize}
+		\item validation prevents deletion if the user is the owner of an organization - in such case, the user must delete the organization first,
 		\item the "delete account" option is available in the profile settings,
 		\item the user is required to enter their password and confirm the action,
 		\item after successfully deleting the account, the user receives a confirmation pop-up and is redirected to the login page,
@@ -400,4 +404,133 @@ User stories are a collection of features described from the perspective of the 
 \end{enumerate}
 
 \subsubsection{Vineyard Owner:}
+
+\begin{enumerate}
+
+	\item As a vineyard owner, I am able to access vineyard worker and oenologist functionalities in order to manage the vineyard and winery operations effectively.
+	Definition of done:
+	\begin{itemize}
+		\item the vineyard owner has access to all of the mentioned functinalities in respective dashboards of the application,
+		\item the vineyard owner can use all of the mentioned functionalities without any restrictions,
+		\item the vineyard owner can access the same data as vineyard workers and oenologists,
+		\item all actions performed by the vineyard owner using vineyard worker and oenologist functionalities are correctly recorded in the system and reflected in the database.
+	\end{itemize}
+
+    \item As a vineyard owner, I can generate production efficiency report in order to review it and analyze the efficiency of the production process.
+    Definition of done:
+	\begin{itemize}
+		\item in reports section, there is an option to generate production efficiency report,
+		\item after selecting the option to generate production efficiency report, user can select the time period and/or specific production batches for which the report is to be generated,
+		\item after confirming the selected parameters, a report is generated,
+		\item the report includes key performance indicators such as yield per hectare, average time from harvest to bottling, and percentage of batches marked as spoiled,
+		\item the report is saved in the system and can be accessed later from the reports section.
+	\end{itemize}
+
+	\item As a vineyard owner, I can generate diversity of grapevine varieties report in order to review it and analyze the variety distribution in the vineyard.
+    Definition of done:
+	\begin{itemize}
+		\item in reports section, there is an option to generate diversity of grapevine varieties report,
+		\item after selecting the option to generate diversity of grapevine varieties report, user can select the time period and/or specific fields for which the report is to be generated,
+		\item after confirming the selected parameters, a report is generated,
+		\item the report includes information about the different grapevine varieties planted in the vineyard, their respective areas, and their contribution to the overall production,
+		\item the report is saved in the system and can be accessed later from the reports section.
+	\end{itemize}
+
+	\item As a vineyard owner, I can generate vineyard operations report in order to review it and analyze the operational efficiency of the vineyard.
+    Definition of done:
+	\begin{itemize}
+		\item in reports section, there is an option to generate vineyard operations report,
+		\item after selecting the option to generate vineyard operations report, user can select the time period and/or specific operations for which the report is to be generated,
+		\item after confirming the selected parameters, a report is generated,
+		\item the report includes information about the various operations performed in the vineyard (e.g., pruning, irrigation, pest control), their frequency, and their impact on production efficiency,
+		\item the report is saved in the system and can be accessed later from the reports section.
+	\end{itemize}
+
+	\item As a vineyard owner, I can generate historical trend report in order to review it and analyze the production trends over time.
+    Definition of done:
+	\begin{itemize}
+		\item in reports section, there is an option to generate historical trend report,
+		\item after selecting the option to generate historical trend report, user can select the time period, and aggregation level (e.g., monthly, quarterly, yearly),
+		\item after confirming the selected parameters, a report is generated,
+		\item the report includes the same information as other reports, but aggregated over time to show trends and patterns,
+		\item the report is saved in the system and can be accessed later from the reports section.
+	\end{itemize}
+
+    \item As a vineyard owner, I can view information about the organization.
+    Definition of done:
+	\begin{itemize}
+		\item the information about the organization is accessible from the organizati	on dashboard,
+		\item the information includes the organization name, address, contact information, and a list of associated vineyards and winery equipment.
+	\end{itemize}
+
+    \item As a vineyard owner, I can edit information about the organization, in order to keep it up-to-date.
+    Definition of done:
+	\begin{itemize}
+		\item the information edit form is accessible from the organization dashboard,
+		\item the user can modify every field of the organization information, including the name, address and contact information,
+		\item all changes are saved in the database and can be reviewed later.
+	\end{itemize}
+
+    \item As a vineyard owner, I can remove the organization from the system, which will also remove all associated data, in order to ensure that organization data is not stored in the system if I no longer want to use the application.
+    Definition of done:
+	\begin{itemize}
+		\item the user can access the organization removal option from the organization dashboard,
+		\item the user must confirm the removal action by entering the password,
+		\item upon confirmation, the organization and all associated data are deleted from the system,
+		\item after successful deletion, the vineyard owner role is revoked, and the user is redirected to the home page.
+	\end{itemize}
+
+    \item As a vineyard owner, I can view, add and delete vineyard fields from the organization along with the grape variety planted there, in order to keep the information about the vineyard up-to-date.
+    Definition of done:
+	\begin{itemize}
+		\item the user can access the vineyard field management option from the organization dashboard,
+		\item the user can add new vineyard fields,
+		\item when adding a new vineyard field, the user must provide information about the field's location, date of planting, area, and the grape varieties planted there,
+		\item the user can delete existing vineyard fields from the organization,
+		\item all changes are saved in the database and can be reviewed later.
+	\end{itemize}
+
+    \item As a vineyard owner, I can view, add and delete winery equipment from organization, in order to keep the information about the winery equipment up-to-date.
+    Definition of done:
+	\begin{itemize}
+		\item the user can access the winery equipment management option from the organization dashboard,
+		\item the user can add new winery equipment such as fermentation tanks, barrels, and bottling machines,
+		\item when adding new winery equipment, the user must provide information about the equipment type, location, and capacity,
+		\item the user can delete existing winery equipment from the organization,
+		\item all changes are saved in the database and can be reviewed later.
+	\end{itemize}
+
+    \item As a vineyard owner, I can add users to the organization, in order to allow them to access the system and contribute to the management of the vineyard.
+    Definition of done:
+	\begin{itemize}
+		\item the user can access the user management option from the organization dashboard,
+		\item thevineyard owner is able to enter the email address provided by the employee they want to add to the organization, 
+		\item the system checks if there is an existing account associated with that email address,
+		\item if there is an existing account, the user receives a notification with an option to confirm joining the organization,
+		\item after employee confirms joining the organization, vineyard owner receives a notification about the successful addition of the user to the organization,
+		\item if there is no existing account, error message is displayed, prompting the vineyard owner to ask the employee to register first,
+		\item all changes are saved in the database and can be reviewed later.
+	\end{itemize}
+
+    \item As a vineyard owner, I can view and delete users from organization, in order to manage the access to the system and ensure that only authorized personnel can access the vineyard data.
+    Definition of done:
+	\begin{itemize}
+		\item the user can access the user management option from the organization dashboard,
+		\item the user can view a list of all users in the organization,
+		\item the user can delete users from the organization,
+		\item all changes are saved in the database and can be reviewed later.
+	\end{itemize}
+
+	\item As a vineyard owner, I can assign and revoke roles to other users in the organization, in order to manage their permissions and access to different functionalities of the system.
+	Definition of done:
+	\begin{itemize}
+		\item the user can access the user management option from the organization dashboard,
+		\item the user can assign roles to users, such as vineyard worker or oenologist,
+		\item multiple roles can be assigned to a single user,
+		\item the user can revoke roles from users,
+		\item all changes are saved in the database and can be reviewed later.
+	\end{itemize}
+	
+\end{enumerate}
+
 \subsubsection{Administrator: }
