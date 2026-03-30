@@ -53,7 +53,7 @@ jobs:
           texfiles=docs/*.tex
           for f in $texfiles; do
             echo "Building $f"
-            latexmk -pdf -halt-on-error -output-directory=build "$f"
+            latexmk -pdf -halt-on-error -output-directory=build docs/"$f"
           done
 
       - name: Upload PDFs and Create Release
