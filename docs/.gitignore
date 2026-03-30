@@ -6,5 +6,6 @@
 *.bbl
 *.blg
 *.fls
+*.dvi
 *.fdb_latexmk
 *.synctex.gz
