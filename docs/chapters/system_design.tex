@@ -135,7 +135,7 @@ User stories are a collection of features described from the perspective of the 
 		\item the password recovery button is located on the login form and is easily accessible,
 		\item after clicking the password recovery button, a new form opens where the user is required to provide their email address to receive an email containing a link to reset their password,
 		\item the email is sent to the user,
-		\item after receiving the email and clicking the link, the user must enter a new password and confirm it,
+		\item after receiving the email and clicking the link, the user must enter a new password (meeting the minimum strength requirements) and confirm it,
 		\item the password hash is updated in the database,
 		\item after successfully changing the password, the user receives a confirmation pop-up and is asked to log in again using the new password.
 	\end{itemize}
@@ -168,7 +168,7 @@ User stories are a collection of features described from the perspective of the 
 	\item As a logged-in user I can change my password so that I can maintain the security of my account.
 	\\Definition of done:
 	\begin{itemize}
-		\item after clicking the "change password" option, the user is required to provide their current password and the new password twice for confirmation,
+		\item after clicking the "change password" option, the user is required to provide their current password and the new password (which must meet the security strength criteria) twice for confirmation,
 		\item after successfully changing the password, the user receives a confirmation pop-up and is asked to log in again using the new password,
 		\item the password hash is updated in the database.
 	\end{itemize}
@@ -552,6 +552,7 @@ User stories are a collection of features described from the perspective of the 
 	\item As an administrator, I would like to reset user's password if they lost access to their email in order to restore their ability to work.  Definition of Done:
 	\begin{itemize}
 		\item the "change users' password" option is available in the admin dashboard settings,
+		\item the administrator sets a new temporary password that complies with the system's password strength policy,
 		\item the user is required to provide their bank info for confirmation of account ownership,
 		\todo[inline]{W jaki sposób? \textuparrow}
 		\item the password hash is updated in the database.
