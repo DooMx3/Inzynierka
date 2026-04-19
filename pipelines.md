@@ -8,6 +8,12 @@
     - Fields
     - Fermenters
 
+## Joining organization
+- Użytkownik po utworzeniu konta widzi adres email który podał przy rejestracji
+- Ma go przesłać do Ownera
+- Kiedy owner doda usera, user ma odświeżyć swoją stronę
+- Przy pierwszym dostępie do organizacji wyświetla się monit "Zostałeś dodany, chcesz pozostać?" opcje "pozostań" / "opuść organizację" 
+
 ## Wine production
 - Field (poletko):
     - podział na czerwone i białe winogrona
