@@ -116,13 +116,13 @@ User stories are a collection of features described from the perspective of the 
 
 \begin{enumerate}
 	\item As a guest user, I can visit the winery's website to check out its offerings.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the winery's “Offer” button is easily accessible on the website,
 		\item after clicking the "Offer" button, the user sees the winery's offer.
 	\end{itemize}
 	\item As a guest user, I can reset my password to regain access to my account and log in.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the login button is easily accessible on the home page,
 		\item after clicking the login button, the user sees the login form,
@@ -134,7 +134,7 @@ User stories are a collection of features described from the perspective of the 
 		\item after successfully changing the password, the user receives a confirmation pop-up and is asked to log in again using the new password.
 	\end{itemize}
 	\item As a guest user, I can securely log in to my profile to access the resources stored there.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the login button is easily accessible on the home page,
 		\item after clicking the login button, the user sees the login form,
@@ -142,7 +142,7 @@ User stories are a collection of features described from the perspective of the 
 		\item after entering the correct information, the user is redirected to the dashboard.
 	\end{itemize}
 	\item As a user, I want to be able to open a page with detailed information about the wine batch the bottle comes from by scanning a QR code.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the user scans the QR code on the bottle using their mobile device,
 		\item after scanning the code, the user is redirected to a page with detailed information about that particular batch of wine.
@@ -153,14 +153,14 @@ User stories are a collection of features described from the perspective of the 
 
 \begin{enumerate}
 	\item As a logged-in user I can log out of the system so that my account is secure and no one can use it without my knowledge.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the "log out" button is easily accessible in the user interface,
 		\item after clicking the "log out" button, the user is logged out of the system, session token is invalidated on the backend,
 		\item after logging out, user is redirected to the login page.
 	\end{itemize}
 	\item As a logged-in user I can change my password so that I can maintain the security of my account.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the "change password" option is available in the profile settings,
 		\item the user is required to provide their current password and the new password twice for confirmation,
@@ -168,7 +168,7 @@ User stories are a collection of features described from the perspective of the 
 		\item the password hash is updated in the database.
 	\end{itemize}
 	\item As a logged-in user I can change my email address so that I can keep my personal information up to date.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the "change email" option is available in the profile settings,
 		\item the user is required to provide new email address and confirm the operation,
@@ -176,7 +176,7 @@ User stories are a collection of features described from the perspective of the 
 		\item the email address is updated in the database.
 	\end{itemize}
 	\item As a logged-in user I can change my phone number so that I can keep my personal information up to date.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the "change phone number" option is available in the profile settings,
 		\item the user is required to provide new phone number and confirm the operation,
@@ -184,7 +184,7 @@ User stories are a collection of features described from the perspective of the 
 		\item the phone number is updated in the database.
 	\end{itemize}
 	\item As a logged-in user I can delete my account so that I can remove all my personal data from the system in case I no longer want to use the application.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item validation prevents deletion if the user is the owner of an organization - in such case, the user must delete the organization first,
 		\item the "delete account" option is available in the profile settings,
@@ -193,7 +193,7 @@ User stories are a collection of features described from the perspective of the 
 		\item all personal data is removed from the database.
 	\end{itemize}
 	\item As a logged-in user who is not a part of any organization I can create an organization and become its owner so that I can manage my vineyard and winery operations effectively.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item validation prevents creation if user already has an organization,
 		\item the "create organization" option is available in the user dashboard,
@@ -203,7 +203,7 @@ User stories are a collection of features described from the perspective of the 
 		\item the organization is added to the database and associated with the user's account.
 	\end{itemize}
 	\item As a logged-in user I want to join an existing organization so that I can contribute to the management of the vineyard.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the user email is visible in user dashboard so that the Vineyard Owner can easily add account to the organization,
 		\item after the owner adds the user to the organization, the user receives a notification with an option to confirm,
@@ -214,28 +214,28 @@ User stories are a collection of features described from the perspective of the 
 
 \subsubsection{Vineyard Worker:}
 \begin{enumerate}
-	\item As an vineyard worker I would like to be able to view, store, edit and delete information about what was done on vineyard in order to be able to view them  in the future if needed. Definition of done:
+	\item As an vineyard worker I would like to be able to view, store, edit and delete information about what was done on vineyard in order to be able to view them  in the future if needed. \\Definition of done:
 	\begin{itemize}
 		\item list of done tasks on specific parcel is visible to vineyard worker,
 		\item vineyard worker is able to edit tasks,
 		\item vineyard worker can delete task,
 		\item confirmation is required before removal,
 	\end{itemize}
-	\item As an vineyard worker I would like to be able to view, store, edit and delete information about plants on vineyard in order to be able to view them in the future if needed. Definition of done:
+	\item As an vineyard worker I would like to be able to view, store, edit and delete information about plants on vineyard in order to be able to view them in the future if needed. \\Definition of done:
 	\begin{itemize}
 		\item list of information about plants on vineyard is visible to vineyard worker,
 		\item  vineyard worker is able to edit information about plants on vineyard,
 		\item vineyard worker can delete information about plants on vineyard,
 		\item confirmation is required before removal,
 	\end{itemize}
-	\item As an vineyard worker I would like to be able to view, store, edit and delete information about pests and plant diseases on vineyard in order to be able to view them in the future if needed. Definition of done:
+	\item As an vineyard worker I would like to be able to view, store, edit and delete information about pests and plant diseases on vineyard in order to be able to view them in the future if needed. \\Definition of done:
 	\begin{itemize}
 		\item list of information about pests and plant diseases is visible to vineyard worker,
 		\item  vineyard worker is able to edit information about pests and plant diseases,
 		\item vineyard worker can delete information about pests and plant diseases,
 		\item confirmation is required before removal,
 	\end{itemize}
-	\item As an vineyard worker I would like to be able to view, store, edit and delete information about about amount of grapes harvested  on vineyard in order to be able to view them in the future if needed. Definition of done:
+	\item As an vineyard worker I would like to be able to view, store, edit and delete information about about amount of grapes harvested  on vineyard in order to be able to view them in the future if needed. \\Definition of done:
 	\begin{itemize}
 		\item list of information about about amount of grapes harvested on specific parcel is visible to vineyard worker,
 		\item  vineyard worker is able to edit information about about amount of grapes harvested,
@@ -257,7 +257,7 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 	
 	\item As a oenologist, I want to be able to select specific batches in order to record information at each stage of production.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the section containing the production batches is easily accessible,
 		\item after selecting the section with production batches, all batches are displayed,
@@ -270,7 +270,7 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 	
 	\item As a oenologist, I want to be able to edit the measurement data I've entered, because I made a mistake doing that.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the section containing the production batches is easily accessible,
 		\item after selecting the section with production batches, all batches are displayed,
@@ -286,7 +286,7 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 	
 	\item As a oenologist, I want to be able to start a new production batch.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the section containing the production batches is easily accessible,
 		\item the button to start a new production batch is easily accessible,
@@ -299,7 +299,7 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 	
 	\item As a oenologist, I want to be able to mark a batch of wine I’ve selected as spoiled.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the section containing the production batches is easily accessible,
 		\item after selecting the section with production batches, all batches are displayed,
@@ -315,7 +315,7 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 	
 	\item As a oenologist, I want to be able to mark a batch of wine I’ve selected as not spoiled and ready for bottling.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the section containing the production batches is easily accessible,
 		\item after selecting the section with production batches, all batches are displayed,
@@ -331,7 +331,7 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 	
 	\item As a oenologist, I want to be able to complete a production batch by bottling it.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the section containing the production batches is easily accessible,
 		\item after selecting the section with production batches, all batches are displayed,
@@ -344,7 +344,7 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 	
 		\item As a oenologist, I want to be able to scan the QR code displayed on a piece of winery equipment to obtain information about the batch of wine it contains.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the user scans the QR code located on one of the items of equipment in the winery,
 		\item the system links information about a piece of equipment to the batch of wine it contains and displays information about that batch,
@@ -353,7 +353,7 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 	
 		\item As a oenologist, I want to be able to edit information about a batch of wine stored inside a piece of winery equipment after scanning the QR code on it, because I made a mistake doing that.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the user scans the QR code located on one of the items of equipment in the winery,
 		\item the system links information about a piece of equipment to the batch of wine it contains and displays information about that batch,
@@ -366,7 +366,7 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 	
 		\item As a oenologist, I want to be able to add measurement data for a batch of wine after scanning the QR code located on the piece of winery equipment where the batch is stored.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the user scans the QR code located on one of the items of equipment in the winery,
 		\item the system links information about a piece of equipment to the batch of wine it contains and displays information about that batch,
@@ -378,7 +378,7 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 	
 		\item As a oenologist, I want to be able to create a new production batch by scanning the QR code on the piece of equipment where the production batch is to be started.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the user scans the QR code located on one of the items of equipment in the winery,
 		\item the system checks whether a different batch of the product is already present in a given piece of winery equipment,
@@ -392,7 +392,7 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 	
 		\item As a oenologist, I want to be able to mark a batch of wine as spoiled by scanning the QR code located on a piece of vineyard equipment.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the user scans the QR code located on one of the items of equipment in the winery,
 		\item the system checks which batch of wine is inside the winery equipment ,
@@ -407,7 +407,7 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 	
 		\item As a oenologist, I want to be able to mark a batch of wine as not spoiled by scanning the QR code located on a piece of vineyard equipment.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the user scans the QR code located on one of the items of equipment in the winery,
 		\item the system checks which batch of wine is inside the winery equipment,
@@ -422,7 +422,7 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 	
 		\item As a oenologist, I want to be able to complete a production batch by bottling it after scanning the QR code on the equipment where the batch is stored.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the user scans the QR code located on a piece of winery equipment,
 		\item the system identifies the wine batch inside and displays its current status and data,
@@ -438,7 +438,7 @@ User stories are a collection of features described from the perspective of the 
 
 \begin{enumerate}
 	\item As a vineyard owner, I am able to access vineyard worker and oenologist functionalities in order to manage the vineyard and winery operations effectively.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the vineyard owner has access to all of the mentioned functinalities in respective dashboards of the application,
 		\item the vineyard owner can use all of the mentioned functionalities without any restrictions,
@@ -447,7 +447,7 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 
     \item As a vineyard owner, I can generate production efficiency report in order to review it and analyze the efficiency of the production process.
-    Definition of done:
+    \\Definition of done:
 	\begin{itemize}
 		\item in reports section, there is an option to generate production efficiency report,
 		\item after selecting the option to generate production efficiency report, user can select the time period and/or specific production batches for which the report is to be generated,
@@ -457,7 +457,7 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 
 	\item As a vineyard owner, I can generate diversity of grapevine varieties report in order to review it and analyze the variety distribution in the vineyard.
-    Definition of done:
+    \\Definition of done:
 	\begin{itemize}
 		\item in reports section, there is an option to generate diversity of grapevine varieties report,
 		\item after selecting the option to generate diversity of grapevine varieties report, user can select the time period and/or specific fields for which the report is to be generated,
@@ -467,7 +467,7 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 
 	\item As a vineyard owner, I can generate vineyard operations report in order to review it and analyze the operational efficiency of the vineyard.
-    Definition of done:
+    \\Definition of done:
 	\begin{itemize}
 		\item in reports section, there is an option to generate vineyard operations report,
 		\item after selecting the option to generate vineyard operations report, user can select the time period and/or specific operations for which the report is to be generated,
@@ -477,7 +477,7 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 
 	\item As a vineyard owner, I can generate historical trend report in order to review it and analyze the production trends over time.
-    Definition of done:
+    \\Definition of done:
 	\begin{itemize}
 		\item in reports section, there is an option to generate historical trend report,
 		\item after selecting the option to generate historical trend report, user can select the time period, and aggregation level (e.g., monthly, quarterly, yearly),
@@ -487,14 +487,14 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 
     \item As a vineyard owner, I can view information about the organization.
-    Definition of done:
+    \\Definition of done:
 	\begin{itemize}
 		\item the information about the organization is accessible from the organization dashboard,
 		\item the information includes the organization name, address, contact information, and a list of associated vineyards and winery equipment.
 	\end{itemize}
 
     \item As a vineyard owner, I can edit information about the organization, in order to keep it up-to-date.
-    Definition of done:
+    \\Definition of done:
 	\begin{itemize}
 		\item the information edit form is accessible from the organization dashboard,
 		\item the user can modify every field of the organization information, including the name, address and contact information,
@@ -502,7 +502,7 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 
     \item As a vineyard owner, I can remove the organization from the system, which will also remove all associated data, in order to ensure that organization data is not stored in the system if I no longer want to use the application.
-    Definition of done:
+    \\Definition of done:
 	\begin{itemize}
 		\item the user can access the organization removal option from the organization dashboard,
 		\item the user must confirm the removal action by entering the password,
@@ -511,7 +511,7 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 
     \item As a vineyard owner, I can view, add and delete vineyard fields from the organization along with the grape variety planted there, in order to keep the information about the vineyard up-to-date.
-    Definition of done:
+    \\Definition of done:
 	\begin{itemize}
 		\item the user can access the vineyard field management option from the organization dashboard,
 		\item the user can add new vineyard fields,
@@ -521,7 +521,7 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 
     \item As a vineyard owner, I can view, add and delete winery equipment from organization, in order to keep the information about the winery equipment up-to-date.
-    Definition of done:
+    \\Definition of done:
 	\begin{itemize}
 		\item the user can access the winery equipment management option from the organization dashboard,
 		\item the user can add new winery equipment such as fermentation tanks, barrels, and bottling machines,
@@ -531,7 +531,7 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 
     \item As a vineyard owner, I can add users to the organization, in order to allow them to access the system and contribute to the management of the vineyard.
-    Definition of done:
+    \\Definition of done:
 	\begin{itemize}
 		\item the user can access the user management option from the organization dashboard,
 		\item the vineyard owner is able to enter the email address provided by the employee they want to add to the organization, 
@@ -543,7 +543,7 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 
     \item As a vineyard owner, I can view and delete users from organization, in order to manage the access to the system and ensure that only authorized personnel can access the vineyard data.
-    Definition of done:
+    \\Definition of done:
 	\begin{itemize}
 		\item the user can access the user management option from the organization dashboard,
 		\item the user can view a list of all users in the organization,
@@ -552,7 +552,7 @@ User stories are a collection of features described from the perspective of the 
 	\end{itemize}
 
 	\item As a vineyard owner, I can assign and revoke roles to other users in the organization, in order to manage their permissions and access to different functionalities of the system.
-	Definition of done:
+	\\Definition of done:
 	\begin{itemize}
 		\item the user can access the user management option from the organization dashboard,
 		\item the user can assign roles to users, such as vineyard worker or oenologist,
@@ -588,6 +588,6 @@ User stories are a collection of features described from the perspective of the 
 \subsection{Database design}
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.7\textwidth]{pictures/db-diagram.png}
+    %\includegraphics[width=0.7\textwidth]{pictures/db-diagram.png}
     \caption{Database diagram}
 \end{figure}
