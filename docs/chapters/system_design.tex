@@ -116,6 +116,17 @@ User stories are a collection of features described from the perspective of the 
 		\item the winery's “Offer” button is easily accessible on the website,
 		\item after clicking the "Offer" button, the user sees the winery's offer.
 	\end{itemize}
+	\item As a guest user, I can create an account to become a registered user and access personalized features.
+	\\Definition of done:
+	\begin{itemize}
+		\item the "Register" button is clearly visible on the home page and the login form,
+		\item after clicking the registration button, the user is presented with a registration form,
+		\item the user is required to provide necessary details,
+		\item the system validates that the email address is not already in use and that the password meets security requirements,
+		\item after submitting the form, a confirmation email is sent to the user's provided address,
+		\item upon clicking the activation link in the email, the account is activated in the database,
+		\item the user is redirected to a success page and can now log in to their new account.
+	\end{itemize}
 	\item As a guest user, I can reset my password to regain access to my account and log in.
 	\\Definition of done:
 	\begin{itemize}
@@ -124,7 +135,7 @@ User stories are a collection of features described from the perspective of the 
 		\item the password recovery button is located on the login form and is easily accessible,
 		\item after clicking the password recovery button, a new form opens where the user is required to provide their email address to receive an email containing a link to reset their password,
 		\item the email is sent to the user,
-		\item after receiving the email and clicking the link, the user must enter a new password and confirm it,
+		\item after receiving the email and clicking the link, the user must enter a new password (meeting the minimum strength requirements) and confirm it,
 		\item the password hash is updated in the database,
 		\item after successfully changing the password, the user receives a confirmation pop-up and is asked to log in again using the new password.
 	\end{itemize}
@@ -157,7 +168,7 @@ User stories are a collection of features described from the perspective of the 
 	\item As a logged-in user I can change my password so that I can maintain the security of my account.
 	\\Definition of done:
 	\begin{itemize}
-		\item after clicking the "change password" option, the user is required to provide their current password and the new password twice for confirmation,
+		\item after clicking the "change password" option, the user is required to provide their current password and the new password (which must meet the security strength criteria) twice for confirmation,
 		\item after successfully changing the password, the user receives a confirmation pop-up and is asked to log in again using the new password,
 		\item the password hash is updated in the database.
 	\end{itemize}
@@ -550,7 +561,7 @@ User stories are a collection of features described from the perspective of the 
 	\\Definition of Done:
 	\begin{itemize}
 		\item the vineyard owner is required to verify his identity,
-		\item after successful verification, the administrator is able to reset the password for the vineyard owner,
+		\item after successful verification, the administrator sets a new temporary password that complies with the system's password strength policy,
 		\item the password hash is updated in the database.
 	\end{itemize}
 	\item As an administrator, I would like to create, remove, edit and view the list of administrators. 
