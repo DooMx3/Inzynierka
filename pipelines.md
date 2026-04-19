@@ -14,6 +14,20 @@
 - Kiedy owner doda usera, user ma odświeżyć swoją stronę
 - Przy pierwszym dostępie do organizacji wyświetla się monit "Zostałeś dodany, chcesz pozostać?" opcje "pozostań" / "opuść organizację" 
 
+## Reseting password
+### User
+- User powiadamia Ownera
+- Owner ma opcję w aplikacji do zresetowania hasła usera
+- User musi od razu zmienić hasło z domyślnego
+
+### Owner
+- Wysyła maila do admina
+- Następuje magiczne *potwierdzenie tożsamości*
+- Admin resetuje hasło na domyślne
+- Owner zmienia sobie hasło
+
+Domyślnym hasłem może być np pesel danego użytkownika, albo losowe hasło wysyłane ręcznie mailem.
+
 ## Wine production
 - Field (poletko):
     - podział na czerwone i białe winogrona
