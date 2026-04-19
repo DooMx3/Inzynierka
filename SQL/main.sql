@@ -1,21 +1,47 @@
 CREATE TABLE IF NOT EXISTS "users" (
 	"id" INTEGER NOT NULL,
 	"organisationId" INTEGER,
-	-- Enum { NONE, PENDING_INVITATION, MEMBER }
-	"membershipStatus" VARCHAR(32) DEFAULT 'NONE',
+	-- Enum { NONE, PENDING, MEMBER }
+	-- Invitation status sent by the Owner. Before sending: NONE, after sending: PENDING, after accepting: MEMBER, after rejecting: NONE.
+	"membershipStatus" VARCHAR(8) DEFAULT 'NONE',
+	-- User's name
+	"firstName" VARCHAR(128),
+	-- User's surname
+	"lastName" VARCHAR(128),
+	-- First part of the address
+	"addressOne" VARCHAR(255),
+	-- Second part of the address
+	"addressTwo" VARCHAR(255),
+	-- IBAN
+	"bankAccountNumber" VARCHAR(28),
 	PRIMARY KEY("id")
 );
 
 
-COMMENT ON COLUMN "users"."membershipStatus" IS 'Enum { NONE, PENDING_INVITATION, MEMBER }';
+COMMENT ON COLUMN "users"."membershipStatus" IS 'Enum { NONE, PENDING, MEMBER }
+Invitation status sent by the Owner. Before sending: NONE, after sending: PENDING, after accepting: MEMBER, after rejecting: NONE.';
+COMMENT ON COLUMN "users"."firstName" IS 'User''s name';
+COMMENT ON COLUMN "users"."lastName" IS 'User''s surname';
+COMMENT ON COLUMN "users"."addressOne" IS 'First part of the address';
+COMMENT ON COLUMN "users"."addressTwo" IS 'Second part of the address';
+COMMENT ON COLUMN "users"."bankAccountNumber" IS 'IBAN';
 
 
 CREATE TABLE IF NOT EXISTS "roles" (
 	"id" INTEGER NOT NULL,
+	-- Readable, full name
+	"name" VARCHAR(64),
+	-- Short description of a role
+	"description" VARCHAR(512),
+	-- Defines hierarchy, ranges from 0 (guest) to 100 (admin)
+	"level" SMALLINT,
 	PRIMARY KEY("id")
 );
 
 
+COMMENT ON COLUMN "roles"."name" IS 'Readable, full name';
+COMMENT ON COLUMN "roles"."description" IS 'Short description of a role';
+COMMENT ON COLUMN "roles"."level" IS 'Defines hierarchy, ranges from 0 (guest) to 100 (admin)';
 
 
 CREATE TABLE IF NOT EXISTS "usersRoles" (
