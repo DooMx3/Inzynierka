@@ -2,7 +2,7 @@
 
 ## Database visual editor
 
-[Editor](https://www.drawdb.app/editor?shareId=35d42fd05d0ff77b6a4fc64594476c7c)
+[Editor](https://www.drawdb.app/editor?shareId=d303b3625da76c5cf50531b932afbd43)
 
 ###### Good practices
 
