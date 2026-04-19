@@ -81,7 +81,8 @@ The system shall provide the following functionalities, categorized by users. Th
 	\item the ability to view, add and delete vineyard fields from the organization along with the grape variety planted there,
 	\item the ability to view, add and delete winery equipment from organization,
 	\item the ability to view, add and delete users from organization,
-	\item the ability to assign and revoke roles to other users in the organization.
+	\item the ability to assign and revoke roles to other users in the organization,
+	\item the ability to reset a user's password, if they belong to organisation.
 \end{itemize}
 \subsubsection{Administrator: }
 \begin{itemize}
@@ -529,14 +530,24 @@ User stories are a collection of features described from the perspective of the 
 		\item the owner can change all user personal information including: first and last name, address, bank account number,
 		\item all changes are saved in the database and can be reviewed later.
 	\end{itemize}
+	\todo[inline]{to na pewno git?\textuparrow}
 
 	\item As a vineyard owner, I can assign and revoke roles to other users in the organization, in order to manage their permissions and access to different functionalities of the system.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user can assign roles to users, such as vineyard worker or oenologist,
+		\item the owner can assign roles to users, such as vineyard worker or oenologist,
 		\item multiple roles can be assigned to a single user,
-		\item the user can revoke roles from users,
+		\item the owner can revoke roles from users,
 		\item all changes are saved in the database and can be reviewed later.
+	\end{itemize}
+
+	\todo[inline]{Czy ostatnia linia nie zalicza się przypadkiem to tych obvious wymagań co powinniśmy wywalić?}
+
+\item As a vineyard owner. I want to be able to change password of user belonging to my organisation.
+	\\Definition of done:
+	\begin{itemize}
+		\item the owner can generate link pointing to password reset form for every user in their organisation,
+		\item link is valid for 24h.
 	\end{itemize}
 	
 \end{enumerate}
