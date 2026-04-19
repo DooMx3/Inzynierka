@@ -196,7 +196,8 @@ User stories are a collection of features described from the perspective of the 
 	\\Definition of done:
 	\begin{itemize}
 		\item the user email is visible in user dashboard so that the Vineyard Owner can easily add account to the organization,
-		\item after the owner adds the user to the organization, the user receives a notification with an option to confirm,
+		\item after the owner adds the user to the organization, the user should refresh the page,
+		\item after refreshing the page, the user is prompted to confirm joining the organization,
 		\item after confirming, the user is redirected to the organization dashboard and can access the features based on their assigned role,
 		\item the user is associated with the organization in the database.
 	\end{itemize}
@@ -508,10 +509,9 @@ User stories are a collection of features described from the perspective of the 
 	\begin{itemize}
 		\item the vineyard owner is able to enter the email address provided by the employee they want to add to the organization, 
 		\item the system checks if there is an existing account associated with that email address,
-		\item if there is an existing account, the user receives a notification with an option to confirm joining the organization,
-		\item after employee confirms joining the organization, vineyard owner receives a notification about the successful addition of the user to the organization,
-		\item if there is no existing account, error message is displayed, prompting the vineyard owner to ask the employee to register first,
-		\item all changes are saved in the database and can be reviewed later.
+		\item if there is an existing account, the user is added to the organization,
+		\item after employee confirms joining the organization, new user appears in the user list,
+		\item if there is no existing account, error message is displayed, prompting the vineyard owner to ask the employee to register first.
 	\end{itemize}
 
     \item As a vineyard owner, I can view and delete users from organization, in order to manage the access to the system and ensure that only authorized personnel can access the vineyard data.
