@@ -107,7 +107,6 @@ Application described in this work should implement the following criteria:
 
 \subsection{User stories}
 User stories are a collection of features described from the perspective of the application’s user \cite{cohn2004}. Unlike functional requirements, they provide a better understanding of the needs of non-technical users. This approach ensures that the application will be better aligned with business needs.
-\todo[inline]{Czy powinny być w tym samy stylu wszystkie czy może być jak jest?}
 \subsubsection{Guest User:}
 
 \begin{enumerate}
@@ -129,13 +128,14 @@ User stories are a collection of features described from the perspective of the 
 		\item the password hash is updated in the database,
 		\item after successfully changing the password, the user receives a confirmation pop-up and is asked to log in again using the new password.
 	\end{itemize}
-	\item As a guest user, I can securely log in to my profile to access the resources stored there.
+	\item As a guest user, I can log in to my account to access the resources stored there.
 	\\Definition of done:
 	\begin{itemize}
 		\item the login button is easily accessible on the home page,
 		\item after clicking the login button, the user sees the login form,
 		\item the user is required to enter their email address and password to log in,
-		\item after entering the correct information, the user is redirected to the dashboard.
+		\item after entering the correct information, the user is redirected to the dashboard,
+		\item if user enters incorrect login or password, an error message is displayed prompting them to try again.
 	\end{itemize}
 	\item As a user, I want to be able to open a page with detailed information about the wine batch the bottle comes from by scanning a QR code.
 	\\Definition of done:
