@@ -151,31 +151,27 @@ User stories are a collection of features described from the perspective of the 
 	\item As a logged-in user I can log out of the system so that my account is secure and no one can use it without my knowledge.
 	\\Definition of done:
 	\begin{itemize}
-		\item the "log out" button is easily accessible in the user interface,
 		\item after clicking the "log out" button, the user is logged out of the system, session token is invalidated on the backend,
 		\item after logging out, user is redirected to the login page.
 	\end{itemize}
 	\item As a logged-in user I can change my password so that I can maintain the security of my account.
 	\\Definition of done:
 	\begin{itemize}
-		\item the "change password" option is available in the profile settings,
-		\item the user is required to provide their current password and the new password twice for confirmation,
+		\item after clicking the "change password" option, the user is required to provide their current password and the new password twice for confirmation,
 		\item after successfully changing the password, the user receives a confirmation pop-up and is asked to log in again using the new password,
 		\item the password hash is updated in the database.
 	\end{itemize}
 	\item As a logged-in user I can change my email address so that I can keep my personal information up to date.
 	\\Definition of done:
 	\begin{itemize}
-		\item the "change email" option is available in the profile settings,
-		\item the user is required to provide new email address and confirm the operation,
+		\item after clicking the "change email" option, the user is required to provide new email address and confirm the operation,
 		\item after successfully changing the email address, the user receives a confirmation pop-up and is asked to log in again using the new email and password,
 		\item the email address is updated in the database.
 	\end{itemize}
 	\item As a logged-in user I can change my phone number so that I can keep my personal information up to date.
 	\\Definition of done:
 	\begin{itemize}
-		\item the "change phone number" option is available in the profile settings,
-		\item the user is required to provide new phone number and confirm the operation,
+		\item after clicking the "change phone number" option, the user is required to provide new phone number and confirm the operation,
 		\item after successfully changing the phone number, the user receives a confirmation pop-up,
 		\item the phone number is updated in the database.
 	\end{itemize}
@@ -183,8 +179,7 @@ User stories are a collection of features described from the perspective of the 
 	\\Definition of done:
 	\begin{itemize}
 		\item validation prevents deletion if the user is the owner of an organization - in such case, the user must delete the organization first,
-		\item the "delete account" option is available in the profile settings,
-		\item the user is required to enter their password and confirm the action,
+		\item after clicking the "delete account" option, the user is required to enter their password and confirm the action,
 		\item after successfully deleting the account, the user receives a confirmation pop-up and is redirected to the login page,
 		\item all personal data is removed from the database.
 	\end{itemize}
@@ -192,8 +187,7 @@ User stories are a collection of features described from the perspective of the 
 	\\Definition of done:
 	\begin{itemize}
 		\item validation prevents creation if user already has an organization,
-		\item the "create organization" option is available in the user dashboard,
-		\item the user is required to provide the organization details and confirm the action,
+		\item after clicking the "create organization" option, the user is required to provide the organization details and confirm the action,
 		\item after successfully creating the organization, the user receives a confirmation pop-up and is redirected to the organization management page,
 		\item the user is assigned the role of "owner" in the newly created organization,
 		\item the organization is added to the database and associated with the user's account.
@@ -437,7 +431,6 @@ User stories are a collection of features described from the perspective of the 
     \item As a vineyard owner, I can generate production efficiency report in order to review it and analyze the efficiency of the production process.
     \\Definition of done:
 	\begin{itemize}
-		\item in reports section, there is an option to generate production efficiency report,
 		\item after selecting the option to generate production efficiency report, user can select the time period and/or specific production batches for which the report is to be generated,
 		\item after confirming the selected parameters, a report is generated,
 		\item the report includes key performance indicators such as yield per hectare, average time from harvest to bottling, and percentage of batches marked as spoiled,
@@ -447,7 +440,6 @@ User stories are a collection of features described from the perspective of the 
 	\item As a vineyard owner, I can generate diversity of grapevine varieties report in order to review it and analyze the variety distribution in the vineyard.
     \\Definition of done:
 	\begin{itemize}
-		\item in reports section, there is an option to generate diversity of grapevine varieties report,
 		\item after selecting the option to generate diversity of grapevine varieties report, user can select the time period and/or specific fields for which the report is to be generated,
 		\item after confirming the selected parameters, a report is generated,
 		\item the report includes information about the different grapevine varieties planted in the vineyard, their respective areas, and their contribution to the overall production,
@@ -457,7 +449,6 @@ User stories are a collection of features described from the perspective of the 
 	\item As a vineyard owner, I can generate vineyard operations report in order to review it and analyze the operational efficiency of the vineyard.
     \\Definition of done:
 	\begin{itemize}
-		\item in reports section, there is an option to generate vineyard operations report,
 		\item after selecting the option to generate vineyard operations report, user can select the time period and/or specific operations for which the report is to be generated,
 		\item after confirming the selected parameters, a report is generated,
 		\item the report includes information about the various operations performed in the vineyard (e.g., pruning, irrigation, pest control), their frequency, and their impact on production efficiency,
@@ -467,7 +458,6 @@ User stories are a collection of features described from the perspective of the 
 	\item As a vineyard owner, I can generate historical trend report in order to review it and analyze the production trends over time.
     \\Definition of done:
 	\begin{itemize}
-		\item in reports section, there is an option to generate historical trend report,
 		\item after selecting the option to generate historical trend report, user can select the time period, and aggregation level (e.g., monthly, quarterly, yearly),
 		\item after confirming the selected parameters, a report is generated,
 		\item the report includes the same information as other reports, but aggregated over time to show trends and patterns,
@@ -477,14 +467,12 @@ User stories are a collection of features described from the perspective of the 
     \item As a vineyard owner, I can view information about the organization.
     \\Definition of done:
 	\begin{itemize}
-		\item the information about the organization is accessible from the organization dashboard,
 		\item the information includes the organization name, address, contact information, and a list of associated vineyards and winery equipment.
 	\end{itemize}
 
     \item As a vineyard owner, I can edit information about the organization, in order to keep it up-to-date.
     \\Definition of done:
 	\begin{itemize}
-		\item the information edit form is accessible from the organization dashboard,
 		\item the user can modify every field of the organization information, including the name, address and contact information,
 		\item all changes are saved in the database and can be reviewed later.
 	\end{itemize}
@@ -492,7 +480,6 @@ User stories are a collection of features described from the perspective of the 
     \item As a vineyard owner, I can remove the organization from the system, which will also remove all associated data, in order to ensure that organization data is not stored in the system if I no longer want to use the application.
     \\Definition of done:
 	\begin{itemize}
-		\item the user can access the organization removal option from the organization dashboard,
 		\item the user must confirm the removal action by entering the password,
 		\item upon confirmation, the organization and all associated data are deleted from the system,
 		\item after successful deletion, the vineyard owner role is revoked, and the user is redirected to the home page.
@@ -501,7 +488,6 @@ User stories are a collection of features described from the perspective of the 
     \item As a vineyard owner, I can view, add and delete vineyard fields from the organization along with the grape variety planted there, in order to keep the information about the vineyard up-to-date.
     \\Definition of done:
 	\begin{itemize}
-		\item the user can access the vineyard field management option from the organization dashboard,
 		\item the user can add new vineyard fields,
 		\item when adding a new vineyard field, the user must provide information about the field's location, date of planting, area, and the grape varieties planted there,
 		\item the user can delete existing vineyard fields from the organization,
@@ -511,7 +497,6 @@ User stories are a collection of features described from the perspective of the 
     \item As a vineyard owner, I can view, add and delete winery equipment from organization, in order to keep the information about the winery equipment up-to-date.
     \\Definition of done:
 	\begin{itemize}
-		\item the user can access the winery equipment management option from the organization dashboard,
 		\item the user can add new winery equipment such as fermentation tanks, barrels, and bottling machines,
 		\item when adding new winery equipment, the user must provide information about the equipment type, location, and capacity,
 		\item the user can delete existing winery equipment from the organization,
@@ -521,7 +506,6 @@ User stories are a collection of features described from the perspective of the 
     \item As a vineyard owner, I can add users to the organization, in order to allow them to access the system and contribute to the management of the vineyard.
     \\Definition of done:
 	\begin{itemize}
-		\item the user can access the user management option from the organization dashboard,
 		\item the vineyard owner is able to enter the email address provided by the employee they want to add to the organization, 
 		\item the system checks if there is an existing account associated with that email address,
 		\item if there is an existing account, the user receives a notification with an option to confirm joining the organization,
@@ -533,7 +517,6 @@ User stories are a collection of features described from the perspective of the 
     \item As a vineyard owner, I can view and delete users from organization, in order to manage the access to the system and ensure that only authorized personnel can access the vineyard data.
     \\Definition of done:
 	\begin{itemize}
-		\item the user can access the user management option from the organization dashboard,
 		\item the user can view a list of all users in the organization,
 		\item the user can delete users from the organization,
 		\item all changes are saved in the database and can be reviewed later.
@@ -542,7 +525,6 @@ User stories are a collection of features described from the perspective of the 
 	\item As a vineyard owner, I can assign and revoke roles to other users in the organization, in order to manage their permissions and access to different functionalities of the system.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user can access the user management option from the organization dashboard,
 		\item the user can assign roles to users, such as vineyard worker or oenologist,
 		\item multiple roles can be assigned to a single user,
 		\item the user can revoke roles from users,
