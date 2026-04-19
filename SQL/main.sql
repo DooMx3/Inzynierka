@@ -1,50 +1,47 @@
-CREATE TABLE IF NOT EXISTS "users" (
+CREATE TABLE IF NOT EXISTS "user" (
 	"id" INTEGER NOT NULL,
 	"organisationId" INTEGER,
 	-- Enum { NONE, PENDING, MEMBER }
 	-- Invitation status sent by the Owner. Before sending: NONE, after sending: PENDING, after accepting: MEMBER, after rejecting: NONE.
 	"membershipStatus" VARCHAR(8) DEFAULT 'NONE',
 	-- User's name
-	"firstName" VARCHAR(128),
+	"firstName" VARCHAR(128) NOT NULL,
 	-- User's surname
-	"lastName" VARCHAR(128),
+	"lastName" VARCHAR(128) NOT NULL,
 	-- First part of the address
-	"addressOne" VARCHAR(255),
+	"addressOne" VARCHAR(255) NOT NULL,
 	-- Second part of the address
-	"addressTwo" VARCHAR(255),
+	"addressTwo" VARCHAR(255) NOT NULL,
 	-- IBAN
-	"bankAccountNumber" VARCHAR(28),
+	"bankAccountNumber" VARCHAR(28) NOT NULL,
 	PRIMARY KEY("id")
 );
 
 
-COMMENT ON COLUMN "users"."membershipStatus" IS 'Enum { NONE, PENDING, MEMBER }
+COMMENT ON COLUMN "user"."membershipStatus" IS 'Enum { NONE, PENDING, MEMBER }
 Invitation status sent by the Owner. Before sending: NONE, after sending: PENDING, after accepting: MEMBER, after rejecting: NONE.';
-COMMENT ON COLUMN "users"."firstName" IS 'User''s name';
-COMMENT ON COLUMN "users"."lastName" IS 'User''s surname';
-COMMENT ON COLUMN "users"."addressOne" IS 'First part of the address';
-COMMENT ON COLUMN "users"."addressTwo" IS 'Second part of the address';
-COMMENT ON COLUMN "users"."bankAccountNumber" IS 'IBAN';
+COMMENT ON COLUMN "user"."firstName" IS 'User''s name';
+COMMENT ON COLUMN "user"."lastName" IS 'User''s surname';
+COMMENT ON COLUMN "user"."addressOne" IS 'First part of the address';
+COMMENT ON COLUMN "user"."addressTwo" IS 'Second part of the address';
+COMMENT ON COLUMN "user"."bankAccountNumber" IS 'IBAN';
 
 
-CREATE TABLE IF NOT EXISTS "roles" (
+CREATE TABLE IF NOT EXISTS "role" (
 	"id" INTEGER NOT NULL,
 	-- Readable, full name
-	"name" VARCHAR(64),
+	"name" VARCHAR(64) NOT NULL,
 	-- Short description of a role
 	"description" VARCHAR(512),
-	-- Defines hierarchy, ranges from 0 (guest) to 100 (admin)
-	"level" SMALLINT,
 	PRIMARY KEY("id")
 );
 
 
-COMMENT ON COLUMN "roles"."name" IS 'Readable, full name';
-COMMENT ON COLUMN "roles"."description" IS 'Short description of a role';
-COMMENT ON COLUMN "roles"."level" IS 'Defines hierarchy, ranges from 0 (guest) to 100 (admin)';
+COMMENT ON COLUMN "role"."name" IS 'Readable, full name';
+COMMENT ON COLUMN "role"."description" IS 'Short description of a role';
 
 
-CREATE TABLE IF NOT EXISTS "usersRoles" (
+CREATE TABLE IF NOT EXISTS "user_role" (
 	"id" INTEGER NOT NULL,
 	"userId" INTEGER NOT NULL,
 	"roleId" INTEGER NOT NULL,
@@ -54,7 +51,7 @@ CREATE TABLE IF NOT EXISTS "usersRoles" (
 
 
 
-CREATE TABLE IF NOT EXISTS "jobs" (
+CREATE TABLE IF NOT EXISTS "job" (
 	"id" INTEGER NOT NULL,
 	"organisationId" INTEGER NOT NULL,
 	"userId" INTEGER NOT NULL,
@@ -63,13 +60,14 @@ CREATE TABLE IF NOT EXISTS "jobs" (
 	"batchId" INTEGER,
 	"recordId" INTEGER,
 	"harvestId" INTEGER,
+	"jobTypeId" INTEGER NOT NULL,
 	PRIMARY KEY("id")
 );
 
 
 
 
-CREATE TABLE IF NOT EXISTS "fields" (
+CREATE TABLE IF NOT EXISTS "field" (
 	"id" INTEGER NOT NULL,
 	"grapeTypeId" INTEGER NOT NULL,
 	"organisationId" INTEGER NOT NULL,
@@ -79,8 +77,10 @@ CREATE TABLE IF NOT EXISTS "fields" (
 
 
 
-CREATE TABLE IF NOT EXISTS "grapes" (
+CREATE TABLE IF NOT EXISTS "grape_type" (
 	"id" INTEGER NOT NULL,
+	"name" VARCHAR(255) NOT NULL,
+	"colorId" INTEGER NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -90,26 +90,27 @@ CREATE TABLE IF NOT EXISTS "grapes" (
 CREATE TABLE IF NOT EXISTS "equipment" (
 	"id" INTEGER NOT NULL,
 	"organisationId" INTEGER NOT NULL,
+	"name" VARCHAR(255) NOT NULL,
+	"typeId" INTEGER NOT NULL,
 	PRIMARY KEY("id")
 );
 
 
 
 
-CREATE TABLE IF NOT EXISTS "batches" (
+CREATE TABLE IF NOT EXISTS "batch" (
 	"id" INTEGER NOT NULL,
 	"currentLocationId" INTEGER NOT NULL,
 	"grapeId" INTEGER NOT NULL,
 	"organisationId" INTEGER NOT NULL,
 	"harvestId" INTEGER,
-	"wineId" INTEGER NOT NULL,
 	PRIMARY KEY("id")
 );
 
 
 
 
-CREATE TABLE IF NOT EXISTS "records" (
+CREATE TABLE IF NOT EXISTS "record" (
 	"id" INTEGER NOT NULL,
 	"organisationId" INTEGER NOT NULL,
 	"batchId" INTEGER,
@@ -120,49 +121,46 @@ CREATE TABLE IF NOT EXISTS "records" (
 
 
 
-CREATE TABLE IF NOT EXISTS "ogranisations" (
+CREATE TABLE IF NOT EXISTS "ogranisation" (
 	"id" INTEGER NOT NULL,
+	"name" VARCHAR(255) NOT NULL,
+	"address_1" VARCHAR(255) NOT NULL,
+	"address_2" VARCHAR(255) NOT NULL,
+	"city" VARCHAR(255) NOT NULL,
 	PRIMARY KEY("id")
 );
 
 
 
 
-CREATE TABLE IF NOT EXISTS "harvests" (
+CREATE TABLE IF NOT EXISTS "harvest" (
 	"id" INTEGER NOT NULL,
 	"fieldId" INTEGER NOT NULL,
 	"organisationId" INTEGER NOT NULL,
+	"grapeId" INTEGER,
+	"amount" INTEGER,
 	PRIMARY KEY("id")
 );
 
 
 
 
-CREATE TABLE IF NOT EXISTS "sales" (
-	"id" INTEGER NOT NULL,
-	"organisationId" INTEGER NOT NULL,
-	"batchId" INTEGER NOT NULL,
-	"wineId" INTEGER NOT NULL,
-	PRIMARY KEY("id")
-);
-
-
-
-
-CREATE TABLE IF NOT EXISTS "offer" (
+CREATE TABLE IF NOT EXISTS "offering" (
 	"id" INTEGER NOT NULL,
 	"organisationId" INTEGER NOT NULL,
 	"wineId" INTEGER NOT NULL,
+	"price" INTEGER NOT NULL,
 	PRIMARY KEY("id")
 );
 
 
 
 
-CREATE TABLE IF NOT EXISTS "wines" (
+CREATE TABLE IF NOT EXISTS "wine" (
 	"id" INTEGER NOT NULL,
 	"organisationId" INTEGER NOT NULL,
 	"name" VARCHAR(255) NOT NULL,
+	"description" TEXT,
 	PRIMARY KEY("id")
 );
 
@@ -176,90 +174,133 @@ CREATE TABLE IF NOT EXISTS "recordType" (
 
 
 
-ALTER TABLE "roles"
-ADD FOREIGN KEY("id") REFERENCES "usersRoles"("roleId")
+
+CREATE TABLE IF NOT EXISTS "equipment_type" (
+	"id" INTEGER NOT NULL GENERATED BY DEFAULT AS IDENTITY,
+	"name" VARCHAR(255) NOT NULL,
+	PRIMARY KEY("id")
+);
+
+
+
+
+CREATE TABLE IF NOT EXISTS "job_type" (
+	"id" INTEGER NOT NULL GENERATED BY DEFAULT AS IDENTITY,
+	"name" VARCHAR(255),
+	PRIMARY KEY("id")
+);
+
+
+
+
+CREATE TABLE IF NOT EXISTS "grape_color" (
+	"id" INTEGER NOT NULL GENERATED BY DEFAULT AS IDENTITY,
+	"name" VARCHAR(255) NOT NULL,
+	PRIMARY KEY("id")
+);
+
+
+
+
+CREATE TABLE IF NOT EXISTS "wine_batch" (
+	"id" INTEGER NOT NULL GENERATED BY DEFAULT AS IDENTITY,
+	"wineId" INTEGER NOT NULL,
+	"batchId" INTEGER NOT NULL,
+	PRIMARY KEY("id")
+);
+
+
+
+ALTER TABLE "role"
+ADD FOREIGN KEY("id") REFERENCES "user_role"("roleId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "users"
-ADD FOREIGN KEY("id") REFERENCES "usersRoles"("userId")
+ALTER TABLE "user"
+ADD FOREIGN KEY("id") REFERENCES "user_role"("userId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "users"
-ADD FOREIGN KEY("id") REFERENCES "jobs"("userId")
+ALTER TABLE "user"
+ADD FOREIGN KEY("id") REFERENCES "job"("userId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "fields"
-ADD FOREIGN KEY("id") REFERENCES "jobs"("fieldId")
+ALTER TABLE "field"
+ADD FOREIGN KEY("id") REFERENCES "job"("fieldId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "grapes"
-ADD FOREIGN KEY("id") REFERENCES "fields"("grapeTypeId")
+ALTER TABLE "grape_type"
+ADD FOREIGN KEY("id") REFERENCES "field"("grapeTypeId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "equipment"
-ADD FOREIGN KEY("id") REFERENCES "jobs"("equipmentId")
+ADD FOREIGN KEY("id") REFERENCES "job"("equipmentId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "batches"
-ADD FOREIGN KEY("id") REFERENCES "jobs"("batchId")
+ALTER TABLE "batch"
+ADD FOREIGN KEY("id") REFERENCES "job"("batchId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "batches"
+ALTER TABLE "batch"
 ADD FOREIGN KEY("currentLocationId") REFERENCES "equipment"("id")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "grapes"
-ADD FOREIGN KEY("id") REFERENCES "batches"("grapeId")
+ALTER TABLE "grape_type"
+ADD FOREIGN KEY("id") REFERENCES "batch"("grapeId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "jobs"
-ADD FOREIGN KEY("recordId") REFERENCES "records"("id")
+ALTER TABLE "job"
+ADD FOREIGN KEY("recordId") REFERENCES "record"("id")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "batches"
-ADD FOREIGN KEY("id") REFERENCES "records"("batchId")
+ALTER TABLE "batch"
+ADD FOREIGN KEY("id") REFERENCES "record"("batchId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "ogranisations"
-ADD FOREIGN KEY("id") REFERENCES "users"("organisationId")
+ALTER TABLE "ogranisation"
+ADD FOREIGN KEY("id") REFERENCES "user"("organisationId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "ogranisations"
-ADD FOREIGN KEY("id") REFERENCES "fields"("organisationId")
+ALTER TABLE "ogranisation"
+ADD FOREIGN KEY("id") REFERENCES "field"("organisationId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "ogranisations"
+ALTER TABLE "ogranisation"
 ADD FOREIGN KEY("id") REFERENCES "equipment"("organisationId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "ogranisations"
-ADD FOREIGN KEY("id") REFERENCES "jobs"("organisationId")
+ALTER TABLE "ogranisation"
+ADD FOREIGN KEY("id") REFERENCES "job"("organisationId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "ogranisations"
-ADD FOREIGN KEY("id") REFERENCES "records"("organisationId")
+ALTER TABLE "ogranisation"
+ADD FOREIGN KEY("id") REFERENCES "record"("organisationId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "ogranisations"
-ADD FOREIGN KEY("id") REFERENCES "batches"("organisationId")
+ALTER TABLE "ogranisation"
+ADD FOREIGN KEY("id") REFERENCES "batch"("organisationId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "fields"
-ADD FOREIGN KEY("id") REFERENCES "harvests"("fieldId")
+ALTER TABLE "field"
+ADD FOREIGN KEY("id") REFERENCES "harvest"("fieldId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "harvests"
-ADD FOREIGN KEY("id") REFERENCES "jobs"("harvestId")
+ALTER TABLE "harvest"
+ADD FOREIGN KEY("id") REFERENCES "job"("harvestId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "ogranisations"
-ADD FOREIGN KEY("id") REFERENCES "harvests"("organisationId")
+ALTER TABLE "ogranisation"
+ADD FOREIGN KEY("id") REFERENCES "harvest"("organisationId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "ogranisations"
-ADD FOREIGN KEY("id") REFERENCES "sales"("organisationId")
+ALTER TABLE "harvest"
+ADD FOREIGN KEY("id") REFERENCES "batch"("harvestId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "batches"
-ADD FOREIGN KEY("id") REFERENCES "sales"("batchId")
+ALTER TABLE "ogranisation"
+ADD FOREIGN KEY("id") REFERENCES "offering"("organisationId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "harvests"
-ADD FOREIGN KEY("id") REFERENCES "batches"("harvestId")
+ALTER TABLE "ogranisation"
+ADD FOREIGN KEY("id") REFERENCES "wine"("organisationId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "ogranisations"
-ADD FOREIGN KEY("id") REFERENCES "offer"("organisationId")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "ogranisations"
-ADD FOREIGN KEY("id") REFERENCES "wines"("organisationId")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "batches"
-ADD FOREIGN KEY("wineId") REFERENCES "wines"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "wines"
-ADD FOREIGN KEY("id") REFERENCES "offer"("wineId")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "wines"
-ADD FOREIGN KEY("id") REFERENCES "sales"("wineId")
+ALTER TABLE "wine"
+ADD FOREIGN KEY("id") REFERENCES "offering"("wineId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "recordType"
-ADD FOREIGN KEY("id") REFERENCES "records"("recordTypeId")
+ADD FOREIGN KEY("id") REFERENCES "record"("recordTypeId")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "equipment"
+ADD FOREIGN KEY("typeId") REFERENCES "equipment_type"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "job"
+ADD FOREIGN KEY("jobTypeId") REFERENCES "job_type"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "grape_type"
+ADD FOREIGN KEY("colorId") REFERENCES "grape_color"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "wine_batch"
+ADD FOREIGN KEY("wineId") REFERENCES "wine"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "wine_batch"
+ADD FOREIGN KEY("batchId") REFERENCES "batch"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "harvest"
+ADD FOREIGN KEY("grapeId") REFERENCES "grape_type"("id")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
