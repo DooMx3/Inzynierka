@@ -9,9 +9,9 @@ CREATE TABLE IF NOT EXISTS "user" (
 	-- User's surname
 	"lastName" VARCHAR(128) NOT NULL,
 	-- First part of the address
-	"addressOne" VARCHAR(255) NOT NULL,
+	"address_1" VARCHAR(255) NOT NULL,
 	-- Second part of the address
-	"addressTwo" VARCHAR(255) NOT NULL,
+	"address_2" VARCHAR(255) NOT NULL,
 	-- IBAN
 	"bankAccountNumber" VARCHAR(28) NOT NULL,
 	PRIMARY KEY("id")
@@ -22,8 +22,8 @@ COMMENT ON COLUMN "user"."membershipStatus" IS 'Enum { NONE, PENDING, MEMBER }
 Invitation status sent by the Owner. Before sending: NONE, after sending: PENDING, after accepting: MEMBER, after rejecting: NONE.';
 COMMENT ON COLUMN "user"."firstName" IS 'User''s name';
 COMMENT ON COLUMN "user"."lastName" IS 'User''s surname';
-COMMENT ON COLUMN "user"."addressOne" IS 'First part of the address';
-COMMENT ON COLUMN "user"."addressTwo" IS 'Second part of the address';
+COMMENT ON COLUMN "user"."address_1" IS 'First part of the address';
+COMMENT ON COLUMN "user"."address_2" IS 'Second part of the address';
 COMMENT ON COLUMN "user"."bankAccountNumber" IS 'IBAN';
 
 
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS "role" (
 	-- Readable, full name
 	"name" VARCHAR(64) NOT NULL,
 	-- Short description of a role
-	"description" VARCHAR(512),
+	"description" TEXT,
 	PRIMARY KEY("id")
 );
 
@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS "user_role" (
 
 CREATE TABLE IF NOT EXISTS "job" (
 	"id" INTEGER NOT NULL,
+	"jobTypeId" INTEGER NOT NULL,
 	"organisationId" INTEGER NOT NULL,
 	"userId" INTEGER NOT NULL,
 	"equipmentId" INTEGER,
@@ -60,11 +61,15 @@ CREATE TABLE IF NOT EXISTS "job" (
 	"batchId" INTEGER,
 	"recordId" INTEGER,
 	"harvestId" INTEGER,
-	"jobTypeId" INTEGER NOT NULL,
+	"startedAt" DATE,
+	"completedAt" DATE NOT NULL,
+	-- Additional user's notes
+	"description" TEXT,
 	PRIMARY KEY("id")
 );
 
 
+COMMENT ON COLUMN "job"."description" IS 'Additional user''s notes';
 
 
 CREATE TABLE IF NOT EXISTS "field" (
