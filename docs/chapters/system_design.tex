@@ -127,17 +127,13 @@ User stories are a collection of features described from the perspective of the 
 		\item upon clicking the activation link in the email, the account is activated in the database,
 		\item the user is redirected to a success page and can now log in to their new account.
 	\end{itemize}
-	\item As a guest user, I can reset my password to regain access to my account and log in.
+	\item As a guest user, I can reset my password to regain access to my account.
 	\\Definition of done:
 	\begin{itemize}
-		\item the login button is easily accessible on the home page,
-		\item after clicking the login button, the user sees the login form,
-		\item the password recovery button is located on the login form and is easily accessible,
-		\item after clicking the password recovery button, a new form opens where the user is required to provide their email address to receive an email containing a link to reset their password,
-		\item the email is sent to the user,
-		\item after receiving the email and clicking the link, the user must enter a new password (meeting the minimum strength requirements) and confirm it,
-		\item the password hash is updated in the database,
-		\item after successfully changing the password, the user receives a confirmation pop-up and is asked to log in again using the new password.
+		\item the user provides their email address in the recovery form,
+		\item the system sends an email with a unique reset link,
+		\item after clicking the link, the user sets a new password that meets the security strength requirements,
+		\item the password hash is updated in the database.
 	\end{itemize}
 	\item As a guest user, I can log in to my account to access the resources stored there.
 	\\Definition of done:
@@ -252,11 +248,16 @@ User stories are a collection of features described from the perspective of the 
 \subsubsection{Oenologist:}
 
 \begin{enumerate}
+	\item As an oenologist, I can view a list of all production batches to monitor the current status of the winery. 
+	\\Definition of done:
+	\begin{itemize}
+		\item the system displays a searchable and filterable list of all production batches, 
+		\item for each batch, the list shows its unique ID, current stage, and status.
+	\end{itemize}
+	
 	\item As a oenologist, I want to be able to view information about a specific batch, so I can compare specifications with others.
 	Definiton of done:
 	\begin{itemize}
-		\item the section containing the production batches is easily accessible,
-		\item after selecting the section with production batches, all batches are displayed,
 		\item the user selects a specific batch; they can use sorting and filters to help them find the item they're looking for more easily,
 		\item after selecting a specific batch, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
 		\item the user can click on a specific measurement, which will expand to display detailed information.
@@ -265,9 +266,6 @@ User stories are a collection of features described from the perspective of the 
 	\item As a oenologist, I want to be able to select specific batches in order to record information at each stage of production.
 	\\Definition of done:
 	\begin{itemize}
-		\item the section containing the production batches is easily accessible,
-		\item after selecting the section with production batches, all batches are displayed,
-		\item the user selects a specific batch; they can use sorting and filters to help them find the item they're looking for more easily,
 		\item after selecting a specific batch, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
 		\item the button for adding a new measurement is highlighted and easily accessible,
 		\item after clicking the button to enter a new measurement, a form for entering measurement data opens,
@@ -278,9 +276,6 @@ User stories are a collection of features described from the perspective of the 
 	\item As a oenologist, I want to be able to edit the measurement data I've entered, because I made a mistake doing that.
 	\\Definition of done:
 	\begin{itemize}
-		\item the section containing the production batches is easily accessible,
-		\item after selecting the section with production batches, all batches are displayed,
-		\item the user selects a specific batch; they can use sorting and filters to help them find the item they're looking for more easily,
 		\item after selecting a specific batch, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
 		\item the user can click on a specific measurement, which will expand to display detailed information,
 		\item the edit button is highlighted and easily accessible,
@@ -294,8 +289,6 @@ User stories are a collection of features described from the perspective of the 
 	\item As a oenologist, I want to be able to start a new production batch.
 	\\Definition of done:
 	\begin{itemize}
-		\item the section containing the production batches is easily accessible,
-		\item the button to start a new production batch is easily accessible,
 		\item the user clicks the button to start a new production batch,
 		\item a form appears in which the user selects the piece of equipment where the production batch is to begin, as well as the batch of fruit and the quantity from which the batch is to be produced,
 		\item the user clicks the button to confirm the creation of a new production batch,
@@ -307,9 +300,6 @@ User stories are a collection of features described from the perspective of the 
 	\item As a oenologist, I want to be able to mark a batch of wine I’ve selected as spoiled.
 	\\Definition of done:
 	\begin{itemize}
-		\item the section containing the production batches is easily accessible,
-		\item after selecting the section with production batches, all batches are displayed,
-		\item the user selects a specific batch; they can use sorting and filters to help them find the item they're looking for more easily,
 		\item after selecting a specific batch, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
 		\item the button for marking a batch of wine as spoiled is highlighted and easily accessible,
 		\item the user clicks the button to mark the batch of wine as spoiled,
@@ -323,9 +313,6 @@ User stories are a collection of features described from the perspective of the 
 	\item As a oenologist, I want to be able to mark a batch of wine I’ve selected as not spoiled and ready for bottling.
 	\\Definition of done:
 	\begin{itemize}
-		\item the section containing the production batches is easily accessible,
-		\item after selecting the section with production batches, all batches are displayed,
-		\item the user selects a specific batch; they can use sorting and filters to help them find the item they're looking for more easily,
 		\item after selecting a specific batch, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
 		\item the button for marking a batch of wine as not spoiled is highlighted and easily accessible,
 		\item the user clicks the button to mark the batch of wine as excellent,
@@ -339,8 +326,6 @@ User stories are a collection of features described from the perspective of the 
 	\item As a oenologist, I want to be able to complete a production batch by bottling it.
 	\\Definition of done:
 	\begin{itemize}
-		\item the section containing the production batches is easily accessible,
-		\item after selecting the section with production batches, all batches are displayed,
 		\item the user selects a specific batch (only those marked as "ready for bottling" or "not spoiled" are eligible),
 		\item the button for finalizing the batch through bottling is highlighted and easily accessible,
 		\item after clicking the bottling button, a form appears where the user enters the number of bottles produced, bottle size, and storage location,
