@@ -47,14 +47,12 @@ jobs:
             fontconfig
 
       - name: Build all .tex files found in the repository
+        working-directory: docs
         run: |
           set -e
           mkdir -p build
-          texfiles=docs/*.tex
-          for f in $texfiles; do
-            echo "Building $f"
-            latexmk -pdf -halt-on-error -output-directory=build "$f"
-          done
+          echo "Building main.tex"
+          latexmk -pdf -halt-on-error -output-directory=build "main.tex"
 
       - name: Upload PDFs and Create Release
         uses: ncipollo/release-action@v1
