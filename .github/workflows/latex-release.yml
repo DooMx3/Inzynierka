@@ -33,19 +33,6 @@ jobs:
           echo "Automated build including those changes:" > release_body.txt
           git log ${prev_tag}...HEAD --oneline --pretty=format:"- %s" >> release_body.txt
 
-      - name: Install TeX
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            texlive-latex-recommended \
-            texlive-latex-extra \
-            texlive-fonts-recommended \
-            texlive-fonts-extra \
-            texlive-xetex \
-            texlive-lang-polish \
-            latexmk \
-            fontconfig
-
       - name: Build LaTeX document
         uses: xu-cheng/latex-action@v3
         with:
