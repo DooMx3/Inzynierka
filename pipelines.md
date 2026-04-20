@@ -28,6 +28,9 @@
 
 Domyślnym hasłem może być np pesel danego użytkownika, albo losowe hasło wysyłane ręcznie mailem.
 
+## Delete Account
+Utworzyć rekord z "DELETED_USER", przypisać do niego wszystkie jobs przy usuwaniu pracownika.
+
 ## Wine production
 - Field (poletko):
     - podział na czerwone i białe winogrona
