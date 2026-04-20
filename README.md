@@ -2,7 +2,11 @@
 
 ## Database visual editor
 
-[Editor](https://www.drawdb.app/editor?shareId=d303b3625da76c5cf50531b932afbd43)
+- We are using new God's editor named dbdiagram.io
+- Each of us need's to have their own project on this God's website
+- Till we finish nothing matter, just place the tables randomly on grid, in the end God's unfortunate will need to move relations lines to be visible
+
+[Editor](https://dbdiagram.io/)
 
 ###### Good practices
 
