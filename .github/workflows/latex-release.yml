@@ -38,7 +38,6 @@ jobs:
         with:
           root_file: main.tex
           working_directory: docs
-          # This action uses TeX Live Full by default, covering all your polish/extra requirements
           args: -pdf -halt-on-error -output-directory=build
 
       - name: Upload PDFs and Create Release
@@ -46,7 +45,7 @@ jobs:
         with:
           draft: false
           prerelease: false
-          artifacts: 'build/*.pdf'
+          artifacts: 'docs/build/*.pdf'
           bodyFile: ./release_body.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
