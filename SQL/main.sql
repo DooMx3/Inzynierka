@@ -220,16 +220,6 @@ CREATE TABLE IF NOT EXISTS "wine_batch" (
 COMMENT ON COLUMN "wine_batch"."spoiled" IS 'representing percentage of spoiled wine';
 
 
-CREATE TABLE IF NOT EXISTS "report" (
-	"id" UUID NOT NULL,
-	"organisationId" INTEGER NOT NULL,
-	"generatedAt" DATE NOT NULL,
-	"resultData" JSON NOT NULL,
-	PRIMARY KEY("id")
-);
-
-
-
 
 CREATE TABLE IF NOT EXISTS "field_harvest" (
 	"id" UUID NOT NULL,
@@ -323,9 +313,6 @@ ADD FOREIGN KEY("wineId") REFERENCES "wine"("id")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "wine_batch"
 ADD FOREIGN KEY("batchId") REFERENCES "batch"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "organisation"
-ADD FOREIGN KEY("id") REFERENCES "report"("id")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "field"
 ADD FOREIGN KEY("id") REFERENCES "field_harvest"("fieldId")
