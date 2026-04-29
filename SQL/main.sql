@@ -213,9 +213,6 @@ CREATE TABLE IF NOT EXISTS "wine_batch" (
 	"id" UUID NOT NULL,
 	"wineId" INTEGER NOT NULL,
 	"batchId" INTEGER NOT NULL,
-	-- representing percentage of spoiled wine
-	"spoiled" BOOLEAN,
-	"quantity" INTEGER,
 	PRIMARY KEY("id")
 );
 
@@ -238,7 +235,6 @@ CREATE TABLE IF NOT EXISTS "field_harvest" (
 	"id" UUID NOT NULL,
 	"fieldId" INTEGER NOT NULL,
 	"harvestId" INTEGER NOT NULL,
-	"harvestedAt" DATE,
 	PRIMARY KEY("id")
 );
 
