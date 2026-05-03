@@ -68,6 +68,7 @@ The system shall provide the following functionalities, categorized by users. Th
 	\item the ability to mark a selected production batch as spoiled, by manually selecting the batch or scanning QR code on one of the pieces of vineyard equipment where the batch is located,
 	\item the ability to unmark a selected production batch, which was marked as spoiled, by manually selecting the batch or scanning QR code on one of the pieces of vineyard equipment where the batch is located,
 	\item the ability to create, read, update and delete a batch of bottled wine, by manually selecting a specific batch or scanning QR code on one of the pieces of equipment in the winery,
+	\item the ability to auto calculate the amount of potassium metabisulfite.
 \end{itemize}
 \subsubsection{Vineyard Owner:}
 \begin{itemize}
@@ -486,6 +487,18 @@ User stories are a collection of features described from the perspective of the 
 		\item scanning a QR code on winery equipment redirects the user to the correct category (must, fermenting, etc.),
 		\item the system automatically filters for the specific batch in that location and highlights it,
 		\item if the equipment is empty, the system suggests creating a new batch for that location.
+	\end{itemize}
+	%===========================================================
+	% potassium metabisulfite
+	%===========================================================
+	\item As an oenologist, I can see how much, potassium metabisulfite, I should add in order to stop the fermentation process, so I do not need to calculate it by hand.
+	\\Definition of done:
+	\begin{itemize}
+		\item the user selects a batch manually or via QR scan,
+		\item the calculate potassium metabisulfite button is highlighted and easly accessible,
+		\item the system automatically calculates the required amount of potassium metabisulfite based on the current quantity and specific parameters,
+		\item the system displays the calculated dosage,
+		\item the user can view the formula and change the amount of potassium metabisulfite if needed.
 	\end{itemize}
 \end{enumerate}
 
