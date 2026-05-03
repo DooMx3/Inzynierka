@@ -59,12 +59,15 @@ The system shall provide the following functionalities, categorized by users. Th
 \subsubsection{Oenologist:}
 \begin{itemize}
 	\item all of the logged-in abilities,
-	\item the ability to record chemical parameters (sugar level, acidity, pH, temperature and alcohol content) at every stage of production,
-	\item the ability to enter, view, and edit data for each stage of production and bottling by selecting a specific batch or scanning QR code on one of the pieces of equipment in the winery,
-	\item the ability to start a new production batch by manually selecting the initial piece of winery equipment where the process is to begin, or by scanning the QR code on the equipment,
-	\item the ability to mark a selected production batch as spoiled by manually selecting the batch or scanning the piece of vineyard equipment where the batch is located,
-	\item the ability to unmark a selected production batch, which was marked as spoiled, by selecting it manually or by scanning the QR code of the production area where the batch is located,
-	\item the ability to complete a production batch by bottling it.
+	\item the ability to create, read, update and delete a batch of must, by manually selecting a specific batch or scanning QR code on one of the pieces of equipment in the winery,
+	\item the ability to create, read, update and delete a batch of fermenting must, by manually selecting a specific batch or scanning QR code on one of the pieces of equipment in the winery,
+	\item the ability to add, read, update and delete ingredients used in fermenting must,
+	\item the ability to create, read, update and delete a batch of aged wine, by manually selecting a specific batch or scanning QR code on one of the pieces of equipment in the winery,
+	\item the ability to create, read, update and delete a batch of blended wine, by manually selecting a specific batch or scanning QR code on one of the pieces of equipment in the winery,
+	\item the ability to record chemical parameters (sugar level, acidity, pH, temperature and alcohol content) at every stage of production, by manually selecting a specific batch or scanning QR code on one of the pieces of equipment in the winery,
+	\item the ability to mark a selected production batch as spoiled, by manually selecting the batch or scanning QR code on one of the pieces of vineyard equipment where the batch is located,
+	\item the ability to unmark a selected production batch, which was marked as spoiled, by manually selecting the batch or scanning QR code on one of the pieces of vineyard equipment where the batch is located,
+	\item the ability to create, read, update and delete a batch of bottled wine, by manually selecting a specific batch or scanning QR code on one of the pieces of equipment in the winery,
 \end{itemize}
 \subsubsection{Vineyard Owner:}
 \begin{itemize}
@@ -249,180 +252,240 @@ User stories are a collection of features described from the perspective of the 
 \subsubsection{Oenologist:}
 
 \begin{enumerate}
-	\item As an oenologist, I can view a list of all production batches to monitor the current status of the winery. 
+	%===========================================================
+	%MUST
+	%===========================================================
+	\item As an oenologist, I can view a list of all batches of must, so I can compare specifications with others.
 	\\Definition of done:
 	\begin{itemize}
-		\item the system displays a searchable and filterable list of all production batches, 
-		\item for each batch, the list shows its unique ID, current stage, and status.
+		\item the system displays a searchable and filterable list of all must batches,
+		\item for each batch, the list shows its unique ID, creation date, location, quantity and batches of grapes used to make it.
 	\end{itemize}
-	
-	\item As a oenologist, I want to be able to view information about a specific batch, so I can compare specifications with others.
-	Definiton of done:
-	\begin{itemize}
-		\item the user selects a specific batch; they can use sorting and filters to help them find the item they're looking for more easily,
-		\item after selecting a specific batch, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
-		\item the user can click on a specific measurement, which will expand to display detailed information.
-	\end{itemize}
-	
-	\item As a oenologist, I want to be able to select specific batches in order to record information at each stage of production.
+	\item As an oenologist, I can create a new must batch, so I can use it later.
 	\\Definition of done:
 	\begin{itemize}
-		\item after selecting a specific batch, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
-		\item the button for adding a new measurement is highlighted and easily accessible,
-		\item after clicking the button to enter a new measurement, a form for entering measurement data opens,
-		\item the user enters the data and then confirms it,
-		\item the system saves the information correctly.
-	\end{itemize}
-	
-	\item As a oenologist, I want to be able to edit the measurement data I've entered, because I made a mistake doing that.
-	\\Definition of done:
-	\begin{itemize}
-		\item after selecting a specific batch, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
-		\item the user can click on a specific measurement, which will expand to display detailed information,
-		\item the edit button is highlighted and easily accessible,
-		\item after the user clicks the edit button, a form identical to the one used for entering measurements opens, with the exception that it is pre-filled with previously entered data,
-		\item the user corrects the data and clicks the confirmation button,
-		\item a pop-up appears, prompting the user to confirm that they want to edit the measurement,
-		\item the user confirms that they wish to confirm the edit to the measurement,
-		\item the system updates the information correctly.
-	\end{itemize}
-	
-	\item As a oenologist, I want to be able to start a new production batch.
-	\\Definition of done:
-	\begin{itemize}
-		\item the user clicks the button to start a new production batch,
-		\item a form appears in which the user selects the piece of equipment where the production batch is to begin, as well as the batch of fruit and the quantity from which the batch is to be produced,
-		\item the user clicks the button to confirm the creation of a new production batch,
-		\item a pop-up appears in which the user confirms their intention to create a new production batch.
-		\item the user clicks the button to confirm that they want to create a new production batch,
+		\item the user clicks the button to start a new must batch,
+		\item a form appears in which the user selects the piece of equipment where the must batch is to begin, as well as one or more batches of fruit and the quantity from which the batch is to be produced,
+		\item the user clicks the button to confirm the creation of a new must batch,
+		\item a pop-up appears in which the user confirms that they want to create a new must batch,
 		\item the system automatically generates a batch number.
 	\end{itemize}
-	
-	\item As a oenologist, I want to be able to mark a batch of wine I’ve selected as spoiled.
+	\item As an oenologist, I can update a must batch, so I can correct mistakes I have made during creation.
 	\\Definition of done:
 	\begin{itemize}
-		\item after selecting a specific batch, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
-		\item the button for marking a batch of wine as spoiled is highlighted and easily accessible,
-		\item the user clicks the button to mark the batch of wine as spoiled,
-		\item a form appears where the user can describe the reason for marking a batch of wine as spoiled,
-		\item the user clicks the button to confirm that the information in the form is correct,
-		\item a pop-up appears in which the user confirms their intention to mark selected wine batch as spoiled,
-		\item the user confirms that they wish to confirm the selected batch of wine is spoiled,
-		\item the system updates the information correctly.
+		\item the user clicks the button to edit a must batch,
+		\item a form appears in which the user corrects the information,
+		\item a pop-up appears in which the user confirms that they want to update a must batch,
+		\item the system updates the batch.
 	\end{itemize}
-	
-	\item As a oenologist, I want to be able to mark a batch of wine I’ve selected as not spoiled and ready for bottling.
+	\item As an oenologist, I can delete a must batch, because it doesn't meet my expectations.
 	\\Definition of done:
 	\begin{itemize}
-		\item after selecting a specific batch, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
-		\item the button for marking a batch of wine as not spoiled is highlighted and easily accessible,
-		\item the user clicks the button to mark the batch of wine as excellent,
-		\item a form appears where the user can describe the tasting notes and reasons for marking a batch of wine as not spoiled,
-		\item the user clicks the button to confirm that the information in the form is correct,
-		\item a pop-up appears in which the user confirms their intention to mark selected wine batch as not spoiled,
-		\item the user confirms that they wish to confirm the selected batch of wine is not spoiled,
-		\item the system updates the information correctly.
+		\item the user clicks the button to delete a must batch,
+		\item a pop-up appears in which the user confirms that they want to delete a must batch,
+		\item the system correctly deletes the must batch.
 	\end{itemize}
-	
-	\item As a oenologist, I want to be able to complete a production batch by bottling it.
+	\item As an oenologist, I can scan a QR code on a piece of equipment, so I can quickly view must batch associated with it.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user selects a specific batch (only those marked as "ready for bottling" or "not spoiled" are eligible),
-		\item the button for finalizing the batch through bottling is highlighted and easily accessible,
-		\item after clicking the bottling button, a form appears where the user enters the number of bottles produced, bottle size, and storage location,
-		\item the user confirms the data and clicks the finalization button,
-		\item a pop-up appears asking for final confirmation to close the production batch,
-		\item the system saves the information, changes the batch status to "completed/bottled", and frees up the winery equipment previously occupied by this batch.
+		\item the user scans a QR code located on a vineyard element,
+		\item the system redirects the user to the must batch list page,
+		\item the system filters the list to show batch related to that specific equipment and highlights the relevant record.
 	\end{itemize}
-	
-		\item As a oenologist, I want to be able to scan the QR code displayed on a piece of winery equipment to obtain information about the batch of wine it contains.
+	%===========================================================
+	%FERMENTING MUST
+	%===========================================================
+	\item As an oenologist, I can view a list of all batches of fermenting must, so I can compare specifications with others.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user scans the QR code located on one of the items of equipment in the winery,
-		\item the system links information about a piece of equipment to the batch of wine it contains and displays information about that batch,
-		\item after linking an inventory item to a case of wine, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
-		\item the user can click on a specific measurement, which will expand to display detailed information.
+		\item the system displays a searchable and filterable list of all fermenting must batches,
+		\item for each batch, the list shows its unique ID, creation date, location, quantity and batches of must used to make it.
 	\end{itemize}
-	
-		\item As a oenologist, I want to be able to edit information about a batch of wine stored inside a piece of winery equipment after scanning the QR code on it, because I made a mistake doing that.
+	\item As an oenologist, I can create a new fermenting must batch, so I can use it later.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user scans the QR code located on one of the items of equipment in the winery,
-		\item the system links information about a piece of equipment to the batch of wine it contains and displays information about that batch,
-		\item after linking an inventory item to a case of wine, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
-		\item the user can click on a specific measurement, which will expand to display detailed information,
-		\item the button for adding a new measurement is highlighted and easily accessible,
-		\item after clicking the button to enter a new measurement, a form for entering measurement data opens,
-		\item the user enters the data and then confirms it,
-		\item the system saves the information correctly.
-	\end{itemize}
-	
-		\item As a oenologist, I want to be able to add measurement data for a batch of wine after scanning the QR code located on the piece of winery equipment where the batch is stored.
-	\\Definition of done:
-	\begin{itemize}
-		\item the user scans the QR code located on one of the items of equipment in the winery,
-		\item the system links information about a piece of equipment to the batch of wine it contains and displays information about that batch,
-		\item after linking an inventory item to a case of wine, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
-		\item the button for adding a new measurement is highlighted and easily accessible,
-		\item after clicking the button to enter a new measurement, a form for entering measurement data opens,
-		\item the user enters the data and then confirms it,
-		\item the system saves the information correctly.
-	\end{itemize}
-	
-		\item As a oenologist, I want to be able to create a new production batch by scanning the QR code on the piece of equipment where the production batch is to be started.
-	\\Definition of done:
-	\begin{itemize}
-		\item the user scans the QR code located on one of the items of equipment in the winery,
-		\item the system checks whether a different batch of the product is already present in a given piece of winery equipment,
-		\item a message appears stating that the production facility's equipment item is empty and that a new production batch can be created,
-		\item the user selects the button to create a new production batch,
-		\item a form appears in which the user selects the batch of fruit and the quantity from which the batch is to be produced,
-		\item the user clicks the button to confirm the creation of a new production batch,
-		\item a pop-up appears in which the user confirms their intention to create a new production batch.
-		\item the user clicks the button to confirm that they want to create a new production batch,
+		\item the user clicks the button to start a new fermenting must batch,
+		\item a form appears in which the user selects the piece of equipment where the fermenting must batch is to begin, as well as one or more batches of must and the quantity from which the batch is to be produced,
+		\item the user clicks the button to confirm the creation of a new fermenting must batch,
+		\item a pop-up appears in which the user confirms that they want to create a new fermenting must batch,
 		\item the system automatically generates a batch number.
 	\end{itemize}
-	
-		\item As a oenologist, I want to be able to mark a batch of wine as spoiled by scanning the QR code located on a piece of vineyard equipment.
+	\item As an oenologist, I can update a fermenting must batch, so I can correct mistakes I have made during creation.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user scans the QR code located on one of the items of equipment in the winery,
-		\item the system checks which batch of wine is inside the winery equipment ,
-		\item after linking an inventory item to a case of wine, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
-		\item the button for marking a batch of wine as spoiled is highlighted and easily accessible,
-		\item the user clicks the button to mark the batch of wine as spoiled,
-		\item a form appears where the user can describe the reason for marking a batch of wine as spoiled,
-		\item the user clicks the button to confirm that the information in the form is correct,
-		\item a pop-up appears in which the user confirms their intention to mark selected wine batch as spoiled,
-		\item the user confirms that they wish to confirm the selected batch of wine is spoiled,
-		\item the system updates the information correctly.
+		\item the user clicks the button to edit a fermenting must batch,
+		\item a form appears in which the user corrects the information,
+		\item a pop-up appears in which the user confirms that they want to update a fermenting must batch,
+		\item the system updates the batch.
 	\end{itemize}
-	
-		\item As a oenologist, I want to be able to mark a batch of wine as not spoiled by scanning the QR code located on a piece of vineyard equipment.
+	\item As an oenologist, I can delete a fermenting must batch, because it doesn't meet my expectations.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user scans the QR code located on one of the items of equipment in the winery,
-		\item the system checks which batch of wine is inside the winery equipment,
-		\item after linking an inventory item to a case of wine, all relevant data is displayed, broken down by production stage, in the form of a list of measurements,
-		\item the button for marking a batch of wine as not spoiled is highlighted and easily accessible,
-		\item the user clicks the button to mark the batch of wine as not spoiled,
-		\item a form appears where the user can describe the tasting notes and reasons for marking a batch of wine as not spoiled,
-		\item the user clicks the button to confirm that the information in the form is correct,
-		\item a pop-up appears in which the user confirms their intention to mark selected wine batch as not spoiled,
-		\item the user confirms that they wish to confirm the selected batch of wine is not spoiled,
-		\item the system updates the information correctly.
+		\item the user clicks the button to delete a fermenting must batch,
+		\item a pop-up appears in which the user confirms that they want to delete a fermenting must batch,
+		\item the system correctly deletes the fermenting must batch.
 	\end{itemize}
-	
-		\item As a oenologist, I want to be able to complete a production batch by bottling it after scanning the QR code on the equipment where the batch is stored.
+	%===========================================================
+	%INGREDIENTS
+	%===========================================================
+	\item As an oenologist, I can view a list of all ingredients used during fermenting of a specific batch, so I can use this information in the future.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user scans the QR code located on a piece of winery equipment,
-		\item the system identifies the wine batch inside and displays its current status and data,
-		\item the button for finalizing the batch through bottling is highlighted and easily accessible (if the batch meets the criteria for bottling),
-		\item after clicking the bottling button, a form appears where the user enters the number of bottles produced, bottle size, and storage location,
-		\item the user confirms the data and clicks the finalization button,
-		\item a pop-up appears asking for final confirmation to close the production batch,
-		\item the system updates the batch status to "completed/bottled", records the final inventory of bottles, and marks the winery equipment as empty.
+		\item the system displays a list of ingredients used during fermenting of a specific batch.
+	\end{itemize}
+	\item As an oenologist, I can add ingredients and their quantities to log this data for future use.
+	\\Definition of done:
+	\begin{itemize}
+		\item the user clicks the button to add ingredients to a specific fermenting batch of must,
+		\item a form appears in which the user adds the ingredients and their quantity,
+		\item the user clicks the button to confirm the addition of a new ingredient to a batch,
+		\item a pop-up appears in which the user confirms that they want to add a new ingredient,
+		\item the system automatically generates an ingredient number.
+	\end{itemize}
+	\item As an oenologist, I can update an ingredient record, so I can correct mistakes I have made during creation.
+	\\Definition of done:
+	\begin{itemize}
+		\item the user clicks the button to edit an ingredient record,
+		\item a form appears in which the user corrects the information,
+		\item a pop-up appears in which the user confirms that they want to update an ingredient record,
+		\item the system updates the ingredient record.
+	\end{itemize}
+	\item As an oenologist, I can delete an ingredient, because I added it to the wrong fermenting batch of must.
+	\\Definition of done:
+	\begin{itemize}
+		\item the user clicks the button to delete an ingredient,
+		\item a pop-up appears in which the user confirms that they want to delete an ingredient,
+		\item the system correctly deletes the ingredient.
+	\end{itemize}
+	%===========================================================
+	%AGED WINE
+	%===========================================================
+	\item As an oenologist, I can view a list of all batches of aged wine, so I can compare specifications with others.
+	\\Definition of done:
+	\begin{itemize}
+		\item the system displays a searchable and filterable list of all aged wine batches,
+		\item for each batch, the list shows its unique ID, creation date, location, quantity and batches of fermented must used to make it.
+	\end{itemize}
+	\item As an oenologist, I can create a new aged wine batch, so I can use it later.
+	\\Definition of done:
+	\begin{itemize}
+		\item the user clicks the button to start a new aged wine batch,
+		\item a form appears in which the user selects the piece of equipment where the aged wine batch is to begin, as well as one or more batches of fermented must and the quantity from which the batch is to be produced,
+		\item the user clicks the button to confirm the creation of a new aged wine batch,
+		\item a pop-up appears in which the user confirms that they want to create a new aged wine batch,
+		\item the system automatically generates a batch number.
+	\end{itemize}
+	\item As an oenologist, I can update an aged wine batch, so I can correct mistakes I have made during creation.
+	\\Definition of done:
+	\begin{itemize}
+		\item the user clicks the button to edit an aged wine batch,
+		\item a form appears in which the user corrects the information,
+		\item a pop-up appears in which the user confirms that they want to update an aged wine batch,
+		\item the system updates the batch.
+	\end{itemize}
+	\item As an oenologist, I can delete an aged wine batch, because it doesn't meet my expectations.
+	\\Definition of done:
+	\begin{itemize}
+		\item the user clicks the button to delete an aged wine batch,
+		\item a pop-up appears in which the user confirms that they want to delete an aged wine batch,
+		\item the system correctly deletes the aged wine batch.
+	\end{itemize}
+	%===========================================================
+	%BLENDED WINE
+	%===========================================================
+	\item As an oenologist, I can view a list of all batches of blended wine, so I can compare specifications with others.
+	\\Definition of done:
+	\begin{itemize}
+		\item the system displays a searchable and filterable list of all blended wine batches,
+		\item for each batch, the list shows its unique ID, creation date, location, quantity and batches of wine (fermented must) and/or aged wine used to make it.
+	\end{itemize}
+	\item As an oenologist, I can create a new blended wine batch, so I can use it later.
+	\\Definition of done:
+	\begin{itemize}
+		\item the user clicks the button to start a new blended wine batch,
+		\item a form appears in which the user selects the piece of equipment where the blended wine batch is to begin, as well as one or more batches of wine (fermented must) and/or aged wine and the quantity from which the batch is to be produced,
+		\item the user clicks the button to confirm the creation of a new blended wine batch,
+		\item a pop-up appears in which the user confirms that they want to create a new blended wine batch,
+		\item the system automatically generates a batch number.
+	\end{itemize}
+	\item As an oenologist, I can update a blended wine batch, so I can correct mistakes I have made during creation.
+	\\Definition of done:
+	\begin{itemize}
+		\item the user clicks the button to edit a blended wine batch,
+		\item a form appears in which the user corrects the information,
+		\item a pop-up appears in which the user confirms that they want to update a blended wine batch,
+		\item the system updates the batch.
+	\end{itemize}
+	\item As an oenologist, I can delete a blended wine batch, because it doesn't meet my expectations.
+	\\Definition of done:
+	\begin{itemize}
+		\item the user clicks the button to delete a blended wine batch,
+		\item a pop-up appears in which the user confirms that they want to delete a blended wine batch,
+		\item the system correctly deletes the blended wine batch.
+	\end{itemize}
+	%===========================================================
+	%BOTTLED WINE
+	%===========================================================
+	\item As an oenologist, I can view a list of all batches of bottled wine, so I can compare specifications with others.
+	\\Definition of done:
+	\begin{itemize}
+		\item the system displays a searchable and filterable list of all bottled wine batches,
+		\item for each batch, the list shows its unique ID, creation date, location, quantity and batches of wine (fermented must) and/or aged wine and/or blended wine used to make it.
+	\end{itemize}
+	\item As an oenologist, I can create a new bottled wine batch, so I can end the production.
+	\\Definition of done:
+	\begin{itemize}
+		\item the user clicks the button to start a new bottled wine batch,
+		\item a form appears in which the user selects the piece of equipment where the bottled wine batch is to begin, as well as one or more batches of wine (fermented must) and/or aged wine and/or blended wine and the quantity from which the batch is to be produced,
+		\item the user clicks the button to confirm the creation of a new bottled wine batch,
+		\item a pop-up appears in which the user confirms that they want to create a new bottled wine batch,
+		\item the system automatically generates a batch number.
+	\end{itemize}
+	\item As an oenologist, I can update a bottled wine batch, so I can correct mistakes I have made during creation.
+	\\Definition of done:
+	\begin{itemize}
+		\item the user clicks the button to edit a bottled wine batch,
+		\item a form appears in which the user corrects the information,
+		\item a pop-up appears in which the user confirms that they want to update a bottled wine batch,
+		\item the system updates the batch.
+	\end{itemize}
+	\item As an oenologist, I can delete a bottled wine batch, because it doesn't meet my expectations.
+	\\Definition of done:
+	\begin{itemize}
+		\item the user clicks the button to delete a bottled wine batch,
+		\item a pop-up appears in which the user confirms that they want to delete a bottled wine batch,
+		\item the system correctly deletes the bottled wine batch.
+	\end{itemize}
+	%===========================================================
+	% CHEMICAL PARAMETERS
+	%===========================================================
+	\item As an oenologist, I can record and view chemical parameters for any production batch, to monitor quality.
+	\\Definition of done:
+	\begin{itemize}
+		\item the user selects a batch (manually or via QR code) and enters a form to log parameters,
+		\item the form includes sugar level, acidity, pH, temperature, and alcohol content,
+		\item the system stores these values with a timestamp and links them to the specific batch.
+	\end{itemize}
+	%===========================================================
+	% SPOILED STATUS MANAGEMENT 
+	%===========================================================
+	\item As an oenologist, I can mark or unmark a batch as spoiled, to prevent it from entering the next production stage.
+	\\Definition of done:
+	\begin{itemize}
+		\item the user selects a batch manually or via QR scan,
+		\item the user toggles the "Spoiled" status,
+		\item a confirmation pop-up appears,
+		\item the system visually highlights spoiled batches in all lists and prevents further processing unless unmarked.
+	\end{itemize}
+	%===========================================================
+	% QR SCANNING GENERAL
+	%===========================================================
+	\item As an oenologist, I can use QR codes to quickly access and interact with any production stage.
+	\\Definition of done:
+	\begin{itemize}
+		\item scanning a QR code on winery equipment redirects the user to the correct category (must, fermenting, etc.),
+		\item the system automatically filters for the specific batch in that location and highlights it,
+		\item if the equipment is empty, the system suggests creating a new batch for that location.
 	\end{itemize}
 \end{enumerate}
 
