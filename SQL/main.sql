@@ -382,6 +382,8 @@ CREATE TABLE IF NOT EXISTS "refreshTokens" (
 	"id" UUID NOT NULL,
 	"token" VARCHAR(255) NOT NULL,
 	"userID" UUID NOT NULL,
+	"createdAt" TIMESTAMP NOT NULL,
+	"expiresAt" TIMESTAMP NOT NULL,
 	PRIMARY KEY("id")
 );
 
