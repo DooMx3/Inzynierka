@@ -54,9 +54,9 @@ CREATE TABLE IF NOT EXISTS "user_role" (
 
 
 
-CREATE TABLE IF NOT EXISTS "job" (
+CREATE TABLE IF NOT EXISTS "task" (
 	"id" UUID NOT NULL,
-	"jobTypeId" UUID NOT NULL,
+	"taskTypeId" UUID NOT NULL,
 	"organisationId" UUID NOT NULL,
 	"userId" UUID NOT NULL,
 	"equipmentId" UUID,
@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS "job" (
 );
 
 
-COMMENT ON COLUMN "job"."description" IS 'Additional user''''''''s notes';
+COMMENT ON COLUMN "task"."description" IS 'Additional user''''''''s notes';
 
 
 CREATE TABLE IF NOT EXISTS "field" (
@@ -168,7 +168,7 @@ CREATE TABLE IF NOT EXISTS "equipment_type" (
 
 
 
-CREATE TABLE IF NOT EXISTS "job_type" (
+CREATE TABLE IF NOT EXISTS "task_type" (
 	"id" UUID NOT NULL,
 	"name" VARCHAR(255),
 	PRIMARY KEY("id")
@@ -389,6 +389,15 @@ CREATE TABLE IF NOT EXISTS "refreshTokens" (
 
 
 
+
+CREATE TABLE IF NOT EXISTS "recordType" (
+	"id" UUID NOT NULL,
+	"type" VARCHAR(255) NOT NULL,
+	PRIMARY KEY("id")
+);
+
+
+
 ALTER TABLE "role"
 ADD FOREIGN KEY("id") REFERENCES "user_role"("roleId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
@@ -396,139 +405,124 @@ ALTER TABLE "user"
 ADD FOREIGN KEY("id") REFERENCES "user_role"("userId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "user"
-ADD FOREIGN KEY("id") REFERENCES "job"("userId")
+ADD FOREIGN KEY("id") REFERENCES "refreshTokens"("userID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "field"
-ADD FOREIGN KEY("id") REFERENCES "job"("fieldId")
+ALTER TABLE "user"
+ADD FOREIGN KEY("organisationId") REFERENCES "organisation"("id")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "grape_type"
-ADD FOREIGN KEY("id") REFERENCES "field"("grapeTypeId")
+ALTER TABLE "user"
+ADD FOREIGN KEY("id") REFERENCES "task"("userId")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "task_type"
+ADD FOREIGN KEY("id") REFERENCES "task"("taskTypeId")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "organisation"
+ADD FOREIGN KEY("id") REFERENCES "task"("organisationId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "equipment"
-ADD FOREIGN KEY("id") REFERENCES "job"("equipmentId")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "job"
-ADD FOREIGN KEY("recordId") REFERENCES "record"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "organisation"
-ADD FOREIGN KEY("id") REFERENCES "user"("organisationId")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "organisation"
-ADD FOREIGN KEY("id") REFERENCES "field"("organisationId")
+ADD FOREIGN KEY("id") REFERENCES "task"("equipmentId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "organisation"
 ADD FOREIGN KEY("id") REFERENCES "equipment"("organisationId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "organisation"
-ADD FOREIGN KEY("id") REFERENCES "job"("organisationId")
+ALTER TABLE "equipment_type"
+ADD FOREIGN KEY("id") REFERENCES "equipment"("typeId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "organisation"
-ADD FOREIGN KEY("id") REFERENCES "record"("organisationId")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "harvest"
-ADD FOREIGN KEY("id") REFERENCES "job"("harvestId")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "organisation"
-ADD FOREIGN KEY("id") REFERENCES "harvest"("organisationId")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "organisation"
-ADD FOREIGN KEY("id") REFERENCES "offering"("organisationId")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "equipment"
-ADD FOREIGN KEY("typeId") REFERENCES "equipment_type"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "job"
-ADD FOREIGN KEY("jobTypeId") REFERENCES "job_type"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "grape_type"
-ADD FOREIGN KEY("colorId") REFERENCES "grape_color"("id")
+ALTER TABLE "field"
+ADD FOREIGN KEY("id") REFERENCES "task"("fieldId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "field"
 ADD FOREIGN KEY("id") REFERENCES "field_harvest"("fieldId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "harvest"
-ADD FOREIGN KEY("id") REFERENCES "field_harvest"("harvestId")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "harvest"
-ADD FOREIGN KEY("fieldId") REFERENCES "field"("id")
+ALTER TABLE "grape_color"
+ADD FOREIGN KEY("id") REFERENCES "grape_type"("colorId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "grape_type"
 ADD FOREIGN KEY("id") REFERENCES "harvest"("grapeTypeId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "organisation"
+ADD FOREIGN KEY("id") REFERENCES "harvest"("organisationId")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "harvest"
+ADD FOREIGN KEY("id") REFERENCES "field_harvest"("harvestId")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "field"
+ADD FOREIGN KEY("id") REFERENCES "harvest"("fieldId")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "organisation"
+ADD FOREIGN KEY("id") REFERENCES "field"("organisationId")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "grape_type"
+ADD FOREIGN KEY("id") REFERENCES "field"("grapeTypeId")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "organisation"
+ADD FOREIGN KEY("id") REFERENCES "offering"("organisationId")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "organisation"
+ADD FOREIGN KEY("id") REFERENCES "record"("organisationId")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "recordType"
+ADD FOREIGN KEY("id") REFERENCES "record"("recordTypeId")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "harvest"
+ADD FOREIGN KEY("id") REFERENCES "mustHarvests"("harvestID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "must"
+ADD FOREIGN KEY("id") REFERENCES "mustHarvests"("mustID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "organisation"
 ADD FOREIGN KEY("id") REFERENCES "must"("organisationID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "mustHarvests"
-ADD FOREIGN KEY("harvestID") REFERENCES "harvest"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "mustHarvests"
-ADD FOREIGN KEY("mustID") REFERENCES "must"("id")
+ALTER TABLE "must"
+ADD FOREIGN KEY("id") REFERENCES "mustRecords"("mustID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "record"
 ADD FOREIGN KEY("id") REFERENCES "mustRecords"("recordID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "mustRecords"
-ADD FOREIGN KEY("mustID") REFERENCES "must"("id")
+ALTER TABLE "must"
+ADD FOREIGN KEY("id") REFERENCES "fermentationMusts"("mustID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "fermentingMustRecords"
-ADD FOREIGN KEY("fermentingMustID") REFERENCES "fermentingMust"("id")
+ALTER TABLE "fermentingMust"
+ADD FOREIGN KEY("id") REFERENCES "fermentationMusts"("fermentationMustID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "fermentingMustRecords"
-ADD FOREIGN KEY("recordID") REFERENCES "record"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "fermentationMusts"
-ADD FOREIGN KEY("mustID") REFERENCES "must"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "fermentationMusts"
-ADD FOREIGN KEY("fermentationMustID") REFERENCES "fermentingMust"("id")
+ALTER TABLE "ingredients"
+ADD FOREIGN KEY("id") REFERENCES "fermentationIngredients"("ingredientsID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "fermentingMust"
 ADD FOREIGN KEY("id") REFERENCES "fermentationIngredients"("fermentingMustID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "fermentationIngredients"
-ADD FOREIGN KEY("ingredientsID") REFERENCES "ingredients"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "fermentingMust"
-ADD FOREIGN KEY("organisationID") REFERENCES "organisation"("id")
+ADD FOREIGN KEY("id") REFERENCES "fermentingMustRecords"("fermentingMustID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "toBeBottled"
-ADD FOREIGN KEY("fermentingMustID") REFERENCES "fermentingMust"("id")
+ALTER TABLE "record"
+ADD FOREIGN KEY("id") REFERENCES "fermentingMustRecords"("recordID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "bottledWine"
-ADD FOREIGN KEY("toBeBottledID") REFERENCES "toBeBottled"("id")
+ALTER TABLE "record"
+ADD FOREIGN KEY("id") REFERENCES "agedWineRecords"("recordID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "record"
+ADD FOREIGN KEY("id") REFERENCES "blendedWineRecords"("recordID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "organisation"
+ADD FOREIGN KEY("id") REFERENCES "fermentingMust"("organisationID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "organisation"
+ADD FOREIGN KEY("id") REFERENCES "agedWine"("organisationID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "organisation"
 ADD FOREIGN KEY("id") REFERENCES "bottledWine"("organisationID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "botteledWineRecords"
-ADD FOREIGN KEY("botteledWineID") REFERENCES "bottledWine"("id")
+ALTER TABLE "record"
+ADD FOREIGN KEY("id") REFERENCES "botteledWineRecords"("recordID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "botteledWineRecords"
-ADD FOREIGN KEY("recordID") REFERENCES "record"("id")
+ALTER TABLE "bottledWine"
+ADD FOREIGN KEY("id") REFERENCES "offering"("wineId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "agedWine"
-ADD FOREIGN KEY("organisationID") REFERENCES "organisation"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "agedWineRecords"
-ADD FOREIGN KEY("agedWineID") REFERENCES "agedWine"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "agedWineRecords"
-ADD FOREIGN KEY("recordID") REFERENCES "record"("id")
+ALTER TABLE "fermentingMust"
+ADD FOREIGN KEY("id") REFERENCES "agedWineFermentation"("fermentingMustID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "agedWine"
-ADD FOREIGN KEY("id") REFERENCES "toBeBottled"("agedWineID")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "agedWineFermentation"
-ADD FOREIGN KEY("fermentingMustID") REFERENCES "fermentingMust"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "agedWineFermentation"
-ADD FOREIGN KEY("agedWIneID") REFERENCES "agedWine"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "organisation"
-ADD FOREIGN KEY("id") REFERENCES "blendedWine"("organistationID")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "blendedWine"
-ADD FOREIGN KEY("id") REFERENCES "toBeBottled"("blendedWineID")
+ADD FOREIGN KEY("id") REFERENCES "agedWineFermentation"("agedWIneID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "fermentingMust"
 ADD FOREIGN KEY("id") REFERENCES "blendedWineIngredients"("fermentingMustID")
@@ -539,12 +533,27 @@ ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "blendedWine"
 ADD FOREIGN KEY("id") REFERENCES "blendedWineIngredients"("blendedWineID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "blendedWineRecords"
-ADD FOREIGN KEY("blendedWineID") REFERENCES "blendedWine"("id")
+ALTER TABLE "organisation"
+ADD FOREIGN KEY("id") REFERENCES "blendedWine"("organistationID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "blendedWineRecords"
-ADD FOREIGN KEY("recordID") REFERENCES "record"("id")
+ALTER TABLE "blendedWine"
+ADD FOREIGN KEY("id") REFERENCES "toBeBottled"("blendedWineID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "user"
-ADD FOREIGN KEY("id") REFERENCES "refreshTokens"("userID")
+ALTER TABLE "agedWine"
+ADD FOREIGN KEY("id") REFERENCES "toBeBottled"("agedWineID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "fermentingMust"
+ADD FOREIGN KEY("id") REFERENCES "toBeBottled"("fermentingMustID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "agedWine"
+ADD FOREIGN KEY("id") REFERENCES "agedWineRecords"("agedWineID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "blendedWine"
+ADD FOREIGN KEY("id") REFERENCES "blendedWineRecords"("blendedWineID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "bottledWine"
+ADD FOREIGN KEY("toBeBottledID") REFERENCES "toBeBottled"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "bottledWine"
+ADD FOREIGN KEY("id") REFERENCES "botteledWineRecords"("botteledWineID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
