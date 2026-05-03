@@ -69,7 +69,8 @@ The system shall provide the following functionalities, categorized by users. Th
 	\item the ability to unmark a selected production batch, which was marked as spoiled, by manually selecting the batch or scanning QR code on one of the pieces of vineyard equipment where the batch is located,
 	\item the ability to create, read, update and delete a batch of bottled wine, by manually selecting a specific batch or scanning QR code on one of the pieces of equipment in the winery,
 	\item the ability to auto calculate the amount of potassium metabisulfite,
-	\item the ability to calculate predicted alcohol level from juice and during fermenation.
+	\item the ability to calculate predicted alcohol level from juice and during fermenation,
+	\item the ability to automatically calculate nutrients.
 \end{itemize}
 \subsubsection{Vineyard Owner:}
 \begin{itemize}
@@ -509,6 +510,15 @@ User stories are a collection of features described from the perspective of the 
 	\begin{itemize}
 		\item the user selects a batch manually or via QR scan,
 		\item the system displays the predicted alcohol content for a batch of juice or a fermented batch, taking into account the sugar content from the fruit and any added sugar, as well as the type of yeast used.
+	\end{itemize}
+	%===========================================================
+	% nutrients
+	%===========================================================
+	\item As an oenologist, I can see the calculated nutrients, so I will know, how much of every nutrient is in the final product.
+	\\Definition of done:
+	\begin{itemize}
+		\item after finalizing production, the show nutrients button is displayed for every finalized batch,
+		\item after clicking on the show nutrients button, the table of nutrients is displayed.
 	\end{itemize}
 \end{enumerate}
 
