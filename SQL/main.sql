@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS "user" (
 	"id" UUID NOT NULL,
-	"organisationId" INTEGER,
+	"organisationId" UUID,
 	-- Enum { NONE, PENDING, MEMBER }
 	-- Invitation status sent by the Owner. Before sending: NONE, after sending: PENDING, after accepting: MEMBER, after rejecting: NONE.
 	"membershipStatus" VARCHAR(8) DEFAULT 'NONE',
@@ -46,8 +46,8 @@ COMMENT ON COLUMN "role"."description" IS 'Short description of a role';
 
 CREATE TABLE IF NOT EXISTS "user_role" (
 	"id" UUID NOT NULL,
-	"userId" INTEGER NOT NULL,
-	"roleId" INTEGER NOT NULL,
+	"userId" UUID NOT NULL,
+	"roleId" UUID NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -56,14 +56,14 @@ CREATE TABLE IF NOT EXISTS "user_role" (
 
 CREATE TABLE IF NOT EXISTS "job" (
 	"id" UUID NOT NULL,
-	"jobTypeId" INTEGER NOT NULL,
-	"organisationId" INTEGER NOT NULL,
-	"userId" INTEGER NOT NULL,
-	"equipmentId" INTEGER,
-	"fieldId" INTEGER,
-	"batchId" INTEGER,
-	"recordId" INTEGER,
-	"harvestId" INTEGER,
+	"jobTypeId" UUID NOT NULL,
+	"organisationId" UUID NOT NULL,
+	"userId" UUID NOT NULL,
+	"equipmentId" UUID,
+	"fieldId" UUID,
+	"batchId" UUID,
+	"recordId" UUID,
+	"harvestId" UUID,
 	"startedAt" DATE,
 	"completedAt" DATE NOT NULL,
 	-- Additional user''''s notes
@@ -77,8 +77,8 @@ COMMENT ON COLUMN "job"."description" IS 'Additional user''''''''s notes';
 
 CREATE TABLE IF NOT EXISTS "field" (
 	"id" UUID NOT NULL,
-	"grapeTypeId" INTEGER NOT NULL,
-	"organisationId" INTEGER NOT NULL,
+	"grapeTypeId" UUID NOT NULL,
+	"organisationId" UUID NOT NULL,
 	"area" INTEGER,
 	PRIMARY KEY("id")
 );
@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS "field" (
 CREATE TABLE IF NOT EXISTS "grape_type" (
 	"id" UUID NOT NULL,
 	"name" VARCHAR(255) NOT NULL,
-	"colorId" INTEGER NOT NULL,
+	"colorId" UUID NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -98,9 +98,9 @@ CREATE TABLE IF NOT EXISTS "grape_type" (
 
 CREATE TABLE IF NOT EXISTS "equipment" (
 	"id" UUID NOT NULL,
-	"organisationId" INTEGER NOT NULL,
+	"organisationId" UUID NOT NULL,
 	"name" VARCHAR(255) NOT NULL,
-	"typeId" INTEGER NOT NULL,
+	"typeId" UUID NOT NULL,
 	"unitCost" DECIMAL,
 	PRIMARY KEY("id")
 );
@@ -110,8 +110,8 @@ CREATE TABLE IF NOT EXISTS "equipment" (
 
 CREATE TABLE IF NOT EXISTS "record" (
 	"id" UUID NOT NULL,
-	"organisationId" INTEGER NOT NULL,
-	"recordTypeId" INTEGER NOT NULL,
+	"organisationId" UUID NOT NULL,
+	"recordTypeId" UUID NOT NULL,
 	"sugarLevel" INTEGER,
 	"acidity" INTEGER,
 	"PH" INTEGER,
@@ -139,7 +139,7 @@ CREATE TABLE IF NOT EXISTS "organisation" (
 CREATE TABLE IF NOT EXISTS "harvest" (
 	"id" UUID NOT NULL,
 	"fieldId" UUID NOT NULL,
-	"organisationId" INTEGER NOT NULL,
+	"organisationId" UUID NOT NULL,
 	"amount" INTEGER,
 	"grapeTypeId" UUID NOT NULL,
 	PRIMARY KEY("id")
@@ -150,8 +150,8 @@ CREATE TABLE IF NOT EXISTS "harvest" (
 
 CREATE TABLE IF NOT EXISTS "offering" (
 	"id" UUID NOT NULL,
-	"organisationId" INTEGER NOT NULL,
-	"wineId" INTEGER NOT NULL,
+	"organisationId" UUID NOT NULL,
+	"wineId" UUID NOT NULL,
 	"price" INTEGER NOT NULL,
 	PRIMARY KEY("id")
 );
@@ -188,8 +188,8 @@ CREATE TABLE IF NOT EXISTS "grape_color" (
 
 CREATE TABLE IF NOT EXISTS "field_harvest" (
 	"id" UUID NOT NULL,
-	"fieldId" INTEGER NOT NULL,
-	"harvestId" INTEGER NOT NULL,
+	"fieldId" UUID NOT NULL,
+	"harvestId" UUID NOT NULL,
 	PRIMARY KEY("id")
 );
 
