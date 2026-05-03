@@ -68,7 +68,8 @@ The system shall provide the following functionalities, categorized by users. Th
 	\item the ability to mark a selected production batch as spoiled, by manually selecting the batch or scanning QR code on one of the pieces of vineyard equipment where the batch is located,
 	\item the ability to unmark a selected production batch, which was marked as spoiled, by manually selecting the batch or scanning QR code on one of the pieces of vineyard equipment where the batch is located,
 	\item the ability to create, read, update and delete a batch of bottled wine, by manually selecting a specific batch or scanning QR code on one of the pieces of equipment in the winery,
-	\item the ability to auto calculate the amount of potassium metabisulfite.
+	\item the ability to auto calculate the amount of potassium metabisulfite,
+	\item the ability to calculate predicted alcohol level from juice and during fermenation.
 \end{itemize}
 \subsubsection{Vineyard Owner:}
 \begin{itemize}
@@ -499,6 +500,15 @@ User stories are a collection of features described from the perspective of the 
 		\item the system automatically calculates the required amount of potassium metabisulfite based on the current quantity and specific parameters,
 		\item the system displays the calculated dosage,
 		\item the user can view the formula and change the amount of potassium metabisulfite if needed.
+	\end{itemize}
+	%===========================================================
+	% predicted alcohol level
+	%===========================================================
+	\item As an oenologist, I can see the predicted alcohol level in wine after fermentation, so that I will know how much sugar do I need to add to reach the desired alcohol content.
+	\\Definition of done:
+	\begin{itemize}
+		\item the user selects a batch manually or via QR scan,
+		\item the system displays the predicted alcohol content for a batch of juice or a fermented batch, taking into account the sugar content from the fruit and any added sugar, as well as the type of yeast used.
 	\end{itemize}
 \end{enumerate}
 
