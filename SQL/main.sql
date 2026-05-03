@@ -4,9 +4,9 @@ CREATE TABLE IF NOT EXISTS "user" (
 	-- Enum { NONE, PENDING, MEMBER }
 	-- Invitation status sent by the Owner. Before sending: NONE, after sending: PENDING, after accepting: MEMBER, after rejecting: NONE.
 	"membershipStatus" VARCHAR(8) DEFAULT 'NONE',
-	-- User''s name
+	-- User''''s name
 	"firstName" VARCHAR(128) NOT NULL,
-	-- User''s surname
+	-- User''''s surname
 	"lastName" VARCHAR(128) NOT NULL,
 	-- First part of the address
 	"address_1" VARCHAR(255) NOT NULL,
@@ -23,8 +23,8 @@ CREATE TABLE IF NOT EXISTS "user" (
 
 COMMENT ON COLUMN "user"."membershipStatus" IS 'Enum { NONE, PENDING, MEMBER }
 Invitation status sent by the Owner. Before sending: NONE, after sending: PENDING, after accepting: MEMBER, after rejecting: NONE.';
-COMMENT ON COLUMN "user"."firstName" IS 'User''''s name';
-COMMENT ON COLUMN "user"."lastName" IS 'User''''s surname';
+COMMENT ON COLUMN "user"."firstName" IS 'User''''''''s name';
+COMMENT ON COLUMN "user"."lastName" IS 'User''''''''s surname';
 COMMENT ON COLUMN "user"."address_1" IS 'First part of the address';
 COMMENT ON COLUMN "user"."address_2" IS 'Second part of the address';
 COMMENT ON COLUMN "user"."bankAccountNumber" IS 'IBAN';
@@ -66,13 +66,13 @@ CREATE TABLE IF NOT EXISTS "job" (
 	"harvestId" INTEGER,
 	"startedAt" DATE,
 	"completedAt" DATE NOT NULL,
-	-- Additional user''s notes
+	-- Additional user''''s notes
 	"description" TEXT,
 	PRIMARY KEY("id")
 );
 
 
-COMMENT ON COLUMN "job"."description" IS 'Additional user''''s notes';
+COMMENT ON COLUMN "job"."description" IS 'Additional user''''''''s notes';
 
 
 CREATE TABLE IF NOT EXISTS "field" (
@@ -108,22 +108,9 @@ CREATE TABLE IF NOT EXISTS "equipment" (
 
 
 
-CREATE TABLE IF NOT EXISTS "batch" (
-	"id" UUID NOT NULL,
-	"currentLocationId" INTEGER NOT NULL,
-	"grapeId" INTEGER NOT NULL,
-	"organisationId" INTEGER NOT NULL,
-	"harvestId" INTEGER,
-	PRIMARY KEY("id")
-);
-
-
-
-
 CREATE TABLE IF NOT EXISTS "record" (
 	"id" UUID NOT NULL,
 	"organisationId" INTEGER NOT NULL,
-	"batchId" INTEGER,
 	"recordTypeId" INTEGER NOT NULL,
 	"sugarLevel" INTEGER,
 	"acidity" INTEGER,
@@ -151,9 +138,10 @@ CREATE TABLE IF NOT EXISTS "organisation" (
 
 CREATE TABLE IF NOT EXISTS "harvest" (
 	"id" UUID NOT NULL,
-	"fieldId" INTEGER NOT NULL,
+	"fieldId" UUID NOT NULL,
 	"organisationId" INTEGER NOT NULL,
 	"amount" INTEGER,
+	"grapeTypeId" UUID NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -165,17 +153,6 @@ CREATE TABLE IF NOT EXISTS "offering" (
 	"organisationId" INTEGER NOT NULL,
 	"wineId" INTEGER NOT NULL,
 	"price" INTEGER NOT NULL,
-	PRIMARY KEY("id")
-);
-
-
-
-
-CREATE TABLE IF NOT EXISTS "wine" (
-	"id" UUID NOT NULL,
-	"organisationId" INTEGER NOT NULL,
-	"name" VARCHAR(255) NOT NULL,
-	"description" TEXT,
 	PRIMARY KEY("id")
 );
 
@@ -209,22 +186,192 @@ CREATE TABLE IF NOT EXISTS "grape_color" (
 
 
 
-CREATE TABLE IF NOT EXISTS "wine_batch" (
-	"id" UUID NOT NULL,
-	"wineId" INTEGER NOT NULL,
-	"batchId" INTEGER NOT NULL,
-	PRIMARY KEY("id")
-);
-
-
-COMMENT ON COLUMN "wine_batch"."spoiled" IS 'representing percentage of spoiled wine';
-
-
-
 CREATE TABLE IF NOT EXISTS "field_harvest" (
 	"id" UUID NOT NULL,
 	"fieldId" INTEGER NOT NULL,
 	"harvestId" INTEGER NOT NULL,
+	PRIMARY KEY("id")
+);
+
+
+
+
+CREATE TABLE IF NOT EXISTS "must" (
+	"id" UUID NOT NULL,
+	"creationDate" DATE NOT NULL,
+	"quantity" INTEGER NOT NULL,
+	"organisationID" UUID NOT NULL,
+	"isSpoiled" BOOLEAN NOT NULL,
+	PRIMARY KEY("id")
+);
+
+
+
+
+CREATE TABLE IF NOT EXISTS "mustHarvests" (
+	"id" UUID NOT NULL,
+	"harvestID" UUID NOT NULL,
+	"mustID" UUID NOT NULL,
+	PRIMARY KEY("id")
+);
+
+
+
+
+CREATE TABLE IF NOT EXISTS "fermentingMust" (
+	"id" UUID NOT NULL,
+	"startDate" DATE NOT NULL,
+	"endDate" DATE,
+	"quantity" INTEGER NOT NULL,
+	"organisationID" UUID NOT NULL,
+	"idSpoiled" BOOLEAN NOT NULL,
+	PRIMARY KEY("id")
+);
+
+
+
+
+CREATE TABLE IF NOT EXISTS "mustRecords" (
+	"id" UUID NOT NULL,
+	"mustID" UUID NOT NULL,
+	"recordID" UUID NOT NULL,
+	PRIMARY KEY("id")
+);
+
+
+
+
+CREATE TABLE IF NOT EXISTS "fermentingMustRecords" (
+	"id" UUID NOT NULL,
+	"fermentingMustID" UUID NOT NULL,
+	"recordID" UUID NOT NULL,
+	PRIMARY KEY("id")
+);
+
+
+
+
+CREATE TABLE IF NOT EXISTS "fermentationMusts" (
+	"id" UUID NOT NULL,
+	"mustID" UUID NOT NULL,
+	"fermentationMustID" UUID NOT NULL,
+	PRIMARY KEY("id")
+);
+
+
+
+
+CREATE TABLE IF NOT EXISTS "ingredients" (
+	"id" UUID NOT NULL,
+	"name" VARCHAR(255) NOT NULL,
+	PRIMARY KEY("id")
+);
+
+
+
+
+CREATE TABLE IF NOT EXISTS "fermentationIngredients" (
+	"id" UUID NOT NULL,
+	"ingredientsID" UUID NOT NULL,
+	"fermentingMustID" UUID NOT NULL,
+	PRIMARY KEY("id")
+);
+
+
+
+
+CREATE TABLE IF NOT EXISTS "bottledWine" (
+	"id" UUID NOT NULL,
+	"toBeBottledID" UUID NOT NULL,
+	"quantity" INTEGER NOT NULL,
+	"organisationID" UUID NOT NULL,
+	PRIMARY KEY("id")
+);
+
+
+
+
+CREATE TABLE IF NOT EXISTS "toBeBottled" (
+	"id" UUID NOT NULL,
+	"fermentingMustID" UUID,
+	"agedWineID" UUID,
+	"blendedWineID" UUID,
+	PRIMARY KEY("id")
+);
+
+
+
+
+CREATE TABLE IF NOT EXISTS "botteledWineRecords" (
+	"id" UUID NOT NULL,
+	"botteledWineID" UUID NOT NULL,
+	"recordID" UUID NOT NULL,
+	PRIMARY KEY("id")
+);
+
+
+
+
+CREATE TABLE IF NOT EXISTS "agedWine" (
+	"id" UUID NOT NULL,
+	"startDate" DATE NOT NULL,
+	"endDate" DATE,
+	"organisationID" UUID NOT NULL,
+	"quantity" INTEGER NOT NULL,
+	"isSpoiled" BOOLEAN NOT NULL,
+	PRIMARY KEY("id")
+);
+
+
+
+
+CREATE TABLE IF NOT EXISTS "agedWineRecords" (
+	"id" UUID NOT NULL,
+	"agedWineID" UUID NOT NULL,
+	"recordID" UUID NOT NULL,
+	PRIMARY KEY("id")
+);
+
+
+
+
+CREATE TABLE IF NOT EXISTS "agedWineFermentation" (
+	"id" UUID NOT NULL,
+	"fermentingMustID" UUID NOT NULL,
+	"agedWIneID" UUID NOT NULL,
+	PRIMARY KEY("id")
+);
+
+
+
+
+CREATE TABLE IF NOT EXISTS "blendedWine" (
+	"id" UUID NOT NULL,
+	"blendDate" DATE NOT NULL,
+	"organistationID" UUID NOT NULL,
+	"quantity" INTEGER NOT NULL,
+	"isSpoiled" BOOLEAN NOT NULL,
+	PRIMARY KEY("id")
+);
+
+
+
+
+CREATE TABLE IF NOT EXISTS "blendedWineIngredients" (
+	"id" UUID NOT NULL,
+	"fermentingMustID" UUID,
+	"agedWineID" UUID,
+	"blendedWineID" UUID NOT NULL,
+	PRIMARY KEY("id")
+);
+
+
+
+
+CREATE TABLE IF NOT EXISTS "blendedWineRecords" (
+	"id" UUID NOT NULL,
+	"blendedWineID" UUID NOT NULL,
+	"recordID" UUID NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -248,20 +395,8 @@ ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "equipment"
 ADD FOREIGN KEY("id") REFERENCES "job"("equipmentId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "batch"
-ADD FOREIGN KEY("id") REFERENCES "job"("batchId")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "batch"
-ADD FOREIGN KEY("currentLocationId") REFERENCES "equipment"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "grape_type"
-ADD FOREIGN KEY("id") REFERENCES "batch"("grapeId")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "job"
 ADD FOREIGN KEY("recordId") REFERENCES "record"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "batch"
-ADD FOREIGN KEY("id") REFERENCES "record"("batchId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "organisation"
 ADD FOREIGN KEY("id") REFERENCES "user"("organisationId")
@@ -278,26 +413,14 @@ ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "organisation"
 ADD FOREIGN KEY("id") REFERENCES "record"("organisationId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "organisation"
-ADD FOREIGN KEY("id") REFERENCES "batch"("organisationId")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "harvest"
 ADD FOREIGN KEY("id") REFERENCES "job"("harvestId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "organisation"
 ADD FOREIGN KEY("id") REFERENCES "harvest"("organisationId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "harvest"
-ADD FOREIGN KEY("id") REFERENCES "batch"("harvestId")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "organisation"
 ADD FOREIGN KEY("id") REFERENCES "offering"("organisationId")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "organisation"
-ADD FOREIGN KEY("id") REFERENCES "wine"("organisationId")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "wine"
-ADD FOREIGN KEY("id") REFERENCES "offering"("wineId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "equipment"
 ADD FOREIGN KEY("typeId") REFERENCES "equipment_type"("id")
@@ -308,15 +431,105 @@ ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "grape_type"
 ADD FOREIGN KEY("colorId") REFERENCES "grape_color"("id")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "wine_batch"
-ADD FOREIGN KEY("wineId") REFERENCES "wine"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "wine_batch"
-ADD FOREIGN KEY("batchId") REFERENCES "batch"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "field"
 ADD FOREIGN KEY("id") REFERENCES "field_harvest"("fieldId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "harvest"
 ADD FOREIGN KEY("id") REFERENCES "field_harvest"("harvestId")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "harvest"
+ADD FOREIGN KEY("fieldId") REFERENCES "field"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "grape_type"
+ADD FOREIGN KEY("id") REFERENCES "harvest"("grapeTypeId")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "organisation"
+ADD FOREIGN KEY("id") REFERENCES "must"("organisationID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "mustHarvests"
+ADD FOREIGN KEY("harvestID") REFERENCES "harvest"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "mustHarvests"
+ADD FOREIGN KEY("mustID") REFERENCES "must"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "record"
+ADD FOREIGN KEY("id") REFERENCES "mustRecords"("recordID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "mustRecords"
+ADD FOREIGN KEY("mustID") REFERENCES "must"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "fermentingMustRecords"
+ADD FOREIGN KEY("fermentingMustID") REFERENCES "fermentingMust"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "fermentingMustRecords"
+ADD FOREIGN KEY("recordID") REFERENCES "record"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "fermentationMusts"
+ADD FOREIGN KEY("mustID") REFERENCES "must"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "fermentationMusts"
+ADD FOREIGN KEY("fermentationMustID") REFERENCES "fermentingMust"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "fermentingMust"
+ADD FOREIGN KEY("id") REFERENCES "fermentationIngredients"("fermentingMustID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "fermentationIngredients"
+ADD FOREIGN KEY("ingredientsID") REFERENCES "ingredients"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "fermentingMust"
+ADD FOREIGN KEY("organisationID") REFERENCES "organisation"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "toBeBottled"
+ADD FOREIGN KEY("fermentingMustID") REFERENCES "fermentingMust"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "bottledWine"
+ADD FOREIGN KEY("toBeBottledID") REFERENCES "toBeBottled"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "organisation"
+ADD FOREIGN KEY("id") REFERENCES "bottledWine"("organisationID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "botteledWineRecords"
+ADD FOREIGN KEY("botteledWineID") REFERENCES "bottledWine"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "botteledWineRecords"
+ADD FOREIGN KEY("recordID") REFERENCES "record"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "agedWine"
+ADD FOREIGN KEY("organisationID") REFERENCES "organisation"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "agedWineRecords"
+ADD FOREIGN KEY("agedWineID") REFERENCES "agedWine"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "agedWineRecords"
+ADD FOREIGN KEY("recordID") REFERENCES "record"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "agedWine"
+ADD FOREIGN KEY("id") REFERENCES "toBeBottled"("agedWineID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "agedWineFermentation"
+ADD FOREIGN KEY("fermentingMustID") REFERENCES "fermentingMust"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "agedWineFermentation"
+ADD FOREIGN KEY("agedWIneID") REFERENCES "agedWine"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "organisation"
+ADD FOREIGN KEY("id") REFERENCES "blendedWine"("organistationID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "blendedWine"
+ADD FOREIGN KEY("id") REFERENCES "toBeBottled"("blendedWineID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "fermentingMust"
+ADD FOREIGN KEY("id") REFERENCES "blendedWineIngredients"("fermentingMustID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "agedWine"
+ADD FOREIGN KEY("id") REFERENCES "blendedWineIngredients"("agedWineID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "blendedWine"
+ADD FOREIGN KEY("id") REFERENCES "blendedWineIngredients"("blendedWineID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "blendedWineRecords"
+ADD FOREIGN KEY("blendedWineID") REFERENCES "blendedWine"("id")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "blendedWineRecords"
+ADD FOREIGN KEY("recordID") REFERENCES "record"("id")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
