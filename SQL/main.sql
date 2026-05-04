@@ -212,6 +212,7 @@ CREATE TABLE IF NOT EXISTS "mustHarvests" (
 	"id" UUID NOT NULL,
 	"harvestID" UUID NOT NULL,
 	"mustID" UUID NOT NULL,
+	"quantity" INTEGER NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -255,6 +256,7 @@ CREATE TABLE IF NOT EXISTS "fermentationMusts" (
 	"id" UUID NOT NULL,
 	"mustID" UUID NOT NULL,
 	"fermentationMustID" UUID NOT NULL,
+	"quantity" INTEGER NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -264,6 +266,14 @@ CREATE TABLE IF NOT EXISTS "fermentationMusts" (
 CREATE TABLE IF NOT EXISTS "ingredients" (
 	"id" UUID NOT NULL,
 	"name" VARCHAR(255) NOT NULL,
+	"energyContent" INTEGER NOT NULL,
+	"fat" INTEGER NOT NULL,
+	"saturatedFattyAcids" INTEGER NOT NULL,
+	"carbs" INTEGER NOT NULL,
+	"sugars" INTEGER NOT NULL,
+	"protein" INTEGER NOT NULL,
+	"salt" INTEGER NOT NULL,
+	"fibers" INTEGER NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -274,6 +284,7 @@ CREATE TABLE IF NOT EXISTS "fermentationIngredients" (
 	"id" UUID NOT NULL,
 	"ingredientsID" UUID NOT NULL,
 	"fermentingMustID" UUID NOT NULL,
+	"quantity" INTEGER NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -296,6 +307,7 @@ CREATE TABLE IF NOT EXISTS "toBeBottled" (
 	"fermentingMustID" UUID,
 	"agedWineID" UUID,
 	"blendedWineID" UUID,
+	"quantity" INTEGER,
 	PRIMARY KEY("id")
 );
 
@@ -339,6 +351,7 @@ CREATE TABLE IF NOT EXISTS "agedWineFermentation" (
 	"id" UUID NOT NULL,
 	"fermentingMustID" UUID NOT NULL,
 	"agedWIneID" UUID NOT NULL,
+	"quantity" INTEGER NOT NULL,
 	PRIMARY KEY("id")
 );
 
