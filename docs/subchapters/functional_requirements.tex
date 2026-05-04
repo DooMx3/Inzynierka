@@ -1,0 +1,75 @@
+\subsection{Functional requirements}
+The system shall provide the following functionalities, categorized by users. This approach is consistent with the standard definition of functional requirements \cite{sommerville2017}.
+\subsubsection{Guest User:}
+\begin{itemize}
+	\item the ability to review current offerings,
+	%\item the ability to recover password,
+	\item the ability to log in,
+	\item the ability to view information about batch of wine using QR code from the bottle including:
+	\begin{itemize}
+		\item table of nutrients,
+		\item final wine parameters(sugar level, acidity, pH and alcohol content),
+		\item information about type of grape used for production,
+		\item when was grape harvested,
+		\item how long it spend in barrel if maturated,
+		\item when it was bottled,
+	\end{itemize}
+\end{itemize}
+\subsubsection{Logged-in user:}
+\begin{itemize}
+	\item all of the guest user abilities,
+	\item the ability to log out,
+	\item the ability to change password,
+	\item the ability to change email,
+	\item the ability to change phone number,
+	\item the ability to delete user account,
+	\item the ability to create an organization and become its owner (applicable only for users with no organization affiliation),
+\end{itemize}
+\subsubsection{Vineyard Worker:}
+\begin{itemize}
+	\item all of the logged-in user abilities,
+	\item the ability to view, edit, delete and add complete gardening tasks,
+	\item the ability to view, edit, delete and add plants information in specific vineyard,
+	\item the ability to view, edit, delete and add data about observed pests or plant diseases,
+	\item the ability to view, edit, delete and add  amount of grapes harvested from specific vineyard with particular type.
+\end{itemize}
+\subsubsection{Oenologist:}
+\begin{itemize}
+	\item all of the logged-in abilities,
+	\item the ability to create, read, update and delete a batch of must, by manually selecting a specific batch or scanning QR code on one of the pieces of equipment in the winery,
+	\item the ability to create, read, update and delete a batch of fermenting must, by manually selecting a specific batch or scanning QR code on one of the pieces of equipment in the winery,
+	\item the ability to add, read, update and delete ingredients used in production,
+	\item the ability to create, read, update and delete a batch of aged wine, by manually selecting a specific batch or scanning QR code on one of the pieces of equipment in the winery,
+	\item the ability to create, read, update and delete a batch of blended wine, by manually selecting a specific batch or scanning QR code on one of the pieces of equipment in the winery,
+	\item the ability to record chemical parameters (sugar level, acidity, pH, temperature and alcohol content) at every stage of production, by manually selecting a specific batch or scanning QR code on one of the pieces of equipment in the winery,
+	\item the ability to mark a selected production batch as spoiled, by manually selecting the batch or scanning QR code on one of the pieces of vineyard equipment where the batch is located,
+	\item the ability to unmark a selected production batch, which was marked as spoiled, by manually selecting the batch or scanning QR code on one of the pieces of vineyard equipment where the batch is located,
+	\item the ability to create, read, update and delete a batch of bottled wine, by manually selecting a specific batch or scanning QR code on one of the pieces of equipment in the winery,
+	\item the ability to create, read, update and delete an ingredient,
+	\item the ability to auto calculate the amount of potassium metabisulfite and change it by hand if needed,
+	\item the ability to calculate predicted alcohol level from juice and during fermenation,
+	\item the ability to automatically calculate nutrients and change it by hand if needed.
+\end{itemize}
+\subsubsection{Vineyard Owner:}
+\begin{itemize}
+	\item all of the vineyard worker and oenologist abilities,
+	\item the ability to generate and review reports such as:
+	\begin{itemize}
+		\item production efficiency report,
+		\item diversity of grapevine varieties,
+		\item vineyard operations report,
+		\item historical trend report,
+	\end{itemize}
+	\item the ability to view and edit information about the organization,
+	\item the ability to remove the organization from the system, which will also remove all associated data,
+	\item the ability to view, add and delete vineyard fields from the organization along with the grape variety planted there,
+	\item the ability to view, add and delete winery equipment from organization,
+	\item the ability to view, add and delete users from organization,
+	\item the ability to assign and revoke roles to other users in the organization,
+	\item the ability to reset a user's password, if they belong to organisation.
+\end{itemize}
+\subsubsection{Administrator: }
+\begin{itemize}
+	\item the ability to reset a user's password if they lose access to their email,
+	\item the ability to change an user's personal details.
+\end{itemize}
