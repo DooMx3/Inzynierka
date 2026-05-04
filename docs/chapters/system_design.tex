@@ -69,6 +69,7 @@ The system shall provide the following functionalities, categorized by users. Th
 	\item the ability to mark a selected production batch as spoiled, by manually selecting the batch or scanning QR code on one of the pieces of vineyard equipment where the batch is located,
 	\item the ability to unmark a selected production batch, which was marked as spoiled, by manually selecting the batch or scanning QR code on one of the pieces of vineyard equipment where the batch is located,
 	\item the ability to create, read, update and delete a batch of bottled wine, by manually selecting a specific batch or scanning QR code on one of the pieces of equipment in the winery,
+	\item the ability to create, read, update and delete an ingredient,
 	\item the ability to auto calculate the amount of potassium metabisulfite and change it by hand if needed,
 	\item the ability to calculate predicted alcohol level from juice and during fermenation,
 	\item the ability to automatically calculate nutrients and change it by hand if needed.
@@ -459,6 +460,38 @@ User stories are a collection of features described from the perspective of the 
 		\item the user clicks the button to delete a bottled wine batch,
 		\item a pop-up appears in which the user confirms that they want to delete a bottled wine batch,
 		\item the system correctly deletes the bottled wine batch.
+	\end{itemize}
+	%===========================================================
+	%Ingredient
+	%===========================================================
+	\item As an oenologist, I can view a list of all ingredients, so I can see what I have already added.
+	\\Definition of done:
+	\begin{itemize}
+		\item the system displays a searchable and filterable list of all ingredients.
+	\end{itemize}
+	\item As an oenologist, I can add a new ingredient, so I can use it later.
+	\\Definition of done:
+	\begin{itemize}
+		\item the user clicks the button to add a new ingredient,
+		\item a form appears in which the user creates a new ingredient,
+		\item the user clicks the button to confirm the addition of a new ingredient,
+		\item a pop-up appears in which the user confirms that they want to add a new ingredient,
+		\item the system automatically generates a ingredient number.
+	\end{itemize}
+	\item As an oenologist, I can update a ingredeint, so I can correct mistakes I have made during creation.
+	\\Definition of done:
+	\begin{itemize}
+		\item the user clicks the button to edit a ingredient,
+		\item a form appears in which the user corrects the information,
+		\item a pop-up appears in which the user confirms that they want to update a ingredient,
+		\item the system updates the ingredient.
+	\end{itemize}
+	\item As an oenologist, I can delete a ingredient, because it doesn't meet my expectations.
+	\\Definition of done:
+	\begin{itemize}
+		\item the user clicks the button to delete a must batch,
+		\item a pop-up appears in which the user confirms that they want to delete a ingredient,
+		\item the system correctly deletes the ingredient.
 	\end{itemize}
 	%===========================================================
 	% CHEMICAL PARAMETERS
