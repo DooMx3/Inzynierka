@@ -141,7 +141,6 @@ CREATE TABLE IF NOT EXISTS "harvest" (
 	"fieldId" UUID NOT NULL,
 	"organisationId" UUID NOT NULL,
 	"amount" INTEGER,
-	"grapeTypeId" UUID NOT NULL,
 	PRIMARY KEY("id")
 );
 
