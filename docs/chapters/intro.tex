@@ -20,23 +20,23 @@ Our goal is to create an app that offers a simple and intuitive way to manage a~
 \subsection{Division of work}
 There was three people working on this project. Everyone took part in creation of all chapters, breakdown of who worked on which part of that section is provided in Table~\ref{tab:divison_of_work}.
 \FloatBarrier
-\begin{table}[H]
-	\caption{Division of work}
-	\vspace{0.5cm}
-	\begin{tabular}{l|ccc|}
-		\cline{2-4}
-		& \multicolumn{1}{c|}{Adrian Szwajgier} & \multicolumn{1}{c|}{Karol Solecki} & Michał Strojek \\ \cline{2-4} 
-		& \multicolumn{3}{c|}{Introduction}                                                           \\ \hline
-		\multicolumn{1}{|l|}{Purpose of work}             & \multicolumn{1}{c|}{}                 & \multicolumn{1}{c|}{}              & X              \\ \hline
-		\multicolumn{1}{|l|}{Scope of work}               & \multicolumn{1}{c|}{}                 & \multicolumn{1}{c|}{}              & X              \\ \hline
-		\multicolumn{1}{|l|}{Division of work}            & \multicolumn{1}{c|}{}                 & \multicolumn{1}{c|}{X}             &                \\ \hline
-		& \multicolumn{3}{c|}{System design}                                                          \\ \hline
-		\multicolumn{1}{|l|}{Market analysis}             & \multicolumn{1}{c|}{}                 & \multicolumn{1}{c|}{}              & X              \\ \hline
-		\multicolumn{1}{|l|}{Functional requirements}     & \multicolumn{1}{c|}{X}                & \multicolumn{1}{c|}{}              &                \\ \hline
-		\multicolumn{1}{|l|}{Non-functional requirements} & \multicolumn{1}{c|}{}                 & \multicolumn{1}{c|}{X}             &                \\ \hline
-		\multicolumn{1}{|l|}{User stories} & \multicolumn{1}{c|}{X}                 & \multicolumn{1}{c|}{X}             &      \multicolumn{1}{c|}{X}          \\ \hline
-	\end{tabular}
+\begin{longtable}{c|ccc|}
 	\label{tab:divison_of_work}
-	\centering
-\end{table}
+	\kill % A little hacky way to stop latex from complaining about cline as first thing in table
+	\cline{2-4}
+	& \multicolumn{1}{c|}{Adrian Szwajgier} & \multicolumn{1}{c|}{Karol Solecki} & Michał Strojek \\ \cline{2-4} 
+	\endhead
+	& \multicolumn{3}{c|}{Introduction}                                                           \\ \hline
+	\multicolumn{1}{|l|}{Purpose of work}             & \multicolumn{1}{c|}{}                 & \multicolumn{1}{c|}{}              & X              \\ \hline
+	\multicolumn{1}{|l|}{Scope of work}               & \multicolumn{1}{c|}{}                 & \multicolumn{1}{c|}{}              & X              \\ \hline
+	\multicolumn{1}{|l|}{Division of work}            & \multicolumn{1}{c|}{}                 & \multicolumn{1}{c|}{X}             &                \\ \hline
+	& \multicolumn{3}{c|}{System design}                                                          \\ \hline
+	\multicolumn{1}{|l|}{Market analysis}             & \multicolumn{1}{c|}{}                 & \multicolumn{1}{c|}{}              & X              \\ \hline
+	\multicolumn{1}{|l|}{BPNMs}             & \multicolumn{1}{c|}{X}                 & \multicolumn{1}{c|}{X}              & X              \\ \hline
+	\multicolumn{1}{|l|}{Functional requirements}     & \multicolumn{1}{c|}{X}                & \multicolumn{1}{c|}{}              &                \\ \hline
+	\multicolumn{1}{|l|}{Non-functional requirements} & \multicolumn{1}{c|}{}                 & \multicolumn{1}{c|}{X}             &                \\ \hline
+	\multicolumn{1}{|l|}{User stories} & \multicolumn{1}{c|}{X}                 & \multicolumn{1}{c|}{X}             &      \multicolumn{1}{c|}{X}          \\ \hline
+	\multicolumn{1}{|l|}{Database design} & \multicolumn{1}{c|}{X}                 & \multicolumn{1}{c|}{X}             &      \multicolumn{1}{c|}{X}          \\ \hline
+	\caption{Division of work}\\
+\end{longtable}
 \FloatBarrier
