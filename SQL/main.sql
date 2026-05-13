@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS "equipment" (
 	"organisationId" UUID NOT NULL,
 	"name" VARCHAR(255) NOT NULL,
 	"typeId" UUID NOT NULL,
-	"unitCost" DECIMAL,
+	"endOfTechnicalInspection" DATE,
 	PRIMARY KEY("id")
 );
 
