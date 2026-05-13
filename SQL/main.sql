@@ -373,7 +373,7 @@ CREATE TABLE IF NOT EXISTS "blendedWineIngredients" (
 	"id" UUID NOT NULL,
 	"fermentingMustID" UUID,
 	"agedWineID" UUID,
-	"blendedWineID" UUID NOT NULL,
+	"blendedWineID" UUID,
 	"quantity" INTEGER NOT NULL,
 	PRIMARY KEY("id")
 );
