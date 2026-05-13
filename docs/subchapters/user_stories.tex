@@ -7,41 +7,41 @@ User stories are a collection of features described from the perspective of the 
 	\\Definition of done:
 	\begin{itemize}
 		\item the winery's “Offer” button is easily accessible on the website,
-		\item after clicking the "Offer" button, the user sees the winery's offer.
+		\item after clicking the "Offer" button, the winery's offer is displayed.
 	\end{itemize}
 	\item As a guest user, I can create an account to become a registered user and access personalized features.
 	\\Definition of done:
 	\begin{itemize}
 		\item the "Register" button is clearly visible on the home page and the login form,
-		\item after clicking the registration button, the user is presented with a registration form,
-		\item the user is required to provide necessary details,
+		\item after clicking the registration button, the registration form is displayed,
+		\item the form requires providing necessary details,
 		\item the system validates that the email address is not already in use and that the password meets security requirements,
-		\item after submitting the form, a confirmation email is sent to the user's provided address,
+		\item after submitting the form, a confirmation email is sent to the provided address,
 		\item upon clicking the activation link in the email, the account is activated in the database,
-		\item the user is redirected to a success page and can now log in to their new account.
+		\item the system redirects to a success page and logging in is possible.
 	\end{itemize}
 	\item As a guest user, I can reset my password to regain access to my account.
 	\\Definition of done:
 	\begin{itemize}
-	\item the user provides their email address in the recovery form,
+	\item there is a recovery form with input field for email address,
 	\item the system sends an email with a unique reset link,
-	\item after clicking the link, the user sets a new password that meets the security strength requirements,
+	\item it is possible to set a new password that meets the security strength requirements after clicking the reset link,
 	\item the password hash is updated in the database.
 	\end{itemize}
 	\item As a guest user, I can log in to my account to access the resources stored there.
 	\\Definition of done:
 	\begin{itemize}
 		\item the login button is easily accessible on the home page,
-		\item after clicking the login button, the user sees the login form,
-		\item the user is required to enter their email address and password to log in,
-		\item after entering the correct information, the user is redirected to the dashboard,
-		\item if user enters incorrect login or password, an error message is displayed prompting them to try again.
+		\item after clicking the login button, the login form is displayed,
+		\item the application requires email address and password to log in,
+		\item after entering the correct information, the application redirects to the dashboard,
+		\item if incorrect login or password is entered, an error message is displayed prompting to try again.
 	\end{itemize}
 	\item As a user, I want to be able to open a page with detailed information about the wine batch the bottle comes from by scanning a QR code.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user scans the QR code on the bottle using their mobile device,
-		\item after scanning the code, the user is redirected to a page with detailed information about that particular batch of wine.
+		\item the QR code on the bottle is possible to scan using mobile device,
+		\item after scanning the code, the relevant page can be opened. It contains detailed information about that particular batch of wine.
 	\end{itemize}
 \end{enumerate}
 
@@ -51,13 +51,13 @@ User stories are a collection of features described from the perspective of the 
 	\item As a logged-in user I can log out of the system so that my account is secure and no one can use it without my knowledge.
 	\\Definition of done:
 	\begin{itemize}
-		\item after clicking the "log out" button, the user is logged out of the system, session token is invalidated on the backend,
-		\item after logging out, user is redirected to the login page.
+		\item after clicking the "log out" button, the application logs the user out of the system, session token is invalidated on the backend,
+		\item after logging out, the application redirects to the login page.
 	\end{itemize}
 	\item As a logged-in user I can change my password so that I can maintain the security of my account.
 	\\Definition of done:
 	\begin{itemize}
-		\item after clicking the "change password" option, the user is required to provide their current password and the new password (which must meet the security strength criteria) twice for confirmation,
+		\item after clicking the "change password" option, providing current password and the new password is required. New password (which must meet the security strength criteria) needs to be entered twice for confirmation,
 		\item after successfully changing the password, the user receives a confirmation pop-up and is asked to log in again using the new password,
 		\item the password hash is updated in the database.
 	\end{itemize}
