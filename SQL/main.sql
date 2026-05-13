@@ -277,6 +277,7 @@ CREATE TABLE IF NOT EXISTS "fermentationIngredients" (
 
 CREATE TABLE IF NOT EXISTS "bottledWine" (
 	"id" UUID NOT NULL,
+	"name" VARCHAR(255) NOT NULL,
 	"description" TEXT,
 	"toBeBottledID" UUID NOT NULL,
 	"quantity" INTEGER NOT NULL,
