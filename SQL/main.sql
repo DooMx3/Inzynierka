@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS "task" (
 	"completedAt" DATE NOT NULL,
 	-- Additional user''''''''s notes
 	"description" TEXT,
+	"due" DATE,
 	PRIMARY KEY("id")
 );
 
