@@ -228,7 +228,6 @@ CREATE TABLE IF NOT EXISTS "fermentingMust" (
 	"startDate" DATE NOT NULL,
 	"endDate" DATE,
 	"quantity" INTEGER NOT NULL,
-	"organisationID" UUID NOT NULL,
 	"idSpoiled" BOOLEAN NOT NULL,
 	PRIMARY KEY("id")
 );
@@ -280,7 +279,6 @@ CREATE TABLE IF NOT EXISTS "bottledWine" (
 	"description" TEXT,
 	"toBeBottledID" UUID NOT NULL,
 	"quantity" INTEGER NOT NULL,
-	"organisationID" UUID NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -303,7 +301,6 @@ CREATE TABLE IF NOT EXISTS "agedWine" (
 	"id" UUID NOT NULL,
 	"startDate" DATE NOT NULL,
 	"endDate" DATE,
-	"organisationID" UUID NOT NULL,
 	"quantity" INTEGER NOT NULL,
 	"isSpoiled" BOOLEAN NOT NULL,
 	PRIMARY KEY("id")
@@ -326,7 +323,6 @@ CREATE TABLE IF NOT EXISTS "agedWineFermentation" (
 CREATE TABLE IF NOT EXISTS "blendedWine" (
 	"id" UUID NOT NULL,
 	"blendDate" DATE NOT NULL,
-	"organistationID" UUID NOT NULL,
 	"quantity" INTEGER NOT NULL,
 	"isSpoiled" BOOLEAN NOT NULL,
 	PRIMARY KEY("id")
@@ -451,15 +447,6 @@ ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "fermentingMust"
 ADD FOREIGN KEY("id") REFERENCES "fermentationIngredients"("fermentingMustID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "organisation"
-ADD FOREIGN KEY("id") REFERENCES "fermentingMust"("organisationID")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "organisation"
-ADD FOREIGN KEY("id") REFERENCES "agedWine"("organisationID")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "organisation"
-ADD FOREIGN KEY("id") REFERENCES "bottledWine"("organisationID")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "bottledWine"
 ADD FOREIGN KEY("id") REFERENCES "offering"("wineId")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
@@ -477,9 +464,6 @@ ADD FOREIGN KEY("id") REFERENCES "blendedWineIngredients"("agedWineID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "blendedWine"
 ADD FOREIGN KEY("id") REFERENCES "blendedWineIngredients"("blendedWineID")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "organisation"
-ADD FOREIGN KEY("id") REFERENCES "blendedWine"("organistationID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "blendedWine"
 ADD FOREIGN KEY("id") REFERENCES "toBeBottled"("blendedWineID")
