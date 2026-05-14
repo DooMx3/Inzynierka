@@ -383,6 +383,13 @@ CREATE TABLE IF NOT EXISTS "recordType" (
 	PRIMARY KEY("id")
 );
 
+CREATE TABLE IF NOT EXISTS "disease" (
+	"id" UUID NOT NULL,
+	"name" VARCHAR(255) NOT NULL,
+	"fieldId" UUID NOT NULL,
+	PRIMARY KEY("id")
+);
+
 
 
 ALTER TABLE "role"
