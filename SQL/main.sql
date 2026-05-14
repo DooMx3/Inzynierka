@@ -93,6 +93,7 @@ CREATE TABLE IF NOT EXISTS "spraying" (
 	"sprayingDate" DATE NOT NULL,
 	"substanceId" UUID NOT NULL,
 	"quantity" INTEGER NOT NULL,
+	"completedAt" DATE,
 	"due" DATE,
 	PRIMARY KEY("id")
 );
@@ -165,7 +166,8 @@ CREATE TABLE IF NOT EXISTS "harvest" (
 	"id" UUID NOT NULL,
 	"fieldId" UUID NOT NULL,
 	"organisationId" UUID NOT NULL,
-	"amount" INTEGER,
+	"date" DATE NOT NULL,
+	"amount" INTEGER NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -386,6 +388,7 @@ CREATE TABLE IF NOT EXISTS "recordType" (
 CREATE TABLE IF NOT EXISTS "disease" (
 	"id" UUID NOT NULL,
 	"name" VARCHAR(255) NOT NULL,
+	"dateObserved" DATE NOT NULL,
 	"fieldId" UUID NOT NULL,
 	PRIMARY KEY("id")
 );
