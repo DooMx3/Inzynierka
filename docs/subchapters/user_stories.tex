@@ -58,37 +58,37 @@ User stories are a collection of features described from the perspective of the 
 	\\Definition of done:
 	\begin{itemize}
 		\item after clicking the "change password" option, providing current password and the new password is required. New password (which must meet the security strength criteria) needs to be entered twice for confirmation,
-		\item after successfully changing the password, the user receives a confirmation pop-up and is asked to log in again using the new password,
+		\item after successfully changing the password, the application displays a confirmation pop-up and asks to log in again using the new password,
 		\item the password hash is updated in the database.
 	\end{itemize}
 	\item As a logged-in user I can change my email address so that I can keep my personal information up to date.
 	\\Definition of done:
 	\begin{itemize}
-		\item after clicking the "change email" option, the user is required to provide new email address and confirm the operation,
-		\item after successfully changing the email address, the user receives a confirmation pop-up and is asked to log in again using the new email and password,
+		\item after clicking the "change email" option, the application asks to provide new email address and confirm the operation,
+		\item after successfully changing the email address, the application displays a confirmation pop-up and asks to log in again using the new email and password,
 		\item the email address is updated in the database.
 	\end{itemize}
 	\item As a logged-in user I can change my phone number so that I can keep my personal information up to date.
 	\\Definition of done:
 	\begin{itemize}
-		\item after clicking the "change phone number" option, the user is required to provide new phone number and confirm the operation,
-		\item after successfully changing the phone number, the user receives a confirmation pop-up,
+		\item after clicking the "change phone number" option, the application asks to provide new phone number and confirm the operation,
+		\item after successfully changing the phone number, the application displays a confirmation pop-up,
 		\item the phone number is updated in the database.
 	\end{itemize}
 	\item As a logged-in user I can delete my account so that I can remove all my personal data from the system in case I no longer want to use the application.
 	\\Definition of done:
 	\begin{itemize}
-		\item validation prevents deletion if the user is the owner of an organization - in such case, the user must delete the organization first,
-		\item after clicking the "delete account" option, the user is required to enter their password and confirm the action,
-		\item after successfully deleting the account, the user receives a confirmation pop-up and is redirected to the login page,
+		\item validation prevents deletion if the user is the owner of an organization - in such case, the organization must be deleted first,
+		\item after clicking the "delete account" option, the application asks to enter their password and confirm the action,
+		\item after successfully deleting the account, the application displays a confirmation pop-up and redirects to the login page,
 		\item all personal data is removed from the database.
 	\end{itemize}
 	\item As a logged-in user who is not a part of any organization I can create an organization and become its owner so that I can manage my vineyard and winery operations effectively.
 	\\Definition of done:
 	\begin{itemize}
 		\item validation prevents creation if user already has an organization,
-		\item after clicking the "create organization" option, the user is required to provide the organization details and confirm the action,
-		\item after successfully creating the organization, the user receives a confirmation pop-up and is redirected to the organization management page,
+		\item after clicking the "create organization" option, the application asks to provide the organization details and confirm the action,
+		\item after successfully creating the organization, the application displays a confirmation pop-up and redirects to the organization management page,
 		\item the user is assigned the role of "owner" in the newly created organization,
 		\item the organization is added to the database and associated with the user's account.
 	\end{itemize}
@@ -97,8 +97,8 @@ User stories are a collection of features described from the perspective of the 
 	\begin{itemize}
 		\item the user email is visible in user dashboard so that the Vineyard Owner can easily add account to the organization,
 		\item after the owner adds the user to the organization, the user should refresh the page,
-		\item after refreshing the page, the user is prompted to confirm joining the organization,
-		\item after confirming, the user is redirected to the organization dashboard and can access the features based on their assigned role,
+		\item after refreshing the page, the application prompts to confirm joining the organization,
+		\item after confirming, the application redirects to the organization dashboard and allows access to the features based on assigned role,
 		\item the user is associated with the organization in the database.
 	\end{itemize}
 \end{enumerate}
