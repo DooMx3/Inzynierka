@@ -85,6 +85,25 @@ CREATE TABLE IF NOT EXISTS "field" (
 );
 
 
+CREATE TABLE IF NOT EXISTS "spraying" (
+	"id" UUID NOT NULL,
+	"fieldId" UUID NOT NULL,
+	"organisationId" UUID NOT NULL,
+	"equipmentId" UUID NOT NULL,
+	"sprayingDate" DATE NOT NULL,
+	"substanceId" UUID NOT NULL,
+	"quantity" INTEGER NOT NULL,
+	"due" DATE,
+	PRIMARY KEY("id")
+);
+
+CREATE TABLE IF NOT EXISTS "substance" (
+	"id" UUID NOT NULL,
+	"name" VARCHAR(255) NOT NULL,
+	PRIMARY KEY("id")
+);
+
+
 
 
 CREATE TABLE IF NOT EXISTS "grape_type" (
