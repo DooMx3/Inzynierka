@@ -57,7 +57,7 @@ User stories are a collection of features described from the perspective of the 
 	\item As a logged-in user I can change my password so that I can maintain the security of my account.
 	\\Definition of done:
 	\begin{itemize}
-		\item after clicking the "change password" option, providing current password and the new password is required. New password (which must meet the security strength criteria) needs to be entered twice for confirmation,
+		\item after clicking the "change password" option, the application requires providing current password and the new password. New password (which must meet the security strength criteria) needs to be entered twice for confirmation,
 		\item after successfully changing the password, the application displays a confirmation pop-up and asks to log in again using the new password,
 		\item the password hash is updated in the database.
 	\end{itemize}
@@ -96,7 +96,7 @@ User stories are a collection of features described from the perspective of the 
 	\\Definition of done:
 	\begin{itemize}
 		\item the user email is visible in user dashboard so that the Vineyard Owner can easily add account to the organization,
-		\item after the owner adds the user to the organization, the user should refresh the page,
+		\item after the owner adds the user to the organization, the page needs to be refreshed,
 		\item after refreshing the page, the application prompts to confirm joining the organization,
 		\item after confirming, the application redirects to the organization dashboard and allows access to the features based on assigned role,
 		\item the user is associated with the organization in the database.
@@ -154,32 +154,32 @@ User stories are a collection of features described from the perspective of the 
 	\item As an oenologist, I can create a new must batch, so I can use it later.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user clicks the button to start a new must batch,
-		\item a form appears in which the user selects the piece of equipment where the must batch is to begin, as well as one or more batches of fruit and the quantity from which the batch is to be produced,
-		\item the user clicks the button to confirm the creation of a new must batch,
-		\item a pop-up appears in which the user confirms that they want to create a new must batch,
+		\item there is a button allowing the user to start a new must batch,
+		\item a form appears in which neccessary details might be selected, such as the piece of equipment where the must batch is to begin, as well as one or more batches of fruit and the quantity from which the batch is to be produced,
+		\item there is a button to confirm the creation of a new must batch,
+		\item a pop-up appears with confirmation for creating a new must batch,
 		\item the system automatically generates a batch number.
 	\end{itemize}
 	\item As an oenologist, I can update a must batch, so I can correct mistakes I have made during creation.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user clicks the button to edit a must batch,
-		\item a form appears in which the user corrects the information,
-		\item a pop-up appears in which the user confirms that they want to update a must batch,
+		\item there is a button to edit a must batch,
+		\item a form appears where corrects the information can be entered,
+		\item a pop-up appears with confirmation for updating a must batch,
 		\item the system updates the batch.
 	\end{itemize}
 	\item As an oenologist, I can delete a must batch, because it doesn't meet my expectations.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user clicks the button to delete a must batch,
-		\item a pop-up appears in which the user confirms that they want to delete a must batch,
+		\item there is a button to delete a must batch,
+		\item a pop-up appears with confirmation for deleting a must batch,
 		\item the system correctly deletes the must batch.
 	\end{itemize}
 	\item As an oenologist, I can scan a QR code on a piece of equipment, so I can quickly view must batch associated with it.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user scans a QR code located on a vineyard element,
-		\item the system redirects the user to the must batch list page,
+		\item QR code located on a vineyard element can be scanned using a mobile device,
+		\item the system redirects to the must batch list page,
 		\item the system filters the list to show batch related to that specific equipment and highlights the relevant record.
 	\end{itemize}
 	%===========================================================
@@ -194,25 +194,25 @@ User stories are a collection of features described from the perspective of the 
 	\item As an oenologist, I can create a new fermenting must batch, so I can use it later.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user clicks the button to start a new fermenting must batch,
-		\item a form appears in which the user selects the piece of equipment where the fermenting must batch is to begin, as well as one or more batches of must and the quantity from which the batch is to be produced,
-		\item the user clicks the button to confirm the creation of a new fermenting must batch,
-		\item a pop-up appears in which the user confirms that they want to create a new fermenting must batch,
+		\item there is a button to start a new fermenting must batch,
+		\item a form appears where details can be entered, such as the piece of equipment where the fermenting must batch is to begin, as well as one or more batches of must and the quantity from which the batch is to be produced,
+		\item there is a button to confirm the creation of a new fermenting must batch,
+		\item a pop-up appears with confirmation for creating a new fermenting must batch,
 		\item the system automatically generates a batch number.
 	\end{itemize}
 	\item As an oenologist, I can update a fermenting must batch, so I can correct mistakes I have made during creation.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user clicks the button to edit a fermenting must batch,
-		\item a form appears in which the user corrects the information,
-		\item a pop-up appears in which the user confirms that they want to update a fermenting must batch,
+		\item there is a button to edit a fermenting must batch,
+		\item a form appears where the information can be corrected,
+		\item a pop-up appears with confirmation for updating a fermenting must batch,
 		\item the system updates the batch.
 	\end{itemize}
 	\item As an oenologist, I can delete a fermenting must batch, because it doesn't meet my expectations.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user clicks the button to delete a fermenting must batch,
-		\item a pop-up appears in which the user confirms that they want to delete a fermenting must batch,
+		\item there is a button to delete a fermenting must batch,
+		\item a pop-up appears with confirmation for deleting a fermenting must batch,
 		\item the system correctly deletes the fermenting must batch.
 	\end{itemize}
 	%===========================================================
@@ -226,25 +226,25 @@ User stories are a collection of features described from the perspective of the 
 	\item As an oenologist, I can add ingredients and their quantities to log this data for future use.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user clicks the button to add ingredients to a specific production batch of must,
-		\item a form appears in which the user adds the ingredients and their quantity,
-		\item the user clicks the button to confirm the addition of a new ingredient to a batch,
-		\item a pop-up appears in which the user confirms that they want to add a new ingredient,
+		\item there is a button to add ingredients to a specific production batch of must,
+		\item a form appears where the ingredients and their quantity can be entered,
+		\item there is a button to confirm the addition of a new ingredient to a batch,
+		\item a pop-up appears with confirmation for adding a new ingredient,
 		\item the system automatically generates an ingredient number.
 	\end{itemize}
 	\item As an oenologist, I can update an ingredient record, so I can correct mistakes I have made during creation.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user clicks the button to edit an ingredient record,
-		\item a form appears in which the user corrects the information,
-		\item a pop-up appears in which the user confirms that they want to update an ingredient record,
+		\item there is a button to edit an ingredient record,
+		\item a form appears where the information can be corrected,
+		\item a pop-up appears with confirmation for updating an ingredient record,
 		\item the system updates the ingredient record.
 	\end{itemize}
 	\item As an oenologist, I can delete an ingredient, because I added it to the wrong production batch of must.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user clicks the button to delete an ingredient,
-		\item a pop-up appears in which the user confirms that they want to delete an ingredient,
+		\item there is a button to delete an ingredient,
+		\item a pop-up appears with confirmation for deleting an ingredient,
 		\item the system correctly deletes the ingredient.
 	\end{itemize}
 	%===========================================================
@@ -259,25 +259,25 @@ User stories are a collection of features described from the perspective of the 
 	\item As an oenologist, I can create a new aged wine batch, so I can use it later.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user clicks the button to start a new aged wine batch,
-		\item a form appears in which the user selects the piece of equipment where the aged wine batch is to begin, as well as one or more batches of fermented must and the quantity from which the batch is to be produced,
-		\item the user clicks the button to confirm the creation of a new aged wine batch,
-		\item a pop-up appears in which the user confirms that they want to create a new aged wine batch,
+		\item there is a button to start a new aged wine batch,
+		\item a form appears where details can be selected, such as the piece of equipment where the aged wine batch is to begin, as well as one or more batches of fermented must and the quantity from which the batch is to be produced,
+		\item there is a button to confirm the creation of a new aged wine batch,
+		\item a pop-up appears with confirmation for creating a new aged wine batch,
 		\item the system automatically generates a batch number.
 	\end{itemize}
 	\item As an oenologist, I can update an aged wine batch, so I can correct mistakes I have made during creation.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user clicks the button to edit an aged wine batch,
-		\item a form appears in which the user corrects the information,
-		\item a pop-up appears in which the user confirms that they want to update an aged wine batch,
+		\item there is a button to edit an aged wine batch,
+		\item a form appears where the information can be corrected,
+		\item a pop-up appears with confirmation for updating an aged wine batch,
 		\item the system updates the batch.
 	\end{itemize}
 	\item As an oenologist, I can delete an aged wine batch, because it doesn't meet my expectations.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user clicks the button to delete an aged wine batch,
-		\item a pop-up appears in which the user confirms that they want to delete an aged wine batch,
+		\item there is a button to delete an aged wine batch,
+		\item a pop-up appears with confirmation for deleting an aged wine batch,
 		\item the system correctly deletes the aged wine batch.
 	\end{itemize}
 	%===========================================================
@@ -292,25 +292,25 @@ User stories are a collection of features described from the perspective of the 
 	\item As an oenologist, I can create a new blended wine batch, so I can use it later.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user clicks the button to start a new blended wine batch,
-		\item a form appears in which the user selects the piece of equipment where the blended wine batch is to begin, as well as one or more batches of wine (fermented must) and/or aged wine and the quantity from which the batch is to be produced,
-		\item the user clicks the button to confirm the creation of a new blended wine batch,
-		\item a pop-up appears in which the user confirms that they want to create a new blended wine batch,
+		\item there is a button to start a new blended wine batch,
+		\item a form appears where details can be selected, such as the piece of equipment where the blended wine batch is to begin, as well as one or more batches of wine (fermented must) and/or aged wine and the quantity from which the batch is to be produced,
+		\item there is a button to confirm the creation of a new blended wine batch,
+		\item a pop-up appears with confirmation for creating a new blended wine batch,
 		\item the system automatically generates a batch number.
 	\end{itemize}
 	\item As an oenologist, I can update a blended wine batch, so I can correct mistakes I have made during creation.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user clicks the button to edit a blended wine batch,
-		\item a form appears in which the user corrects the information,
-		\item a pop-up appears in which the user confirms that they want to update a blended wine batch,
+		\item there is a button to edit a blended wine batch,
+		\item a form appears where the information can be corrected,
+		\item a pop-up appears with confirmation for updating a blended wine batch,
 		\item the system updates the batch.
 	\end{itemize}
 	\item As an oenologist, I can delete a blended wine batch, because it doesn't meet my expectations.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user clicks the button to delete a blended wine batch,
-		\item a pop-up appears in which the user confirms that they want to delete a blended wine batch,
+		\item there is a button to delete a blended wine batch,
+		\item a pop-up appears with confirmation for deleting a blended wine batch,
 		\item the system correctly deletes the blended wine batch.
 	\end{itemize}
 	%===========================================================
@@ -325,25 +325,25 @@ User stories are a collection of features described from the perspective of the 
 	\item As an oenologist, I can create a new bottled wine batch, so I can end the production.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user clicks the button to start a new bottled wine batch,
-		\item a form appears in which the user selects the piece of equipment where the bottled wine batch is to begin, as well as one or more batches of wine (fermented must) and/or aged wine and/or blended wine and the quantity from which the batch is to be produced,
-		\item the user clicks the button to confirm the creation of a new bottled wine batch,
-		\item a pop-up appears in which the user confirms that they want to create a new bottled wine batch,
+		\item there is a button to start a new bottled wine batch,
+		\item a form appears where details can be selected, such as the piece of equipment where the bottled wine batch is to begin, as well as one or more batches of wine (fermented must) and/or aged wine and/or blended wine and the quantity from which the batch is to be produced,
+		\item there is a button to confirm the creation of a new bottled wine batch,
+		\item a pop-up appears with confirmation for creating a new bottled wine batch,
 		\item the system automatically generates a batch number.
 	\end{itemize}
 	\item As an oenologist, I can update a bottled wine batch, so I can correct mistakes I have made during creation.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user clicks the button to edit a bottled wine batch,
-		\item a form appears in which the user corrects the information,
-		\item a pop-up appears in which the user confirms that they want to update a bottled wine batch,
+		\item there is a button to edit a bottled wine batch,
+		\item a form appears where the information can be corrected,
+		\item a pop-up appears with confirmation for updating a bottled wine batch,
 		\item the system updates the batch.
 	\end{itemize}
 	\item As an oenologist, I can delete a bottled wine batch, because it doesn't meet my expectations.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user clicks the button to delete a bottled wine batch,
-		\item a pop-up appears in which the user confirms that they want to delete a bottled wine batch,
+		\item there is a button to delete a bottled wine batch,
+		\item a pop-up appears with confirmation for deleting a bottled wine batch,
 		\item the system correctly deletes the bottled wine batch.
 	\end{itemize}
 	%===========================================================
@@ -357,25 +357,25 @@ User stories are a collection of features described from the perspective of the 
 	\item As an oenologist, I can add a new ingredient, so I can use it later.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user clicks the button to add a new ingredient,
-		\item a form appears in which the user creates a new ingredient,
-		\item the user clicks the button to confirm the addition of a new ingredient,
-		\item a pop-up appears in which the user confirms that they want to add a new ingredient,
-		\item the system automatically generates a ingredient number.
+		\item there is a button to add a new ingredient,
+		\item a form appears in which a new ingredient can be created,
+		\item there is a button to confirm the addition of a new ingredient,
+		\item a pop-up appears with confirmation for adding a new ingredient,
+		\item the system automatically generates an ingredient number.
 	\end{itemize}
-	\item As an oenologist, I can update a ingredeint, so I can correct mistakes I have made during creation.
+	\item As an oenologist, I can update a ingredient, so I can correct mistakes I have made during creation.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user clicks the button to edit a ingredient,
-		\item a form appears in which the user corrects the information,
-		\item a pop-up appears in which the user confirms that they want to update a ingredient,
+		\item there is a button to edit a ingredient,
+		\item a form appears where the information can be corrected,
+		\item a pop-up appears with confirmation for updating a ingredient,
 		\item the system updates the ingredient.
 	\end{itemize}
 	\item As an oenologist, I can delete a ingredient, because it doesn't meet my expectations.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user clicks the button to delete a must batch,
-		\item a pop-up appears in which the user confirms that they want to delete a ingredient,
+		\item there is a button to delete a must batch,
+		\item a pop-up appears with confirmation for deleting a ingredient,
 		\item the system correctly deletes the ingredient.
 	\end{itemize}
 	%===========================================================
@@ -384,7 +384,7 @@ User stories are a collection of features described from the perspective of the 
 	\item As an oenologist, I can record and view chemical parameters for any production batch, to monitor quality.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user selects a batch (manually or via QR code) and enters a form to log parameters,
+		\item the batch can be selected (manually or via QR code) and parameters can be entered into a form,
 		\item the form includes sugar level, acidity, pH, temperature, and alcohol content,
 		\item the system stores these values with a timestamp and links them to the specific batch.
 	\end{itemize}
@@ -394,8 +394,8 @@ User stories are a collection of features described from the perspective of the 
 	\item As an oenologist, I can mark or unmark a batch as spoiled, to prevent it from entering the next production stage.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user selects a batch manually or via QR scan,
-		\item the user toggles the "Spoiled" status,
+		\item the batch can be selected (manually or via QR code),
+		\item there is a toggle for the "Spoiled" status,
 		\item a confirmation pop-up appears,
 		\item the system visually highlights spoiled batches in all lists and prevents further processing unless unmarked.
 	\end{itemize}
@@ -415,11 +415,11 @@ User stories are a collection of features described from the perspective of the 
 	\item As an oenologist, I can see how much, potassium metabisulfite, I should add in order to stop the fermentation process, so I do not need to calculate it by hand.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user selects a batch manually or via QR scan,
-		\item the calculate potassium metabisulfite button is highlighted and easly accessible,
+		\item the batch can be selected (manually or via QR code),
+		\item the calculate potassium metabisulfite button is highlighted and easily accessible,
 		\item the system automatically calculates the required amount of potassium metabisulfite based on the current quantity and specific parameters,
 		\item the system displays the calculated dosage,
-		\item the user can view the formula and change the amount of potassium metabisulfite if needed.
+		\item the system displays details, such as the formula and change the amount of potassium metabisulfite if needed.
 	\end{itemize}
 	%===========================================================
 	% predicted alcohol level
@@ -427,7 +427,7 @@ User stories are a collection of features described from the perspective of the 
 	\item As an oenologist, I can see the predicted alcohol level in wine after fermentation, so that I will know how much sugar do I need to add to reach the desired alcohol content.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user selects a batch manually or via QR scan,
+		\item the batch can be selected (manually or via QR code),
 		\item the system displays the predicted alcohol content for a batch of juice or a fermented batch, taking into account the sugar content from the fruit and any added sugar, as well as the type of yeast used.
 	\end{itemize}
 	%===========================================================
@@ -438,7 +438,7 @@ User stories are a collection of features described from the perspective of the 
 	\begin{itemize}
 		\item after finalizing production, the show nutrients button is displayed for every finalized batch,
 		\item after clicking on the show nutrients button, the table of nutrients is displayed,
-		\item the user could change nutrients parameters if there is a need to do that.
+		\item the nutrients parameters can be changed if needed.
 	\end{itemize}
 \end{enumerate}
 
@@ -449,7 +449,7 @@ User stories are a collection of features described from the perspective of the 
 	\item As a vineyard owner, I can generate production efficiency report in order to review it and analyze the efficiency of the production process.
 	\\Definition of done:
 	\begin{itemize}
-		\item after selecting the option to generate production efficiency report, user can select the time period and/or specific production batches for which the report is to be generated,
+		\item after selecting the option to generate production efficiency report, details can be selected, such as the time period and/or specific production batches for which the report is to be generated,
 		\item after confirming the selected parameters, a report is generated,
 		\item the report includes key performance indicators such as yield per hectare, average time from harvest to bottling, and percentage of batches marked as spoiled,
 		\item the report is saved in the system and can be accessed later from the reports section.
@@ -458,7 +458,7 @@ User stories are a collection of features described from the perspective of the 
 	\item As a vineyard owner, I can generate diversity of grapevine varieties report in order to review it and analyze the variety distribution in the vineyard.
 	\\Definition of done:
 	\begin{itemize}
-		\item after selecting the option to generate diversity of grapevine varieties report, user can select the time period and/or specific fields for which the report is to be generated,
+		\item after selecting the option to generate diversity of grapevine varieties report, details can be selected, such as the time period and/or specific fields for which the report is to be generated,
 		\item after confirming the selected parameters, a report is generated,
 		\item the report includes information about the different grapevine varieties planted in the vineyard, their respective areas, and their contribution to the overall production,
 		\item the report is saved in the system and can be accessed later from the reports section.
@@ -467,7 +467,7 @@ User stories are a collection of features described from the perspective of the 
 	\item As a vineyard owner, I can generate vineyard operations report in order to review it and analyze the operational efficiency of the vineyard.
 	\\Definition of done:
 	\begin{itemize}
-		\item after selecting the option to generate vineyard operations report, user can select the time period and/or specific operations for which the report is to be generated,
+		\item after selecting the option to generate vineyard operations report, details can be selected, such as the time period and/or specific operations for which the report is to be generated,
 		\item after confirming the selected parameters, a report is generated,
 		\item the report includes information about the various operations performed in the vineyard (e.g., pruning, irrigation, pest control), their frequency, and their impact on production efficiency,
 		\item the report is saved in the system and can be accessed later from the reports section.
@@ -476,7 +476,7 @@ User stories are a collection of features described from the perspective of the 
 	\item As a vineyard owner, I can generate historical trend report in order to review it and analyze the production trends over time.
 	\\Definition of done:
 	\begin{itemize}
-		\item after selecting the option to generate historical trend report, user can select the time period, and aggregation level (e.g., monthly, quarterly, yearly),
+		\item after selecting the option to generate historical trend report, details can be selected, such as the time period, and aggregation level (e.g., monthly, quarterly, yearly),
 		\item after confirming the selected parameters, a report is generated,
 		\item the report includes the same information as other reports, but aggregated over time to show trends and patterns,
 		\item the report is saved in the system and can be accessed later from the reports section.
@@ -486,13 +486,13 @@ User stories are a collection of features described from the perspective of the 
 	\item As a vineyard owner, I can store, edit and delete offerings from front page.
 	\\Definition of done:
 	\begin{itemize}
-		\item ...
+		\item ... remember, impersonal
 	\end{itemize}
 
 	\item As a vineyard owner, I can store, edit and delete information about end of technical inspection on equipment.
 	\\Definition of done:
 	\begin{itemize}
-		\item ...
+		\item ... remember, impersonal
 	\end{itemize}
 	
 	\item As a vineyard owner, I can view information about the organization.
@@ -509,14 +509,14 @@ User stories are a collection of features described from the perspective of the 
 	\item As a vineyard owner, I can edit information about the organization, in order to keep it up-to-date.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user can modify every field of the organization information, including the name, address and contact information,
+		\item every field of the organization information can be modified, including the name, address and contact information,
 		\item all changes are saved in the database and can be reviewed later.
 	\end{itemize}
 	
 	\item As a vineyard owner, I can remove the organization from the system, which will also remove all associated data, in order to ensure that organization data is not stored in the system if I no longer want to use the application.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user must confirm the removal action by entering the password,
+		\item the removal action must be confirmed by entering the password,
 		\item upon confirmation, the organization and all associated data are deleted from the system,
 		\item after successful deletion, the vineyard owner role is revoked, and the user is redirected to the home page.
 	\end{itemize}
@@ -524,18 +524,18 @@ User stories are a collection of features described from the perspective of the 
 	\item As a vineyard owner, I can view, add and delete vineyard fields from the organization along with the grape variety planted there, in order to keep the information about the vineyard up-to-date.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user can add new vineyard fields,
+		\item new vineyard fields can be added,
 		\item when adding a new vineyard field, the user must provide information about the field's location, date of planting, area, and the grape varieties planted there,
-		\item the user can delete existing vineyard fields from the organization,
+		\item vineyard fields can be deleted from the organization,
 		\item all changes are saved in the database and can be reviewed later.
 	\end{itemize}
 	
 	\item As a vineyard owner, I can view, add and delete winery equipment from organization, in order to keep the information about the winery equipment up-to-date.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user can add new winery equipment such as fermentation tanks, barrels, and bottling machines,
+		\item new winery equipment can be added such as fermentation tanks, barrels, and bottling machines,
 		\item when adding new winery equipment, the user must provide information about the equipment type, location, and capacity,
-		\item the user can delete existing winery equipment from the organization,
+		\item existing winery equipment can be deleted from the organization,
 		\item all changes are saved in the database and can be reviewed later.
 	\end{itemize}
 	
@@ -552,18 +552,18 @@ User stories are a collection of features described from the perspective of the 
 	\item As a vineyard owner, I can view, edit and delete users from organization, in order to manage the access to the system and ensure that only authorized personnel can access the vineyard data.
 	\\Definition of done:
 	\begin{itemize}
-		\item the user can view a list of all users in the organization,
-		\item the user can edit users' information,
-		\item the user can delete users from the organization,
+		\item there is a list of all users in the organization,
+		\item users' information can be edited,
+		\item there is a button for removing users from the organization,
 		\item all changes are saved in the database and can be reviewed later.
 	\end{itemize}
 	
 	\item As a vineyard owner, I can assign and revoke roles to other users in the organization, in order to manage their permissions and access to different functionalities of the system.
 	\\Definition of done:
 	\begin{itemize}
-		\item the owner can assign roles to users, such as vineyard worker or oenologist,
+		\item the roles can be assigned to users, such as vineyard worker or oenologist,
 		\item multiple roles can be assigned to a single user,
-		\item the owner can revoke roles from users,
+		\item the roles can be revoked from users,
 		\item all changes are saved in the database and can be reviewed later.
 	\end{itemize}
 	
@@ -572,13 +572,6 @@ User stories are a collection of features described from the perspective of the 
 \end{enumerate}
 \subsubsection{Administrator: }
 \begin{enumerate}
-	\item As an administrator, I would like to reset vineyard owners' password if they lost access to their email in order to restore their ability to work.  
-	\\Definition of Done:
-	\begin{itemize}
-		\item the vineyard owner is required to verify his identity,
-		\item after successful verification, the administrator sets a new temporary password that complies with the system's password strength policy,
-		\item the password hash is updated in the database.
-	\end{itemize}
 	\item As an administrator, I would like to create, remove, edit and view the list of administrators. 
 	\\Definition of Done:
 	\begin{itemize}
@@ -588,4 +581,6 @@ User stories are a collection of features described from the perspective of the 
 		\item the administrator can edit information about existing administrators,
 		\item all changes are saved in the database and can be reviewed later.
 	\end{itemize}
+	
+	\todo[inline]{Chyba nie potrzebujemy już administratora}
 \end{enumerate}
