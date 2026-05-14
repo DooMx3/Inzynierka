@@ -105,31 +105,87 @@ User stories are a collection of features described from the perspective of the 
 
 \subsubsection{Vineyard Worker:}
 \begin{enumerate}
-	\item As an vineyard worker I would like to be able to view, store, edit and delete information about what was done on vineyard in order to be able to view them  in the future if needed. \\Definition of done:
+	%===========================================================
+	%TASKS
+	%===========================================================
+	\item As an vineyard worker I would like to be able to view information about completed and planned tasks in order to be able to know what was done and what still needs to be done. \\Definition of done:
 	\begin{itemize}
-		\item list of done tasks on specific parcel is visible to vineyard worker,
-		\item vineyard worker is able to add new tasks,
-		\item vineyard worker is able to edit tasks,
-		\item vineyard worker can delete task,
-		\item confirmation is required before removal,
+		\item the system displays a list of completed and planned tasks,
+		\item the list can be filtered by completion status,
+		\item for each task, the list shows its name, due date and completion status,
+		\item user can see description of the task when they click on it,
 	\end{itemize}
-	\todo[inline]{Taski na przyszłosć}
-	\todo[inline]{Opryski CRUD}
-	\item As an vineyard worker I would like to be able to view, store, edit and delete information about pests and plant diseases on vineyard in order to be able to view them in the future if needed. \\Definition of done:
+	\item As an vineyard worker I would like to be able to store and edit information about completed and planned tasks in order to be able to view them in the future if needed. \\Definition of done:
 	\begin{itemize}
-		\item list of information about pests and plant diseases is visible to vineyard worker,
-		\item vineyard worker is able to add information about pests and plant diseases,
-		\item vineyard worker is able to edit information about pests and plant diseases,
-		\item vineyard worker can delete information about pests and plant diseases,
-		\item confirmation is required before removal,
+		\item there is button to add new task,
+		\item worker needs to enter task name,
+		\item description, due date, equipment used and field on which task is performed are optional,
 	\end{itemize}
-	\item As an vineyard worker I would like to be able to view, store, edit and delete information about about amount of grapes harvested  on vineyard in order to be able to view them in the future if needed. \\Definition of done:
+	\item As an vineyard worker I would like to be able to delete information about completed and planned tasks in order to be able remove tasks that is not relevant anymore. \\Definition of done:
 	\begin{itemize}
-		\item list of information about about amount of grapes harvested on specific parcel is visible to vineyard worker,
-		\item vineyard worker is able to add information about amount of grapes harvested,
-		\item vineyard worker is able to edit information about amount of grapes harvested,
-		\item vineyard worker can delete information about about amount of grapes harvested,
-		\item confirmation is required before removal,
+		\item there is a button to delete a task,
+		\item deleting a task requires confirmation,
+	\end{itemize}
+	\item As an vineyard worker I would like to be able to mark task as completed or not completed for it to disapear or reapear on list of due tasks. \\Definition of done:
+	\begin{itemize}
+		\item on task list there is button to mark task as completed or not completed,
+	\end{itemize}
+	%===========================================================
+	%SPRAYING
+	%===========================================================
+	\item As an vineyard worker I would like to be able to view information about spraying in order to inspect past sprayings. \\Definition of done:
+	\begin{itemize}
+		\item the system displays a list of all sprayings,
+		\item for each spraying, the list shows on which field, what substance was used, in what quantity and when the spraying was performed,
+		\item if the spraying has due date, it is highlighted in the list,
+	\end{itemize}
+	\item As an vineyard worker I would like to be able to store and edit information about spraying in order to be able to view them in the future. \\Definition of done:
+	\begin{itemize}
+		\item there is button to add new spraying,
+		\item worker needs to enter substance used and quantity, field on which spraying was performed and select equipment used for spraying,
+		\item spraying date is optionalm but then worker have to set due date for it,
+	\end{itemize}
+	\item As an vineyard worker I would like to be able to delete information about spraying in order to remove record added by mistake. \\Definition of done:
+	\begin{itemize}
+		\item there is a button to delete a spraying,
+		\item deleting a spraying requires confirmation,
+	\end{itemize}
+	%===========================================================
+	%PEST AND DISEASE
+	%===========================================================
+	\item As an vineyard worker I would like to be able to view information about pests and plant diseases on vineyard in order to see past issues. \\Definition of done:
+	\begin{itemize}
+		\item the system displays a list of all pests and plant diseases records,
+		\item for each record, the list shows on which field, what pest or disease was observed and when it was observed,
+	\end{itemize}
+	\item As an vineyard worker I would like to be able to store and edit information about pests and plant diseases on vineyard in order to be able to view them in the future if needed. \\Definition of done:
+	\begin{itemize}
+		\item there is button to add new pest or disease record,
+		\item worker needs to enter pest or disease name, field on which it was observed and enter date of observation,
+	\end{itemize}
+	\item As an vineyard worker I would like to be able to delete information about pests and plant diseases on vineyard in order to remove record added by mistake. \\Definition of done:
+	\begin{itemize}
+		\item there is a button to delete a pest or disease record,
+		\item deleting a pest or disease record requires confirmation,
+	\end{itemize}
+	%===========================================================
+	%HARVEST
+	%===========================================================
+	\item As an vineyard worker I would like to be able to view information about about amount of grapes harvested on vineyard in order compare it with different harvests. \\Definition of done:
+	\begin{itemize}
+		\item the system displays a list of all harvest records,
+		\item for each record, the list shows on which field, what variety of grapes was harvested, in what quantity and when it was harvested,
+	\end{itemize}
+	\item As an vineyard worker I would like to be able to store and edit information about about amount of grapes harvested  on vineyard in order to be able to view them in the future if needed. \\Definition of done:
+	\begin{itemize}
+		\item there is button to add new harvest record,
+		\item there is a button to edit a harvest record,
+		\item worker needs to enter quantity harvested, field on which harvest was performed and enter date of harvest,
+	\end{itemize}
+	\item As an vineyard worker I would like to be able to delete information about about amount of grapes harvested on vineyard in order to be remove record added by mistake. \\Definition of done:
+	\begin{itemize}
+		\item there is a button to delete a harvest record,
+		\item deleting a harvest record requires confirmation,
 	\end{itemize}
 \end{enumerate}
 \subsubsection{Oenologist:}
@@ -438,7 +494,9 @@ User stories are a collection of features described from the perspective of the 
 \subsubsection{Vineyard Owner:}
 
 \begin{enumerate}
-	
+	%===========================================================
+	% REPORTS
+	%===========================================================
 	\item As a vineyard owner, I can generate production efficiency report in order to review it and analyze the efficiency of the production process.
 	\\Definition of done:
 	\begin{itemize}
@@ -475,19 +533,58 @@ User stories are a collection of features described from the perspective of the 
 		\item the report is saved in the system and can be accessed later from the reports section.
 	\end{itemize}
 
-
-	\item As a vineyard owner, I can store, edit and delete offerings from front page.
+	%===========================================================
+	% OFFERINGS
+	%===========================================================
+	\item As a vineyard owner, I can add and edit offerings from front page, in order for customers to be able to read information about wine.
 	\\Definition of done:
 	\begin{itemize}
-		\item ... remember, impersonal
+		\item there is a button to add a new offering,
+		\item there is a button to edit an existing offering next to each offering on the list,
+		\item the form for adding/editing an offering includes selectors for the batch of wine and field for price,
+	\end{itemize}
+	\item As a vineyard owner, I can view offerings from front page, in order to see what wines I have on offer.
+	\\Definition of done:
+	\begin{itemize}
+		\item there is a list of all offerings on the front page,
+		\item for each offering, the list shows the name of the wine and its price,
+	\end{itemize}
+	\item As a vineyard owner, I can delete offerings from front page, in order to remove wine from offer.
+	\\Definition of done:
+	\begin{itemize}
+		\item there is a button to delete an offering,
+		\item deleting an offering requires confirmation,
 	\end{itemize}
 
-	\item As a vineyard owner, I can store, edit and delete information about end of technical inspection on equipment.
+
+	%===========================================================
+	% EQUIPMENT
+	%===========================================================
+	\item As a vineyard owner, I can store and edit information about equipment, in order to link it to batches, tasks etc.
 	\\Definition of done:
 	\begin{itemize}
-		\item ... remember, impersonal
+		\item there is a button to add a new piece of equipment,
+		\item there is a button to edit an existing piece of equipment next to each piece of equipment on the list,
+		\item the form for adding/editing a piece of equipment includes fields for the name and type selector,
+		\item there is option to note date of end of technical inspection,
+	\end{itemize}
+	\item As a vineyard owner, I can view information about equipment, in order to see what equipment I own.
+	\\Definition of done:
+	\begin{itemize}
+		\item there is a list of all equipment,
+		\item for each piece of equipment, the list shows its name, type and date of end of technical inspection (if noted),
+	\end{itemize}
+	\item As a vineyard owner, I can delete information about equipment, in order to remove data about equipment that is out of use.
+	\\Definition of done:
+	\begin{itemize}
+		\item there is a button to delete a piece of equipment,
+		\item deleting a piece of equipment requires confirmation,
+		\item the equipment should still be linked to the historical data, but it should be marked as "deleted" and not appear in the list of available equipment.
 	\end{itemize}
 	
+	%===========================================================
+	% ORGANIZATION
+	%===========================================================
 	\item As a vineyard owner, I can view information about the organization.
 	\\Definition of done:
 	\begin{itemize}
@@ -503,7 +600,6 @@ User stories are a collection of features described from the perspective of the 
 	\\Definition of done:
 	\begin{itemize}
 		\item every field of the organization information can be modified, including the name, address and contact information,
-		\item all changes are saved in the database and can be reviewed later.
 	\end{itemize}
 	
 	\item As a vineyard owner, I can remove the organization from the system, which will also remove all associated data, in order to ensure that organization data is not stored in the system if I no longer want to use the application.
@@ -514,25 +610,33 @@ User stories are a collection of features described from the perspective of the 
 		\item after successful deletion, the vineyard owner role is revoked, and the user is redirected to the home page.
 	\end{itemize}
 	
-	\item As a vineyard owner, I can view, add and delete vineyard fields from the organization along with the grape variety planted there, in order to keep the information about the vineyard up-to-date.
+	%===========================================================
+	% FIELDS
+	%===========================================================
+	\item As a vineyard owner, I can view information about fields from the organization along with the grape variety planted there, in order to see what type of grapes I grow.
 	\\Definition of done:
 	\begin{itemize}
-		\item new vineyard fields can be added,
-		\item when adding a new vineyard field, the user must provide information about the field's location, date of planting, area, and the grape varieties planted there,
-		\item vineyard fields can be deleted from the organization,
-		\item all changes are saved in the database and can be reviewed later.
+		\item there is a list of all fields from the organization,
+		\item for each field, the list shows its area and what grape variety is planted there,
 	\end{itemize}
-	
-	\item As a vineyard owner, I can view, add and delete winery equipment from organization, in order to keep the information about the winery equipment up-to-date.
+	\item As a vineyard owner, I can add and update information about vineyard fields from the organization along with the grape variety planted there, in order to keep the information about the vineyard up-to-date.
 	\\Definition of done:
 	\begin{itemize}
-		\item new winery equipment can be added such as fermentation tanks, barrels, and bottling machines,
-		\item when adding new winery equipment, the user must provide information about the equipment type, location, and capacity,
-		\item existing winery equipment can be deleted from the organization,
-		\item all changes are saved in the database and can be reviewed later.
+		\item there is a button to add a new field,
+		\item there is a button to edit an existing field next to each field on the list,
+		\item the form for adding/editing a field includes fields for the area and selector for grape variety,
+	\end{itemize}
+	\item As a vineyard owner, I can delete information about vineyard fields from the organization along with the grape variety planted there, in order to be able to remove fields that do not belong to me anymore.
+	\\Definition of done:
+	\begin{itemize}
+		\item there is a button to delete a field,
+		\item deleting a field requires confirmation,
 	\end{itemize}
 	
-	\item As a vineyard owner, I can add users to the organization, in order to allow them to access the system and contribute to the management of the vineyard.
+	%===========================================================
+	% USERS
+	%===========================================================
+	\item As a vineyard owner, I can add users to my organization, in order to allow them to access the system and contribute to the management of the vineyard.
 	\\Definition of done:
 	\begin{itemize}
 		\item the vineyard owner is able to enter the email address provided by the employee they want to add to the organization, 
@@ -542,13 +646,18 @@ User stories are a collection of features described from the perspective of the 
 		\item if there is no existing account, error message is displayed, prompting the vineyard owner to ask the employee to register first.
 	\end{itemize}
 	
-	\item As a vineyard owner, I can view, edit and delete users from organization, in order to manage the access to the system and ensure that only authorized personnel can access the vineyard data.
+	\item As a vineyard owner, I can view users in my organization, in order to manage the access to the system and ensure that only authorized personnel can access the vineyard data.
 	\\Definition of done:
 	\begin{itemize}
 		\item there is a list of all users in the organization,
 		\item users' information can be edited,
 		\item there is a button for removing users from the organization,
-		\item all changes are saved in the database and can be reviewed later.
+	\end{itemize}
+	\item As a vineyard owner, I can delete users from organization, in order to remove account of people who don't work for me anymore.
+	\\Definition of done:
+	\begin{itemize}
+		\item there is a button for removing users from the organization,
+		\item deleting a user requires confirmation,
 	\end{itemize}
 	
 	\item As a vineyard owner, I can assign and revoke roles to other users in the organization, in order to manage their permissions and access to different functionalities of the system.
@@ -557,9 +666,5 @@ User stories are a collection of features described from the perspective of the 
 		\item the roles can be assigned to users, such as vineyard worker or oenologist,
 		\item multiple roles can be assigned to a single user,
 		\item the roles can be revoked from users,
-		\item all changes are saved in the database and can be reviewed later.
 	\end{itemize}
-	
-	\todo[inline]{Czy ostatnia linia nie zalicza się przypadkiem to tych obvious wymagań co powinniśmy wywalić?}
-	
 \end{enumerate}
