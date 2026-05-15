@@ -4,9 +4,9 @@ CREATE TABLE IF NOT EXISTS "user" (
 	-- Enum { NONE, PENDING, MEMBER }
 	-- Invitation status sent by the Owner. Before sending: NONE, after sending: PENDING, after accepting: MEMBER, after rejecting: NONE.
 	"membershipStatus" VARCHAR(8) DEFAULT 'NONE',
-	-- User''''''''''''''''s name
+	-- User''''''''''''''''''''''''''''''''s name
 	"firstName" VARCHAR(128) NOT NULL,
-	-- User''''''''''''''''s surname
+	-- User''''''''''''''''''''''''''''''''s surname
 	"lastName" VARCHAR(128) NOT NULL,
 	-- First part of the address
 	"address_1" VARCHAR(255) NOT NULL,
@@ -23,8 +23,8 @@ CREATE TABLE IF NOT EXISTS "user" (
 
 COMMENT ON COLUMN "user"."membershipStatus" IS 'Enum { NONE, PENDING, MEMBER }
 Invitation status sent by the Owner. Before sending: NONE, after sending: PENDING, after accepting: MEMBER, after rejecting: NONE.';
-COMMENT ON COLUMN "user"."firstName" IS 'User''''''''''''''''''''''''''''''''s name';
-COMMENT ON COLUMN "user"."lastName" IS 'User''''''''''''''''''''''''''''''''s surname';
+COMMENT ON COLUMN "user"."firstName" IS 'User''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''s name';
+COMMENT ON COLUMN "user"."lastName" IS 'User''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''s surname';
 COMMENT ON COLUMN "user"."address_1" IS 'First part of the address';
 COMMENT ON COLUMN "user"."address_2" IS 'Second part of the address';
 COMMENT ON COLUMN "user"."bankAccountNumber" IS 'IBAN';
@@ -65,15 +65,20 @@ CREATE TABLE IF NOT EXISTS "task" (
 	"recordId" UUID,
 	"harvestId" UUID,
 	"startedAt" DATE,
-	"completedAt" DATE NOT NULL,
-	-- Additional user''''''''''''''''s notes
+	"completedAt" DATE,
+	-- Additional user''''''''''''''''''''''''''''''''s notes
 	"description" TEXT,
 	"due" DATE,
+	"blendedWineID" UUID,
+	"agedWineID" UUID,
+	"bottledWineID" UUID,
+	"fermentingMustsID" UUID,
+	"mustID" UUID,
 	PRIMARY KEY("id")
 );
 
 
-COMMENT ON COLUMN "task"."description" IS 'Additional user''''''''''''''''''''''''''''''''s notes';
+COMMENT ON COLUMN "task"."description" IS 'Additional user''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''s notes';
 
 
 CREATE TABLE IF NOT EXISTS "field" (
@@ -83,6 +88,8 @@ CREATE TABLE IF NOT EXISTS "field" (
 	"area" INTEGER,
 	PRIMARY KEY("id")
 );
+
+
 
 
 CREATE TABLE IF NOT EXISTS "spraying" (
@@ -97,6 +104,9 @@ CREATE TABLE IF NOT EXISTS "spraying" (
 	"due" DATE,
 	PRIMARY KEY("id")
 );
+
+
+
 
 CREATE TABLE IF NOT EXISTS "substance" (
 	"id" UUID NOT NULL,
@@ -385,6 +395,9 @@ CREATE TABLE IF NOT EXISTS "recordType" (
 	PRIMARY KEY("id")
 );
 
+
+
+
 CREATE TABLE IF NOT EXISTS "disease" (
 	"id" UUID NOT NULL,
 	"name" VARCHAR(255) NOT NULL,
@@ -523,4 +536,19 @@ ADD FOREIGN KEY("id") REFERENCES "record"("fermentingMustID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "must"
 ADD FOREIGN KEY("id") REFERENCES "record"("mustID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "blendedWine"
+ADD FOREIGN KEY("id") REFERENCES "task"("blendedWineID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "agedWine"
+ADD FOREIGN KEY("id") REFERENCES "task"("agedWineID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "bottledWine"
+ADD FOREIGN KEY("id") REFERENCES "task"("bottledWineID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "fermentingMust"
+ADD FOREIGN KEY("id") REFERENCES "task"("fermentingMustsID")
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "must"
+ADD FOREIGN KEY("id") REFERENCES "task"("mustID")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
