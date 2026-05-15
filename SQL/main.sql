@@ -239,6 +239,7 @@ CREATE TABLE IF NOT EXISTS "must" (
 	"organisationID" UUID NOT NULL,
 	"isSpoiled" BOOLEAN NOT NULL,
 	"name" VARCHAR(255),
+	"deleted" BOOLEAN NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -263,6 +264,7 @@ CREATE TABLE IF NOT EXISTS "fermentingMust" (
 	"quantity" INTEGER NOT NULL,
 	"idSpoiled" BOOLEAN NOT NULL,
 	"name" VARCHAR(255),
+	"deleted" BOOLEAN NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -315,6 +317,7 @@ CREATE TABLE IF NOT EXISTS "bottledWine" (
 	"toBeBottledID" UUID NOT NULL,
 	"quantity" INTEGER NOT NULL,
 	"productPhotoPath" VARCHAR(255),
+	"deleted" BOOLEAN NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -340,6 +343,7 @@ CREATE TABLE IF NOT EXISTS "agedWine" (
 	"quantity" INTEGER NOT NULL,
 	"isSpoiled" BOOLEAN NOT NULL,
 	"name" VARCHAR(255),
+	"deleted" BOOLEAN NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -363,6 +367,7 @@ CREATE TABLE IF NOT EXISTS "blendedWine" (
 	"quantity" INTEGER NOT NULL,
 	"isSpoiled" BOOLEAN NOT NULL,
 	"name" VARCHAR(255),
+	"deleted" BOOLEAN NOT NULL,
 	PRIMARY KEY("id")
 );
 
