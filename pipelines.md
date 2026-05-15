@@ -21,12 +21,7 @@
 - User musi od razu zmienić hasło z domyślnego
 
 ### Owner
-- Wysyła maila do admina
-- Następuje magiczne *potwierdzenie tożsamości*
-- Admin resetuje hasło na domyślne
-- Owner zmienia sobie hasło
-
-Domyślnym hasłem może być np pesel danego użytkownika, albo losowe hasło wysyłane ręcznie mailem.
+- Zmiana hasła
 
 ## Delete Account
 Utworzyć rekord z "DELETED_USER", przypisać do niego wszystkie jobs przy usuwaniu pracownika.
