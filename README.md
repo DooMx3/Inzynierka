@@ -54,5 +54,3 @@ job.startedAt, job.completedAt, job.harvestId, field.area, wine_batch.spoiled, j
 All reports are to be saved in reports table
 
 5. 
-
-### Administrator
