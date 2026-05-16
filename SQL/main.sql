@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS "field" (
 	"id" UUID NOT NULL,
 	"grapeTypeId" UUID NOT NULL,
 	"organisationId" UUID NOT NULL,
+	"active" BOOLEAN NOT NULL,
 	"area" INTEGER,
 	PRIMARY KEY("id")
 );
@@ -112,6 +113,7 @@ CREATE TABLE IF NOT EXISTS "substance" (
 	"id" UUID NOT NULL,
 	"name" VARCHAR(255) NOT NULL,
 	"organisationId" UUID NOT NULL,
+	"active" BOOLEAN NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -134,6 +136,7 @@ CREATE TABLE IF NOT EXISTS "equipment" (
 	"name" VARCHAR(255) NOT NULL,
 	"typeId" UUID NOT NULL,
 	"endOfTechnicalInspection" DATE,
+	"active" BOOLEAN NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -167,6 +170,7 @@ CREATE TABLE IF NOT EXISTS "organisation" (
 	"city" VARCHAR(255) NOT NULL,
 	"logoPath" VARCHAR(255),
 	"description" TEXT,
+	"active" BOOLEAN NOT NULL,
 	PRIMARY KEY("id")
 );
 
