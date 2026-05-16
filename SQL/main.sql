@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS "user" (
 	"phoneNumber" VARCHAR(16),
 	"passwordHash" VARCHAR(255) NOT NULL,
 	"email" VARCHAR(255) NOT NULL,
+	"active" BOOLEAN NOT NULL,
 	PRIMARY KEY("id")
 );
 
