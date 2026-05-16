@@ -89,7 +89,19 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
-		\hline
+		id & UUID NOT NULL & \\ \hline
+		organisationId & UUID & \\ \hline
+		membershipStatus & VARCHAR(8) [default: 'NONE', note: '''Enum { NONE, PENDING, MEMBER } & \\ \hline
+		Invitation & status sent by the Owner. Before sending: NONE, after sending: PENDING, after accepting: MEMBER, after rejecting: NONE.'''] & \\ \hline
+		firstName & VARCHAR(128) [not null, note: ] & \\ \hline
+		lastName & VARCHAR(128) [not null, note: ] & \\ \hline
+		address\_1 & VARCHAR(255) [not null, note: 'First part of the address'] & \\ \hline
+		address\_2 & VARCHAR(255) [not null, note: 'Second part of the address'] & \\ \hline
+		bankAccountNumber & VARCHAR(28) [not null, note: 'IBAN'] & \\ \hline
+		phoneNumber & VARCHAR(16) & \\ \hline
+		passwordHash & VARCHAR(255) NOT NULL & \\ \hline
+		email & VARCHAR(255) NOT NULL & \\ \hline
+		active & BOOLEAN [not null, default: true] & \\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -98,6 +110,12 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
+		\hline
+		id & UUID NOT NULL & primary key \\
+		\hline
+		name & VARCHAR(64) NOT NULL & name of the role \\
+		\hline
+		description & TEXT & optional description of the role \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -108,6 +126,42 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		\hline
 		Name & Type & Description  \\
 		\hline
+		id & UUID NOT NULL & primary key\\
+		\hline
+		taskTypeId & UUID NOT NULL & \\
+		\hline
+		organisationId & UUID NOT NULL & \\
+		\hline
+		userId & UUID NOT NULL & \\
+		\hline
+		equipmentId & UUID & \\
+		\hline
+		fieldId & UUID & \\
+		\hline
+		batchId & UUID & \\
+		\hline
+		recordId & UUID & \\
+		\hline
+		harvestId & UUID & \\
+		\hline
+		startedAt & DATE & \\
+		\hline
+		completedAt & DATE & \\
+		\hline
+		description & TEXT & \\
+		\hline
+		due & DATE & \\
+		\hline
+		blendedWineID & UUID & \\
+		\hline
+		agedWineID & UUID & \\
+		\hline
+		bottledWineID & UUID & \\
+		\hline
+		fermentingMustsID & UUID & \\
+		\hline
+		mustID & UUID & \\
+		\hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -116,6 +170,16 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
+		\hline
+		id & UUID NOT NULL & \\
+		\hline
+		grapeTypeId & UUID NOT NULL & \\
+		\hline
+		organisationId & UUID NOT NULL & \\
+		\hline
+		active & BOOLEAN NOT NULL DEFAULT TRUE & \\
+		\hline
+		area & INTEGER & \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -126,6 +190,24 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		\hline
 		Name & Type & Description  \\
 		\hline
+		id & UUID NOT NULL & \\
+		\hline
+		fieldId & UUID NOT NULL & \\
+		\hline
+		organisationId & UUID NOT NULL & \\
+		\hline
+		equipmentId & UUID NOT NULL & \\
+		\hline
+		sprayingDate & DATE NOT NULL & \\
+		\hline
+		substanceId & UUID NOT NULL & \\
+		\hline
+		quantity & INTEGER NOT NULL & \\
+		\hline
+		completedAt & DATE & \\
+		\hline
+		due & DATE & \\
+		\hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -134,6 +216,14 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
+		\hline
+		id & UUID NOT NULL & \\
+		\hline
+		name & VARCHAR(255) NOT NULL & \\
+		\hline
+		organisationId & UUID NOT NULL & \\
+		\hline
+		active & BOOLEAN [not null, default: true] & \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -144,6 +234,12 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		\hline
 		Name & Type & Description  \\
 		\hline
+		id UUID & NOT NULL & \\
+		\hline
+		name & VARCHAR(255) NOT NULL & \\
+		\hline
+		colorId & UUID NOT NULL & \\
+		\hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -152,6 +248,18 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
+		\hline
+		id & UUID NOT NULL & \\
+		\hline
+		organisationId & UUID NOT NULL & \\
+		\hline
+		name & VARCHAR(255) NOT NULL & \\
+		\hline
+		typeId & UUID NOT NULL & \\
+		\hline
+		endOfTechnicalInspection & DATE & \\
+		\hline
+		active & BOOLEAN [not null, default: true] & \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -170,6 +278,25 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
+		id & UUID NOT NULL & \\
+		\hline
+		name & VARCHAR(255) NOT NULL & \\
+		\hline
+		taxId & VARCHAR(20) & \\
+		\hline
+		street & VARCHAR(255) & \\
+		\hline
+		postalCode & VARCHAR(20) & \\
+		\hline
+		city & VARCHAR(255) NOT NULL & \\
+		\hline
+		logoPath & VARCHAR(255) & \\
+		\hline
+		motto & VARCHAR(512) & \\
+		\hline
+		active & BOOLEAN [not null, default: true] & \\
+		\hline
+		createdAt & TIMESTAMP [not null, default: `CURRENT\_TIMESTAMP`] & \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -179,6 +306,15 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
+		id & UUID NOT NULL & \\
+		\hline
+		fieldId & UUID NOT NULL & \\
+		\hline
+		organisationId & UUID NOT NULL & \\
+		\hline
+		date & DATE NOT NULL & \\
+		\hline
+		amount & INTEGER NOT NULL & \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -188,6 +324,13 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
+		id & UUID NOT NULL & \\
+		\hline
+		organisationId & UUID NOT NULL & \\
+		\hline
+		wineId & UUID NOT NULL & \\
+		\hline
+		price & INTEGER NOT NULL & \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -197,7 +340,8 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
-		\hline
+		id & UUID NOT NULL & \\ \hline
+		name & VARCHAR(255) NOT NULL & \\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -206,7 +350,8 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
-		\hline
+		id & UUID NOT NULL & \\ \hline
+		name & VARCHAR(255) & \\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -215,7 +360,8 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
-		\hline
+		id & UUID NOT NULL & \\ \hline
+		name & VARCHAR(255) NOT NULL & \\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -224,7 +370,13 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
-		\hline
+		id & UUID NOT NULL & \\ \hline
+		creationDate & DATE NOT NULL & \\ \hline
+		quantity & INTEGER NOT NULL & \\ \hline
+		organisationID & UUID NOT NULL & \\ \hline
+		isSpoiled & BOOLEAN NOT NULL & \\ \hline
+		name & VARCHAR(255) & \\ \hline
+		deleted & BOOLEAN NOT NULL & \\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -233,7 +385,13 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
-		\hline
+		id & UUID NOT NULL & \\ \hline
+		startDate & DATE NOT NULL & \\ \hline
+		endDate & DATE & \\ \hline
+		quantity & INTEGER NOT NULL & \\ \hline
+		idSpoiled & BOOLEAN NOT NULL & \\ \hline
+		name & VARCHAR(255) & \\ \hline
+		deleted & BOOLEAN NOT NULL & \\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -242,7 +400,16 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
-		\hline
+		id & UUID NOT NULL & \\ \hline
+		name & VARCHAR(255) NOT NULL & \\ \hline
+		energyContent & INTEGER NOT NULL & \\ \hline
+		fat & INTEGER NOT NULL & \\ \hline
+		saturatedFattyAcids & INTEGER NOT NULL & \\ \hline
+		carbs & INTEGER NOT NULL & \\ \hline
+		sugars & INTEGER NOT NULL & \\ \hline
+		protein & INTEGER NOT NULL & \\ \hline
+		salt & INTEGER NOT NULL & \\ \hline
+		fibers & INTEGER NOT NULL & \\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -251,7 +418,13 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
-		\hline
+		id & UUID NOT NULL & \\ \hline
+		name & VARCHAR(255) NOT NULL & \\ \hline
+		description & TEXT & \\ \hline
+		toBeBottledID & UUID NOT NULL & \\ \hline
+		quantity & INTEGER NOT NULL & \\ \hline
+		productPhotoPath & VARCHAR(255) & \\ \hline
+		deleted & BOOLEAN NOT NULL & \\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -260,7 +433,11 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
-		\hline
+		id & UUID NOT NULL & \\ \hline
+		fermentingMustID & UUID & \\ \hline
+		agedWineID & UUID & \\ \hline
+		blendedWineID & UUID & \\ \hline
+		quantity & INTEGER NOT NULL & \\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -269,7 +446,13 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
-		\hline
+		id & UUID NOT NULL & \\ \hline
+		startDate & DATE NOT NULL & \\ \hline
+		endDate & DATE & \\ \hline
+		quantity & INTEGER NOT NULL & \\ \hline
+		isSpoiled & BOOLEAN NOT NULL & \\ \hline
+		name & VARCHAR(255) & \\ \hline
+		deleted & BOOLEAN NOT NULL & \\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -278,7 +461,10 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
-		\hline
+		id & UUID NOT NULL & \\ \hline
+		fermentingMustID & UUID NOT NULL & \\ \hline
+		agedWIneID & UUID NOT NULL & \\ \hline
+		quantity & INTEGER NOT NULL & \\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -287,7 +473,12 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
-		\hline
+		id & UUID NOT NULL & \\ \hline
+		blendDate & DATE NOT NULL & \\ \hline
+		quantity & INTEGER NOT NULL & \\ \hline
+		isSpoiled & BOOLEAN NOT NULL & \\ \hline
+		name & VARCHAR(255) & \\ \hline
+		deleted & BOOLEAN NOT NULL & \\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -296,7 +487,11 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
-		\hline
+		id & UUID NOT NULL & \\ \hline
+		token & VARCHAR(255) NOT NULL & \\ \hline
+		userID & UUID NOT NULL & \\ \hline
+		createdAt & TIMESTAMP NOT NULL & \\ \hline
+		expiresAt & TIMESTAMP NOT NULL & \\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -305,7 +500,8 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
-		\hline
+		id & UUID NOT NULL & \\ \hline
+		type & VARCHAR(255) NOT NULL & \\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -315,6 +511,9 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
-		\hline
+		id & UUID NOT NULL & \\ \hline
+		name & VARCHAR(255) NOT NULL & \\ \hline
+		dateObserved & DATE NOT NULL & \\ \hline
+		fieldId & UUID NOT NULL & \\ \hline
 	\end{tabular}
 \end{table}
