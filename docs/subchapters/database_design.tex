@@ -81,24 +81,240 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	
 \subsubsection{Tables description}
 
-%\FloatBarrier
-%\begin{table}[th]
-%	\centering
-%	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
-%		\hline
-%		Name & Type & Description  \\
-%		\hline
-%	\end{tabular}
-%\FloatBarrier
-
 \FloatBarrier
 \begin{table}[th]
 	\centering
 	\caption{Description of table user}
+	\label{tab:first_table_description}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
 		\hline
 	\end{tabular}
-\FloatBarrier
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table role}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table task}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table field}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table spraying}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table substance}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table grape\_type}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table equipment}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table record}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table organisation}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table harvest}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table offering}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table equipment\_type}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table task\_type}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table grape\_color}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table must}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table fermentingMust}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table ingredients}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table bottledWine}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table toBeBottled}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table agedWine}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table agedWineFermentation}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table blendedWine}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table refreshTokens}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table recordType}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table disease}
+	\label{tab:last_table_describtion}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description  \\
+		\hline
+	\end{tabular}
 \end{table}
