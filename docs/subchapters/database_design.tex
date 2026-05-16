@@ -1,49 +1,49 @@
 \subsection{Database design}
-Database schema design was done using ERD diagram\cite{harrington2016relational}. Tables of this database are described in table\ref{tab:tables_description}. Columns of each table are described in detail in tables table\ref{tab:first_table_description} - table\ref{tab:last_table_describtion}.
+Database schema design was done using ERD diagram \cite{harrington2016relational}. Tables of this database are described in table \ref{tab:tables_description}. Columns of each table are described in detail in tables table \ref{tab:first_table_description} - table \ref{tab:last_table_describtion}.
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.85\textwidth]{pictures/db-diagram.png}
 	\caption{Database diagram}
 \end{figure}
 \subsubsection{Database tables}
-\begin{longtable}{|c|c|}
+\begin{longtable}{|m{0.30\textwidth}|m{0.60\textwidth}|}
 	\hline
 	Table name & Description \\
 	\hline
 	\endhead
 	user & \\
 	\hline
-	role & \\
+	user\_role & Join table for N-N relation\\
 	\hline
-	user\_role & \\
+	role & Table containing predefined set of roles\\
 	\hline
-	task & \\
+	task & Table containing tasks to do\\
 	\hline
-	field & \\
+	field & Table containing fields that have grapes planted on them\\
 	\hline
-	spraying & \\
+	spraying & Table containing information about spraying done on fields\\
 	\hline
-	substance & \\
+	substance & Table containing user defined list of chemicals that can be used to spray\\
 	\hline
-	grape\_type & \\
+	grape\_type & Table containing user defined list of grapes variety\\
 	\hline
-	equipment & \\
+	equipment & Table containing information about winary and vineyard equipment e.g. fermentors, barrels \\
 	\hline
 	record & \\
 	\hline
-	organisation & \\
+	organisation & Table containing information about organisations\\
 	\hline
-	harvest & \\
+	harvest & Tables containing amount of grapes, dates and on what field it was harvested\\
 	\hline
-	offering & \\
+	offering & \textcolor{red}{Table containing list of wines that are available to buy}\\
 	\hline
-	equipment\_type & \\
+	equipment\_type & Table containing predefined list of equipment typ e.g. fermentor, spraying machine\\
 	\hline
-	task\_type & \\
+	task\_type & \textcolor{red}{Table containing prefedifned task type list(different task types have different fields)}\\
 	\hline
-	grape\_color & \\
+	grape\_color & Table containing predefined list of grape colours(red, white)\\
 	\hline
-	field\_harvest & \\
+	field\_harvest & Join table for N-N relation\\
 	\hline
 	must & \\
 	\hline
@@ -73,7 +73,7 @@ Database schema design was done using ERD diagram\cite{harrington2016relational}
 	\hline
 	recordType & \\
 	\hline
-	disease & \\
+	disease & Table containing stored pests attacks, fungal infections etc.\\
 	\hline
 	\caption{Tables description}
 	\label{tab:tables_description}
