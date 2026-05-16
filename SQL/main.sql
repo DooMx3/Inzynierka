@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS "user" (
 	"phoneNumber" VARCHAR(16),
 	"passwordHash" VARCHAR(255) NOT NULL,
 	"email" VARCHAR(255) NOT NULL,
-	"active" BOOLEAN NOT NULL,
+    "active" BOOLEAN NOT NULL DEFAULT TRUE,
 	PRIMARY KEY("id")
 );
 
@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS "field" (
 	"id" UUID NOT NULL,
 	"grapeTypeId" UUID NOT NULL,
 	"organisationId" UUID NOT NULL,
-	"active" BOOLEAN NOT NULL,
+    "active" BOOLEAN NOT NULL DEFAULT TRUE,
 	"area" INTEGER,
 	PRIMARY KEY("id")
 );
@@ -114,7 +114,7 @@ CREATE TABLE IF NOT EXISTS "substance" (
 	"id" UUID NOT NULL,
 	"name" VARCHAR(255) NOT NULL,
 	"organisationId" UUID NOT NULL,
-	"active" BOOLEAN NOT NULL,
+    "active" BOOLEAN NOT NULL DEFAULT TRUE,
 	PRIMARY KEY("id")
 );
 
@@ -137,7 +137,7 @@ CREATE TABLE IF NOT EXISTS "equipment" (
 	"name" VARCHAR(255) NOT NULL,
 	"typeId" UUID NOT NULL,
 	"endOfTechnicalInspection" DATE,
-	"active" BOOLEAN NOT NULL,
+    "active" BOOLEAN NOT NULL DEFAULT TRUE,
 	PRIMARY KEY("id")
 );
 
@@ -164,15 +164,17 @@ CREATE TABLE IF NOT EXISTS "record" (
 
 
 CREATE TABLE IF NOT EXISTS "organisation" (
-	"id" UUID NOT NULL,
-	"name" VARCHAR(255) NOT NULL,
-	"address_1" VARCHAR(255) NOT NULL,
-	"address_2" VARCHAR(255) NOT NULL,
-	"city" VARCHAR(255) NOT NULL,
-	"logoPath" VARCHAR(255),
-	"description" TEXT,
-	"active" BOOLEAN NOT NULL,
-	PRIMARY KEY("id")
+    "id" UUID NOT NULL,
+    "name" VARCHAR(255) NOT NULL,
+    "taxId" VARCHAR(20),                 -- NIP
+    "street" VARCHAR(255),               -- Street name and number (nullable because the vinary might be located in a rural area without a specific street address)
+    "postalCode" VARCHAR(20),            
+    "city" VARCHAR(255) NOT NULL,        -- City / Town
+    "logoPath" VARCHAR(255),
+    "motto" VARCHAR(512),
+    "active" BOOLEAN NOT NULL DEFAULT TRUE,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY("id")
 );
 
 
