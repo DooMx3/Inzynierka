@@ -95,9 +95,6 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		Invitation & status sent by the Owner. Before sending: NONE, after sending: PENDING, after accepting: MEMBER, after rejecting: NONE.'''] & \\ \hline
 		firstName & VARCHAR(128) [not null, note: ] & \\ \hline
 		lastName & VARCHAR(128) [not null, note: ] & \\ \hline
-		address\_1 & VARCHAR(255) [not null, note: 'First part of the address'] & \\ \hline
-		address\_2 & VARCHAR(255) [not null, note: 'Second part of the address'] & \\ \hline
-		bankAccountNumber & VARCHAR(28) [not null, note: 'IBAN'] & \\ \hline
 		phoneNumber & VARCHAR(16) & \\ \hline
 		passwordHash & VARCHAR(255) NOT NULL & \\ \hline
 		email & VARCHAR(255) NOT NULL & \\ \hline

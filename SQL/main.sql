@@ -9,11 +9,6 @@ CREATE TABLE IF NOT EXISTS "user" (
 	-- User''''''''''''''''''''''''''''''''s surname
 	"lastName" VARCHAR(128) NOT NULL,
 	-- First part of the address
-	"address_1" VARCHAR(255) NOT NULL,
-	-- Second part of the address
-	"address_2" VARCHAR(255) NOT NULL,
-	-- IBAN
-	"bankAccountNumber" VARCHAR(28) NOT NULL,
 	"phoneNumber" VARCHAR(16),
 	"passwordHash" VARCHAR(255) NOT NULL,
 	"email" VARCHAR(255) NOT NULL,
