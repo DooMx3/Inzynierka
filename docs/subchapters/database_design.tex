@@ -11,7 +11,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	Table name & Description \\
 	\hline
 	\endhead
-	user & \\
+	user & A table containing information about users\\
 	\hline
 	user\_role & Join table for N-N relation\\
 	\hline
@@ -29,7 +29,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\hline
 	equipment & Table containing information about winary and vineyard equipment e.g. fermentors, barrels \\
 	\hline
-	record & \\
+	record & A table containing information about chemical parameter records\\
 	\hline
 	organisation & Table containing information about organisations\\
 	\hline
@@ -45,33 +45,33 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\hline
 	field\_harvest & Join table for N-N relation\\
 	\hline
-	must & \\
+	must & A table containing information about a batch of must\\
 	\hline
-	mustHarvests & \\
+	mustHarvests & Join table for N-N relation\\
 	\hline
-	fermentingMust & \\
+	fermentingMust & A table containing information about a batch of fermenting must\\
 	\hline
-	fermentationMusts & \\
+	fermentationMusts & Join table for N-N relation\\
 	\hline
-	ingredients & \\
+	ingredients & A table containing information about ingredients\\
 	\hline
-	fermentationIngredients & \\
+	fermentationIngredients & Join table for N-N relation\\
 	\hline
-	bottledWine & \\
+	bottledWine & A table containing information about a batch of  bottled wine\\
 	\hline
-	toBeBottled & \\
+	toBeBottled & Join table for N-N relation\\
 	\hline
-	agedWine & \\
+	agedWine & A table containing information about a batch of  aged wine\\
 	\hline
-	agedWineFermentation & \\
+	agedWineFermentation & Join table for N-N relation\\
 	\hline
-	blendedWine & \\
+	blendedWine & A table containing information about a batch of blended wine\\
 	\hline
-	blendedWineIngredients & \\
+	blendedWineIngredients & Join table for N-N relation\\
 	\hline
-	refreshTokens & \\
+	refreshTokens & Table containing refresh tokens\\
 	\hline
-	recordType & \\
+	recordType & A table containing information about record types\\
 	\hline
 	disease & Table containing stored pests attacks, fungal infections etc.\\
 	\hline
