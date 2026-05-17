@@ -59,7 +59,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\hline
 	bottledWine & A table containing information about a batch of  bottled wine\\
 	\hline
-	toBeBottled & Join table for N-N relation\\
+	toBeBottled & A table allowing for the use of different types of batches\\
 	\hline
 	agedWine & A table containing information about a batch of  aged wine\\
 	\hline
@@ -88,17 +88,17 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\label{tab:first_table_description}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
-		Name & Type & Description  \\
-		id & UUID NOT NULL & \\ \hline
-		organisationId & UUID & \\ \hline
-		membershipStatus & VARCHAR(8) [default: 'NONE', note: '''Enum { NONE, PENDING, MEMBER } & \\ \hline
-		Invitation & status sent by the Owner. Before sending: NONE, after sending: PENDING, after accepting: MEMBER, after rejecting: NONE.'''] & \\ \hline
-		firstName & VARCHAR(128) [not null, note: ] & \\ \hline
-		lastName & VARCHAR(128) [not null, note: ] & \\ \hline
-		phoneNumber & VARCHAR(16) & \\ \hline
-		passwordHash & VARCHAR(255) NOT NULL & \\ \hline
-		email & VARCHAR(255) NOT NULL & \\ \hline
-		active & BOOLEAN [not null, default: true] & \\ \hline
+		Name & Type & Description  \\ \hline
+		id & UUID NOT NULL & primary key\\ \hline
+		organisationId & UUID & the ID of the organisation to which the user belongs\\ \hline
+		membershipStatus & VARCHAR(8) [default: 'NONE', note: '''Enum { NONE, PENDING, MEMBER } & user status\\ \hline
+		Invitation & status sent by the Owner. Before sending: NONE, after sending: PENDING, after accepting: MEMBER, after rejecting: NONE.'''] & the invitation status of a particular user\\ \hline
+		firstName & VARCHAR(128) [not null, note: ] & user's first name\\ \hline
+		lastName & VARCHAR(128) [not null, note: ] & user's last name\\ \hline
+		phoneNumber & VARCHAR(16) & user's phone number\\ \hline
+		passwordHash & VARCHAR(255) NOT NULL & password hash\\ \hline
+		email & VARCHAR(255) NOT NULL & user's email\\ \hline
+		active & BOOLEAN [not null, default: true] & the activity status of a user's account\\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -231,11 +231,11 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		\hline
 		Name & Type & Description  \\
 		\hline
-		id UUID & NOT NULL & \\
+		id UUID & NOT NULL & primary key\\
 		\hline
-		name & VARCHAR(255) NOT NULL & \\
+		name & VARCHAR(255) NOT NULL & grape name\\
 		\hline
-		colorId & UUID NOT NULL & \\
+		colorId & UUID NOT NULL & grape colour id\\
 		\hline
 	\end{tabular}
 \end{table}
@@ -357,8 +357,8 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
-		id & UUID NOT NULL & \\ \hline
-		name & VARCHAR(255) NOT NULL & \\ \hline
+		id & UUID NOT NULL & primary key\\ \hline
+		name & VARCHAR(255) NOT NULL & the name of the grape colour\\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -366,14 +366,13 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\caption{Description of table must}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
-		Name & Type & Description  \\
-		id & UUID NOT NULL & \\ \hline
-		creationDate & DATE NOT NULL & \\ \hline
-		quantity & INTEGER NOT NULL & \\ \hline
-		organisationID & UUID NOT NULL & \\ \hline
-		isSpoiled & BOOLEAN NOT NULL & \\ \hline
-		name & VARCHAR(255) & \\ \hline
-		deleted & BOOLEAN NOT NULL & \\ \hline
+		Name & Type & Description  \\ \hline
+		id & UUID NOT NULL & primary key\\ \hline
+		quantity & INTEGER NOT NULL & quantity of a batch\\ \hline
+		organisationID & UUID NOT NULL & organistaion id\\ \hline
+		isSpoiled & BOOLEAN NOT NULL & a binary value indicating whether a batch is spoiled\\ \hline
+		name & VARCHAR(255) & batch name\\ \hline
+		deleted & BOOLEAN NOT NULL & a binary value indicating whether the batch has been deleted\\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -381,14 +380,12 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\caption{Description of table fermentingMust}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
-		Name & Type & Description  \\
-		id & UUID NOT NULL & \\ \hline
-		startDate & DATE NOT NULL & \\ \hline
-		endDate & DATE & \\ \hline
-		quantity & INTEGER NOT NULL & \\ \hline
-		idSpoiled & BOOLEAN NOT NULL & \\ \hline
-		name & VARCHAR(255) & \\ \hline
-		deleted & BOOLEAN NOT NULL & \\ \hline
+		Name & Type & Description  \\ \hline
+		id & UUID NOT NULL & primary key\\ \hline
+		quantity & INTEGER NOT NULL & quantity of a batch\\ \hline
+		idSpoiled & BOOLEAN NOT NULL & a binary value indicating whether a batch is spoiled\\ \hline
+		name & VARCHAR(255) & batch name\\ \hline
+		deleted & BOOLEAN NOT NULL & a binary value indicating whether the batch has been deleted\\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -397,16 +394,16 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
-		id & UUID NOT NULL & \\ \hline
-		name & VARCHAR(255) NOT NULL & \\ \hline
-		energyContent & INTEGER NOT NULL & \\ \hline
-		fat & INTEGER NOT NULL & \\ \hline
-		saturatedFattyAcids & INTEGER NOT NULL & \\ \hline
-		carbs & INTEGER NOT NULL & \\ \hline
-		sugars & INTEGER NOT NULL & \\ \hline
-		protein & INTEGER NOT NULL & \\ \hline
-		salt & INTEGER NOT NULL & \\ \hline
-		fibers & INTEGER NOT NULL & \\ \hline
+		id & UUID NOT NULL & primary key\\ \hline
+		name & VARCHAR(255) NOT NULL & ingredient name\\ \hline
+		energyContent & INTEGER NOT NULL & calorie content\\ \hline
+		fat & INTEGER NOT NULL & fat content\\ \hline
+		saturatedFattyAcids & INTEGER NOT NULL & saturated fat content\\ \hline
+		carbs & INTEGER NOT NULL & carbs content\\ \hline
+		sugars & INTEGER NOT NULL & sugars content\\ \hline
+		protein & INTEGER NOT NULL & protein content\\ \hline
+		salt & INTEGER NOT NULL & salt content\\ \hline
+		fibers & INTEGER NOT NULL & fibers content\\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -414,14 +411,14 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\caption{Description of table bottledWine}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
-		Name & Type & Description  \\
-		id & UUID NOT NULL & \\ \hline
-		name & VARCHAR(255) NOT NULL & \\ \hline
-		description & TEXT & \\ \hline
-		toBeBottledID & UUID NOT NULL & \\ \hline
-		quantity & INTEGER NOT NULL & \\ \hline
-		productPhotoPath & VARCHAR(255) & \\ \hline
-		deleted & BOOLEAN NOT NULL & \\ \hline
+		Name & Type & Description  \\ \hline
+		id & UUID NOT NULL & primary key\\ \hline
+		name & VARCHAR(255) NOT NULL & batch name\\ \hline
+		description & TEXT & description of the wine batch\\ \hline
+		toBeBottledID & UUID NOT NULL & bottled product ID\\ \hline
+		quantity & INTEGER NOT NULL & quantity of a batch\\ \hline
+		productPhotoPath & VARCHAR(255) & path to the photo of the bottle\\ \hline
+		deleted & BOOLEAN NOT NULL & a binary value indicating whether the batch has been deleted\\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -429,12 +426,12 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\caption{Description of table toBeBottled}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
-		Name & Type & Description  \\
-		id & UUID NOT NULL & \\ \hline
-		fermentingMustID & UUID & \\ \hline
-		agedWineID & UUID & \\ \hline
-		blendedWineID & UUID & \\ \hline
-		quantity & INTEGER NOT NULL & \\ \hline
+		Name & Type & Description  \\ \hline
+		id & UUID NOT NULL & primary key\\ \hline
+		fermentingMustID & UUID & optional batch ID after fermentation\\ \hline
+		agedWineID & UUID & optional ID for the aged batch\\ \hline
+		blendedWineID & UUID & optional blended batch ID\\ \hline
+		quantity & INTEGER NOT NULL & quantity of a batch\\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -442,14 +439,12 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\caption{Description of table agedWine}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
-		Name & Type & Description  \\
-		id & UUID NOT NULL & \\ \hline
-		startDate & DATE NOT NULL & \\ \hline
-		endDate & DATE & \\ \hline
-		quantity & INTEGER NOT NULL & \\ \hline
-		isSpoiled & BOOLEAN NOT NULL & \\ \hline
-		name & VARCHAR(255) & \\ \hline
-		deleted & BOOLEAN NOT NULL & \\ \hline
+		Name & Type & Description  \\ \hline
+		id & UUID NOT NULL & primary key\\ \hline
+		quantity & INTEGER NOT NULL & quantity of a batch\\ \hline
+		isSpoiled & BOOLEAN NOT NULL & a binary value indicating whether a batch is spoiled\\ \hline
+		name & VARCHAR(255) & batch name\\ \hline
+		deleted & BOOLEAN NOT NULL & a binary value indicating whether the batch has been deleted\\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -457,11 +452,11 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\caption{Description of table agedWineFermentation}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
-		Name & Type & Description  \\
-		id & UUID NOT NULL & \\ \hline
-		fermentingMustID & UUID NOT NULL & \\ \hline
-		agedWIneID & UUID NOT NULL & \\ \hline
-		quantity & INTEGER NOT NULL & \\ \hline
+		Name & Type & Description  \\ \hline
+		id & UUID NOT NULL & primary key\\ \hline
+		fermentingMustID & UUID NOT NULL & fermentation must batch ID\\ \hline
+		agedWIneID & UUID NOT NULL & aged wine batch ID\\ \hline
+		quantity & INTEGER NOT NULL & quantity of a batch\\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -469,13 +464,13 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\caption{Description of table blendedWine}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
-		Name & Type & Description  \\
-		id & UUID NOT NULL & \\ \hline
-		blendDate & DATE NOT NULL & \\ \hline
-		quantity & INTEGER NOT NULL & \\ \hline
-		isSpoiled & BOOLEAN NOT NULL & \\ \hline
-		name & VARCHAR(255) & \\ \hline
-		deleted & BOOLEAN NOT NULL & \\ \hline
+		Name & Type & Description  \\ \hline
+		id & UUID NOT NULL & primary key\\ \hline
+		quantity & INTEGER NOT NULL & quantity of a batch\\ \hline
+		organisationID & UUID NOT NULL & organistaion id\\ \hline
+		isSpoiled & BOOLEAN NOT NULL & a binary value indicating whether a batch is spoiled\\ \hline
+		name & VARCHAR(255) & batch name\\ \hline
+		deleted & BOOLEAN NOT NULL & a binary value indicating whether the batch has been deleted\\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -483,12 +478,12 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\caption{Description of table refreshTokens}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
-		Name & Type & Description  \\
-		id & UUID NOT NULL & \\ \hline
-		token & VARCHAR(255) NOT NULL & \\ \hline
-		userID & UUID NOT NULL & \\ \hline
-		createdAt & TIMESTAMP NOT NULL & \\ \hline
-		expiresAt & TIMESTAMP NOT NULL & \\ \hline
+		Name & Type & Description  \\ \hline
+		id & UUID NOT NULL & primary key\\ \hline
+		token & VARCHAR(255) NOT NULL & refresh token\\ \hline
+		userID & UUID NOT NULL & the user ID associated with this refresh token\\ \hline
+		createdAt & TIMESTAMP NOT NULL & creation timestamp\\ \hline
+		expiresAt & TIMESTAMP NOT NULL & expiration timestamp\\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -496,9 +491,9 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\caption{Description of table recordType}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
-		Name & Type & Description  \\
-		id & UUID NOT NULL & \\ \hline
-		type & VARCHAR(255) NOT NULL & \\ \hline
+		Name & Type & Description  \\ \hline
+		id & UUID NOT NULL & primary key\\ \hline
+		type & VARCHAR(255) NOT NULL & name of this type of record\\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -507,10 +502,107 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\label{tab:last_table_describtion}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
-		Name & Type & Description  \\
+		Name & Type & Description  \\ \hline
 		id & UUID NOT NULL & \\ \hline
 		name & VARCHAR(255) NOT NULL & \\ \hline
 		dateObserved & DATE NOT NULL & \\ \hline
 		fieldId & UUID NOT NULL & \\ \hline
+	\end{tabular}
+\end{table}
+\begin{table}[th]
+	\centering
+	\caption{Description of table user\_role}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description \\ \hline
+		id & UUID NOT NULL & \\ \hline
+		userId & UUID NOT NULL & \\ \hline
+		roleId & UUID NOT NULL & \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[th]
+	\centering
+	\caption{Description of table record}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description \\ \hline
+		id & UUID NOT NULL & primary key\\ \hline
+		organisationId & UUID NOT NULL & organistaion id\\ \hline
+		recordTypeId & UUID NOT NULL & record type id\\ \hline
+		sugarLevel & INTEGER & optional sugar level parameter\\ \hline
+		acidity & INTEGER & optional acidity level parameter\\ \hline
+		PH & INTEGER & optional PH level parameter\\ \hline
+		alcohol\_content & INTEGER & optional alcohol level parameter\\ \hline
+		blendedWineID & UUID & optional blended wine batch ID\\ \hline
+		agedWineID & UUID & optional aged wine batch ID\\ \hline
+		bottledWineID & UUID & optional bottled wine batch ID\\ \hline
+		fermentingMustID & UUID & optional fermenting must batch ID\\ \hline
+		mustID & UUID & optional must batch ID\\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[th]
+	\centering
+	\caption{Description of table field\_harvest}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description \\ \hline
+		id & UUID NOT NULL & \\ \hline
+		fieldId & UUID NOT NULL & \\ \hline
+		harvestId & UUID NOT NULL & \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[th]
+	\centering
+	\caption{Description of table mustHarvests}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description \\ \hline
+		id & UUID NOT NULL & primary key\\ \hline
+		harvestID & UUID NOT NULL & harvest id\\ \hline
+		mustID & UUID NOT NULL & must id\\ \hline
+		quantity & INTEGER NOT NULL & quantity of a batch\\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[th]
+	\centering
+	\caption{Description of table fermentationMusts}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description \\ \hline
+		id & UUID NOT NULL & primary key\\ \hline
+		mustID & UUID NOT NULL & must id\\ \hline
+		fermentationMustID & UUID NOT NULL & fermentation must id\\ \hline
+		quantity & INTEGER NOT NULL & quantity of a batch\\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[th]
+	\centering
+	\caption{Description of table fermentationIngredients}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description \\ \hline
+		id & UUID NOT NULL & primary key\\ \hline
+		ingredientsID & UUID NOT NULL & ingredient id\\ \hline
+		fermentingMustID & UUID NOT NULL & fermenting must id\\ \hline
+		quantity & INTEGER NOT NULL & quantity of added ingredient\\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[th]
+	\centering
+	\caption{Description of table blendedWineIngredients}
+	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
+		\hline
+		Name & Type & Description \\ \hline
+		id & UUID NOT NULL & primary key\\ \hline
+		fermentingMustID & UUID & optional fermenting must batch id\\ \hline
+		agedWineID & UUID & optional aged wine batch id\\ \hline
+		blendedWineID & UUID & optional blended wine batch id\\ \hline
+		quantity & INTEGER NOT NULL & quantity of a batch\\ \hline
 	\end{tabular}
 \end{table}
