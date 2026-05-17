@@ -21,9 +21,6 @@ COMMENT ON COLUMN "user"."membershipStatus" IS 'Enum { NONE, PENDING, MEMBER }
 Invitation status sent by the Owner. Before sending: NONE, after sending: PENDING, after accepting: MEMBER, after rejecting: NONE.';
 COMMENT ON COLUMN "user"."firstName" IS 'User''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''s name';
 COMMENT ON COLUMN "user"."lastName" IS 'User''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''s surname';
-COMMENT ON COLUMN "user"."address_1" IS 'First part of the address';
-COMMENT ON COLUMN "user"."address_2" IS 'Second part of the address';
-COMMENT ON COLUMN "user"."bankAccountNumber" IS 'IBAN';
 
 
 CREATE TABLE IF NOT EXISTS "role" (
