@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS "task" (
 	"startedAt" DATE,
 	"completedAt" DATE,
 	-- Additional user''''''''''''''''''''''''''''''''s notes
-	"description" TEXT,
+	"description" TEXT NOT NULL,
 	"due" DATE,
 	"blendedWineID" UUID,
 	"agedWineID" UUID,
