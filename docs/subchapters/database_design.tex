@@ -124,41 +124,41 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		\hline
 		Name & Type & Description  \\
 		\hline
-		id & UUID NOT NULL & primary key\\
+		id & UUID NOT NULL & primary key \\
 		\hline
-		taskTypeId & UUID NOT NULL & \\
+		taskTypeId & UUID NOT NULL & task type \\
 		\hline
-		organisationId & UUID NOT NULL & \\
+		organisationId & UUID NOT NULL & organisation related to task \\
 		\hline
-		userId & UUID NOT NULL & \\
+		userId & UUID NOT NULL & user related to task \\
 		\hline
-		equipmentId & UUID & \\
+		equipmentId & UUID & equiment related to task \\
 		\hline
-		fieldId & UUID & \\
+		fieldId & UUID & field related to task \\
 		\hline
-		batchId & UUID & \\
+		batchId & UUID & batch related to task \\
 		\hline
-		recordId & UUID & \\
+		recordId & UUID & record related to task \\
 		\hline
-		harvestId & UUID & \\
+		harvestId & UUID & harvest related to task \\
 		\hline
-		startedAt & DATE & \\
+		startedAt & DATE & when task started \\
 		\hline
-		completedAt & DATE & \\
+		completedAt & DATE & when task was completed \\
 		\hline
-		description & TEXT & \\
+		description & TEXT & text description of what has to be done \\
 		\hline
-		due & DATE & \\
+		due & DATE & date to which task should be done \\
 		\hline
-		blendedWineID & UUID & \\
+		blendedWineID & UUID & blendedWine related to task \\
 		\hline
-		agedWineID & UUID & \\
+		agedWineID & UUID & agedWine related to task \\
 		\hline
-		bottledWineID & UUID & \\
+		bottledWineID & UUID & bottledWine related to task \\
 		\hline
-		fermentingMustsID & UUID & \\
+		fermentingMustsID & UUID & fermetingMust related to task \\
 		\hline
-		mustID & UUID & \\
+		mustID & UUID & must related to task \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -169,15 +169,15 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		\hline
 		Name & Type & Description  \\
 		\hline
-		id & UUID NOT NULL & \\
+		id & UUID NOT NULL & primary key \\
 		\hline
-		grapeTypeId & UUID NOT NULL & \\
+		grapeTypeId & UUID NOT NULL & grape type \\
 		\hline
-		organisationId & UUID NOT NULL & \\
+		organisationId & UUID NOT NULL & organisation related to field \\
 		\hline
-		active & BOOLEAN NOT NULL DEFAULT TRUE & \\
+		active & BOOLEAN NOT NULL DEFAULT TRUE & activity status \\
 		\hline
-		area & INTEGER & \\
+		area & INTEGER & size in ar\\
 		\hline
 	\end{tabular}
 \end{table}
@@ -188,23 +188,23 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		\hline
 		Name & Type & Description  \\
 		\hline
-		id & UUID NOT NULL & \\
+		id & UUID NOT NULL & primary key \\
 		\hline
-		fieldId & UUID NOT NULL & \\
+		fieldId & UUID NOT NULL & field related to spraying \\
 		\hline
-		organisationId & UUID NOT NULL & \\
+		organisationId & UUID NOT NULL & organisation related to spraying \\
 		\hline
-		equipmentId & UUID NOT NULL & \\
+		equipmentId & UUID NOT NULL & equipment related to spraying \\
 		\hline
-		sprayingDate & DATE NOT NULL & \\
+		sprayingDate & DATE NOT NULL & date of spraying \\
 		\hline
-		substanceId & UUID NOT NULL & \\
+		substanceId & UUID NOT NULL & substance used \\
 		\hline
-		quantity & INTEGER NOT NULL & \\
+		quantity & INTEGER NOT NULL & amount used in L \\
 		\hline
 		completedAt & DATE & \\
 		\hline
-		due & DATE & \\
+		due & DATE & date to when spraying should be done \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -215,13 +215,13 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		\hline
 		Name & Type & Description  \\
 		\hline
-		id & UUID NOT NULL & \\
+		id & UUID NOT NULL & primary key \\
 		\hline
-		name & VARCHAR(255) NOT NULL & \\
+		name & VARCHAR(255) NOT NULL & name of substance \\
 		\hline
-		organisationId & UUID NOT NULL & \\
+		organisationId & UUID NOT NULL & organisation related to substance\\
 		\hline
-		active & BOOLEAN [not null, default: true] & \\
+		active & BOOLEAN NOT NULL & activity status\\
 		\hline
 	\end{tabular}
 \end{table}
@@ -247,17 +247,17 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		\hline
 		Name & Type & Description  \\
 		\hline
-		id & UUID NOT NULL & \\
+		id & UUID NOT NULL & primary key \\
 		\hline
-		organisationId & UUID NOT NULL & \\
+		organisationId & UUID NOT NULL & organisation related to equipment \\
 		\hline
-		name & VARCHAR(255) NOT NULL & \\
+		name & VARCHAR(255) NOT NULL & name of equipment \\
 		\hline
-		typeId & UUID NOT NULL & \\
+		typeId & UUID NOT NULL & equipment type \\
 		\hline
-		endOfTechnicalInspection & DATE & \\
+		endOfTechnicalInspection & DATE & date of end of techincal inspection(if aplicable)\\
 		\hline
-		active & BOOLEAN [not null, default: true] & \\
+		active & BOOLEAN NOT NULL & activity status \\
 		\hline
 	\end{tabular}
 \end{table}
