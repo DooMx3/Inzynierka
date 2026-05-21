@@ -262,6 +262,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
+		\hline
 		id & UUID NOT NULL & primary key \\
 		\hline
 		name & VARCHAR(255) NOT NULL & name of organisation \\
@@ -290,6 +291,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
+		\hline
 		id & UUID NOT NULL & primary key \\
 		\hline
 		fieldId & UUID NOT NULL & field related to harvest \\
@@ -308,6 +310,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description \\
+		\hline
 		id & UUID NOT NULL & primary key \\
 		\hline
 		organisationId & UUID NOT NULL & organisation related to offering \\
@@ -324,6 +327,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
+		\hline
 		id & UUID NOT NULL & primary key \\ \hline
 		name & VARCHAR(255) NOT NULL & name of type \\ \hline
 	\end{tabular}
@@ -334,6 +338,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
+		\hline
 		id & UUID NOT NULL & primary key \\ \hline
 		name & VARCHAR(255) & name of type \\ \hline
 	\end{tabular}
@@ -344,6 +349,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
+		\hline
 		id & UUID NOT NULL & primary key\\ \hline
 		name & VARCHAR(255) NOT NULL & the name of the grape colour\\ \hline
 	\end{tabular}
@@ -381,6 +387,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
+		\hline
 		id & UUID NOT NULL & primary key\\ \hline
 		name & VARCHAR(255) NOT NULL & ingredient name\\ \hline
 		energyContent & INTEGER NOT NULL & calorie content\\ \hline
