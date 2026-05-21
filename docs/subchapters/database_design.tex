@@ -263,38 +263,29 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 \end{table}
 \begin{table}[th]
 	\centering
-	\caption{Description of table record}
-	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
-		\hline
-		Name & Type & Description  \\
-		\hline
-	\end{tabular}
-\end{table}
-\begin{table}[th]
-	\centering
 	\caption{Description of table organisation}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
-		id & UUID NOT NULL & \\
+		id & UUID NOT NULL & primary key \\
 		\hline
-		name & VARCHAR(255) NOT NULL & \\
+		name & VARCHAR(255) NOT NULL & name of organisation \\
 		\hline
-		taxId & VARCHAR(20) & \\
+		taxId & VARCHAR(20) & tax identification number \\
 		\hline
-		street & VARCHAR(255) & \\
+		street & VARCHAR(255) & Street and number\\
 		\hline
-		postalCode & VARCHAR(20) & \\
+		postalCode & VARCHAR(20) & postal code \\
 		\hline
-		city & VARCHAR(255) NOT NULL & \\
+		city & VARCHAR(255) NOT NULL & city name\\
 		\hline
-		logoPath & VARCHAR(255) & \\
+		logoPath & VARCHAR(255) & address of logo image \\
 		\hline
-		motto & VARCHAR(512) & \\
+		motto & VARCHAR(512) & short text displayed on portfolio page \\
 		\hline
-		active & BOOLEAN [not null, default: true] & \\
+		active & BOOLEAN NOT NULL & activity status \\
 		\hline
-		createdAt & TIMESTAMP [not null, default: `CURRENT\_TIMESTAMP`] & \\
+		createdAt & TIMESTAMP NOT NULL & when organisation was created \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -304,15 +295,15 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
-		id & UUID NOT NULL & \\
+		id & UUID NOT NULL & primary key \\
 		\hline
-		fieldId & UUID NOT NULL & \\
+		fieldId & UUID NOT NULL & field related to harvest \\
 		\hline
-		organisationId & UUID NOT NULL & \\
+		organisationId & UUID NOT NULL & organisation related to harvest \\
 		\hline
-		date & DATE NOT NULL & \\
+		date & DATE NOT NULL & date of harvest \\
 		\hline
-		amount & INTEGER NOT NULL & \\
+		amount & INTEGER NOT NULL & how much in kg was harvasted \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -321,14 +312,14 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\caption{Description of table offering}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
-		Name & Type & Description  \\
-		id & UUID NOT NULL & \\
+		Name & Type & Description \\
+		id & UUID NOT NULL & primary key \\
 		\hline
-		organisationId & UUID NOT NULL & \\
+		organisationId & UUID NOT NULL & organisation related to offering \\
 		\hline
-		wineId & UUID NOT NULL & \\
+		wineId & UUID NOT NULL & wine put on offering \\
 		\hline
-		price & INTEGER NOT NULL & \\
+		price & INTEGER NOT NULL & price of that wine \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -338,8 +329,8 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
-		id & UUID NOT NULL & \\ \hline
-		name & VARCHAR(255) NOT NULL & \\ \hline
+		id & UUID NOT NULL & primary key \\ \hline
+		name & VARCHAR(255) NOT NULL & name of type \\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -348,8 +339,8 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
-		id & UUID NOT NULL & \\ \hline
-		name & VARCHAR(255) & \\ \hline
+		id & UUID NOT NULL & primary key \\ \hline
+		name & VARCHAR(255) & name of type \\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -504,21 +495,10 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\ \hline
-		id & UUID NOT NULL & \\ \hline
-		name & VARCHAR(255) NOT NULL & \\ \hline
-		dateObserved & DATE NOT NULL & \\ \hline
-		fieldId & UUID NOT NULL & \\ \hline
-	\end{tabular}
-\end{table}
-\begin{table}[th]
-	\centering
-	\caption{Description of table user\_role}
-	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
-		\hline
-		Name & Type & Description \\ \hline
-		id & UUID NOT NULL & \\ \hline
-		userId & UUID NOT NULL & \\ \hline
-		roleId & UUID NOT NULL & \\ \hline
+		id & UUID NOT NULL & primary key \\ \hline
+		name & VARCHAR(255) NOT NULL name of disease & \\ \hline
+		dateObserved & DATE NOT NULL & when it was observerd \\ \hline
+		fieldId & UUID NOT NULL & field related to observation \\ \hline
 	\end{tabular}
 \end{table}
 
@@ -540,18 +520,6 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		bottledWineID & UUID & optional bottled wine batch ID\\ \hline
 		fermentingMustID & UUID & optional fermenting must batch ID\\ \hline
 		mustID & UUID & optional must batch ID\\ \hline
-	\end{tabular}
-\end{table}
-
-\begin{table}[th]
-	\centering
-	\caption{Description of table field\_harvest}
-	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
-		\hline
-		Name & Type & Description \\ \hline
-		id & UUID NOT NULL & \\ \hline
-		fieldId & UUID NOT NULL & \\ \hline
-		harvestId & UUID NOT NULL & \\ \hline
 	\end{tabular}
 \end{table}
 
