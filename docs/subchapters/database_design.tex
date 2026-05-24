@@ -60,31 +60,31 @@
 	\hline
 	must & A table containing information about a batch of must\\
 	\hline
-	mustHarvests & Join table for N-N relation\\
+	must\_harvest & Join table for N-N relation\\
 	\hline
-	fermentingMust & A table containing information about a batch of fermenting must\\
+	fermenting\_must & A table containing information about a batch of fermenting must\\
 	\hline
-	fermentationMusts & Join table for N-N relation\\
+	fermentation\_must & Join table for N-N relation\\
 	\hline
-	ingredients & A table containing information about ingredients\\
+	ingredient & A table containing information about ingredients\\
 	\hline
-	fermentationIngredients & Join table for N-N relation\\
+	fermentation\_ingredient & Join table for N-N relation\\
 	\hline
-	bottledWine & A table containing information about a batch of  bottled wine\\
+	bottled\_wine & A table containing information about a batch of  bottled wine\\
 	\hline
-	toBeBottled & A table allowing for the use of different types of batches\\
+	to\_be\_bottled & A table allowing for the use of different types of batches\\
 	\hline
-	agedWine & A table containing information about a batch of  aged wine\\
+	aged\_wine & A table containing information about a batch of  aged wine\\
 	\hline
-	agedWineFermentation & Join table for N-N relation\\
+	aged\_wine\_fermentation & Join table for N-N relation\\
 	\hline
-	blendedWine & A table containing information about a batch of blended wine\\
+	blended\_wine & A table containing information about a batch of blended wine\\
 	\hline
-	blendedWineIngredients & Join table for N-N relation\\
+	blended\_wine\_ingredient & Join table for N-N relation\\
 	\hline
-	refreshTokens & Table containing refresh tokens\\
+	refresh\_token & Table containing refresh tokens\\
 	\hline
-	recordType & A table containing information about record types\\
+	record\_type & A table containing information about record types\\
 	\hline
 	disease & Table containing stored pests attacks, fungal infections etc.\\
 	\hline
@@ -382,7 +382,7 @@
 \end{table}
 \begin{table}[th]
 	\centering
-	\caption{Description of table fermentingMust}
+	\caption{Description of table fermenting\_must}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\ \hline
@@ -395,7 +395,7 @@
 \end{table}
 \begin{table}[th]
 	\centering
-	\caption{Description of table ingredients}
+	\caption{Description of table ingredient}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\
@@ -414,7 +414,7 @@
 \end{table}
 \begin{table}[th]
 	\centering
-	\caption{Description of table bottledWine}
+	\caption{Description of table bottled\_wine}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\ \hline
@@ -429,7 +429,7 @@
 \end{table}
 \begin{table}[th]
 	\centering
-	\caption{Description of table toBeBottled}
+	\caption{Description of table to\_be\_bottled}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\ \hline
@@ -442,7 +442,7 @@
 \end{table}
 \begin{table}[th]
 	\centering
-	\caption{Description of table agedWine}
+	\caption{Description of table aged\_wine}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\ \hline
@@ -455,7 +455,7 @@
 \end{table}
 \begin{table}[th]
 	\centering
-	\caption{Description of table agedWineFermentation}
+	\caption{Description of table aged\_wine\_fermentation}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\ \hline
@@ -467,7 +467,7 @@
 \end{table}
 \begin{table}[th]
 	\centering
-	\caption{Description of table blendedWine}
+	\caption{Description of table blended\_wine}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\ \hline
@@ -481,7 +481,7 @@
 \end{table}
 \begin{table}[th]
 	\centering
-	\caption{Description of table refreshTokens}
+	\caption{Description of table refresh\_token}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\ \hline
@@ -494,7 +494,7 @@
 \end{table}
 \begin{table}[th]
 	\centering
-	\caption{Description of table recordType}
+	\caption{Description of table record\_type}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description  \\ \hline
@@ -538,7 +538,7 @@
 
 \begin{table}[th]
 	\centering
-	\caption{Description of table mustHarvests}
+	\caption{Description of table must\_harvest}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description \\ \hline
@@ -551,7 +551,7 @@
 
 \begin{table}[th]
 	\centering
-	\caption{Description of table fermentationMusts}
+	\caption{Description of table fermentation\_must}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description \\ \hline
@@ -564,7 +564,7 @@
 
 \begin{table}[th]
 	\centering
-	\caption{Description of table fermentationIngredients}
+	\caption{Description of table fermentation\_ingredient}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
 		Name & Type & Description \\ \hline
@@ -577,7 +577,7 @@
 
 \begin{table}[th]
 	\centering
-	\caption{Description of table blendedWineIngredients}
+	\caption{Description of table blended\_wine\_ingredient}
 	\label{tab:last_table_describtion}
 	\begin{tabular}{|m{0.30\textwidth}|m{0.30\textwidth}|m{0.30\textwidth}|}
 		\hline
