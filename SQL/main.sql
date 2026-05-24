@@ -173,7 +173,6 @@ CREATE TABLE IF NOT EXISTS "organisation" (
 
 CREATE TABLE IF NOT EXISTS "harvest" (
 	"id" UUID NOT NULL,
-	"fieldId" UUID NOT NULL,
 	"organisationId" UUID NOT NULL,
 	"date" DATE NOT NULL,
 	"amount" INTEGER NOT NULL,
@@ -457,9 +456,6 @@ ADD FOREIGN KEY("fieldId") REFERENCES "field"("id")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "harvest"
 ADD FOREIGN KEY("organisationId") REFERENCES "organisation"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "harvest"
-ADD FOREIGN KEY("fieldId") REFERENCES "field"("id")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "field_harvest"
 ADD FOREIGN KEY("fieldId") REFERENCES "field"("id")
