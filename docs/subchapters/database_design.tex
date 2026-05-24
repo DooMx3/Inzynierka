@@ -97,14 +97,14 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		Name & Type & Description  \\ \hline
 		id & UUID NOT NULL & primary key\\ \hline
 		organisationId & UUID & the ID of the organisation to which the user belongs\\ \hline
-		membershipStatus & VARCHAR(8) [default: 'NONE', note: '''Enum { NONE, PENDING, MEMBER } & user status\\ \hline
-		Invitation & status sent by the Owner. Before sending: NONE, after sending: PENDING, after accepting: MEMBER, after rejecting: NONE.'''] & the invitation status of a particular user\\ \hline
-		firstName & VARCHAR(128) [not null, note: ] & user's first name\\ \hline
-		lastName & VARCHAR(128) [not null, note: ] & user's last name\\ \hline
+		membershipStatus & VARCHAR(8) Enum(NONE,\newline PENDING, MEMBER) & user status\\ \hline
+		Invitation & VARCHAR(8) Enum(PENDING, \newline ACCEPTED, NONE) & the invitation status of a particular user\\ \hline
+		firstName & VARCHAR(128)\newline NOT NULL & user's first name\\ \hline
+		lastName & VARCHAR(128)\newline NOT NULL & user's last name\\ \hline
 		phoneNumber & VARCHAR(16) & user's phone number\\ \hline
-		passwordHash & VARCHAR(255) NOT NULL & password hash\\ \hline
-		email & VARCHAR(255) NOT NULL & user's email\\ \hline
-		active & BOOLEAN [not null, default: true] & the activity status of a user's account\\ \hline
+		passwordHash & VARCHAR(255)\newline NOT NULL & password hash\\ \hline
+		email & VARCHAR(255)\newline NOT NULL & user's email\\ \hline
+		active & BOOLEAN NOT NULL & the activity status of a user's account\\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -116,7 +116,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		\hline
 		id & UUID NOT NULL & primary key \\
 		\hline
-		name & VARCHAR(64) NOT NULL & name of the role \\
+		name & VARCHAR(64)\newline NOT NULL & name of the role \\
 		\hline
 		description & TEXT & optional description of the role \\
 		\hline
@@ -180,7 +180,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		\hline
 		organisationId & UUID NOT NULL & organisation related to field \\
 		\hline
-		active & BOOLEAN NOT NULL DEFAULT TRUE & activity status \\
+		active & BOOLEAN NOT NULL & activity status \\
 		\hline
 		area & INTEGER & size in ar\\
 		\hline
@@ -222,7 +222,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		\hline
 		id & UUID NOT NULL & primary key \\
 		\hline
-		name & VARCHAR(255) NOT NULL & name of substance \\
+		name & VARCHAR(255)\newline NOT NULL & name of substance \\
 		\hline
 		organisationId & UUID NOT NULL & organisation related to substance\\
 		\hline
@@ -239,7 +239,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		\hline
 		id UUID & NOT NULL & primary key\\
 		\hline
-		name & VARCHAR(255) NOT NULL & grape name\\
+		name & VARCHAR(255)\newline NOT NULL & grape name\\
 		\hline
 		colorId & UUID NOT NULL & grape colour id\\
 		\hline
@@ -256,7 +256,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		\hline
 		organisationId & UUID NOT NULL & organisation related to equipment \\
 		\hline
-		name & VARCHAR(255) NOT NULL & name of equipment \\
+		name & VARCHAR(255)\newline NOT NULL & name of equipment \\
 		\hline
 		typeId & UUID NOT NULL & equipment type \\
 		\hline
@@ -275,7 +275,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		\hline
 		id & UUID NOT NULL & primary key \\
 		\hline
-		name & VARCHAR(255) NOT NULL & name of organisation \\
+		name & VARCHAR(255)\newline NOT NULL & name of organisation \\
 		\hline
 		taxId & VARCHAR(20) & tax identification number \\
 		\hline
@@ -283,7 +283,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		\hline
 		postalCode & VARCHAR(20) & postal code \\
 		\hline
-		city & VARCHAR(255) NOT NULL & city name\\
+		city & VARCHAR(255)\newline NOT NULL & city name\\
 		\hline
 		logoPath & VARCHAR(255) & address of logo image \\
 		\hline
@@ -291,7 +291,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		\hline
 		active & BOOLEAN NOT NULL & activity status \\
 		\hline
-		createdAt & TIMESTAMP NOT NULL & when organisation was created \\
+		createdAt & TIMESTAMP\newline NOT NULL & when organisation was created \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -339,7 +339,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		Name & Type & Description  \\
 		\hline
 		id & UUID NOT NULL & primary key \\ \hline
-		name & VARCHAR(255) NOT NULL & name of type \\ \hline
+		name & VARCHAR(255)\newline NOT NULL & name of type \\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -361,7 +361,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		Name & Type & Description  \\
 		\hline
 		id & UUID NOT NULL & primary key\\ \hline
-		name & VARCHAR(255) NOT NULL & the name of the grape colour\\ \hline
+		name & VARCHAR(255)\newline NOT NULL & the name of the grape colour\\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -399,7 +399,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		Name & Type & Description  \\
 		\hline
 		id & UUID NOT NULL & primary key\\ \hline
-		name & VARCHAR(255) NOT NULL & ingredient name\\ \hline
+		name & VARCHAR(255)\newline NOT NULL & ingredient name\\ \hline
 		energyContent & INTEGER NOT NULL & calorie content\\ \hline
 		fat & INTEGER NOT NULL & fat content\\ \hline
 		saturatedFattyAcids & INTEGER NOT NULL & saturated fat content\\ \hline
@@ -417,7 +417,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		\hline
 		Name & Type & Description  \\ \hline
 		id & UUID NOT NULL & primary key\\ \hline
-		name & VARCHAR(255) NOT NULL & batch name\\ \hline
+		name & VARCHAR(255)\newline NOT NULL & batch name\\ \hline
 		description & TEXT & description of the wine batch\\ \hline
 		toBeBottledID & UUID NOT NULL & bottled product ID\\ \hline
 		quantity & INTEGER NOT NULL & quantity of a batch\\ \hline
@@ -484,7 +484,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		\hline
 		Name & Type & Description  \\ \hline
 		id & UUID NOT NULL & primary key\\ \hline
-		token & VARCHAR(255) NOT NULL & refresh token\\ \hline
+		token & VARCHAR(255)\newline NOT NULL & refresh token\\ \hline
 		userID & UUID NOT NULL & the user ID associated with this refresh token\\ \hline
 		createdAt & TIMESTAMP NOT NULL & creation timestamp\\ \hline
 		expiresAt & TIMESTAMP NOT NULL & expiration timestamp\\ \hline
@@ -497,7 +497,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		\hline
 		Name & Type & Description  \\ \hline
 		id & UUID NOT NULL & primary key\\ \hline
-		type & VARCHAR(255) NOT NULL & name of this type of record\\ \hline
+		type & VARCHAR(255)\newline NOT NULL & name of this type of record\\ \hline
 	\end{tabular}
 \end{table}
 \begin{table}[th]
@@ -507,7 +507,7 @@ Database schema design was done using ERD diagram \cite{harrington2016relational
 		\hline
 		Name & Type & Description  \\ \hline
 		id & UUID NOT NULL & primary key \\ \hline
-		name & VARCHAR(255) NOT NULL name of disease & \\ \hline
+		name & VARCHAR(255) & NOT NULL name of disease \\ \hline
 		dateObserved & DATE NOT NULL & when it was observed \\ \hline
 		fieldId & UUID NOT NULL & field related to observation \\ \hline
 	\end{tabular}
