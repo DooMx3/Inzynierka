@@ -157,15 +157,15 @@
 		\hline
 		due & DATE & date to which task should be done \\
 		\hline
-		blendedWineID & UUID & blendedWine related to task \\
+		blendedWineId & UUID & blendedWine related to task \\
 		\hline
-		agedWineID & UUID & agedWine related to task \\
+		agedWineId & UUID & agedWine related to task \\
 		\hline
-		bottledWineID & UUID & bottledWine related to task \\
+		bottledWineId & UUID & bottledWine related to task \\
 		\hline
-		fermentingMustsID & UUID & fermetingMust related to task \\
+		fermentingMustsId & UUID & fermetingMust related to task \\
 		\hline
-		mustID & UUID & must related to task \\
+		mustId & UUID & must related to task \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -372,7 +372,7 @@
 		Name & Type & Description  \\ \hline
 		id & UUID NOT NULL & primary key\\ \hline
 		quantity & INTEGER NOT NULL & quantity of a batch\\ \hline
-		organisationID & UUID NOT NULL & organisation id\\ \hline
+		organisationId & UUID NOT NULL & organisation id\\ \hline
 		isSpoiled & BOOLEAN NOT NULL & a binary value indicating whether a batch is spoiled\\ \hline
 		name & VARCHAR(255) & batch name\\ \hline
 		deleted & BOOLEAN NOT NULL & a binary value indicating whether the batch has been deleted\\ \hline
@@ -419,7 +419,7 @@
 		id & UUID NOT NULL & primary key\\ \hline
 		name & VARCHAR(255)\newline NOT NULL & batch name\\ \hline
 		description & TEXT & description of the wine batch\\ \hline
-		toBeBottledID & UUID NOT NULL & bottled product ID\\ \hline
+		toBeBottledId & UUID NOT NULL & bottled product ID\\ \hline
 		quantity & INTEGER NOT NULL & quantity of a batch\\ \hline
 		productPhotoPath & VARCHAR(255) & path to the photo of the bottle\\ \hline
 		deleted & BOOLEAN NOT NULL & a binary value indicating whether the batch has been deleted\\ \hline
@@ -432,9 +432,9 @@
 		\hline
 		Name & Type & Description  \\ \hline
 		id & UUID NOT NULL & primary key\\ \hline
-		fermentingMustID & UUID & optional batch ID after fermentation\\ \hline
-		agedWineID & UUID & optional ID for the aged batch\\ \hline
-		blendedWineID & UUID & optional blended batch ID\\ \hline
+		fermentingMustId & UUID & optional batch ID after fermentation\\ \hline
+		agedWineId & UUID & optional ID for the aged batch\\ \hline
+		blendedWineI & UUID & optional blended batch ID\\ \hline
 		quantity & INTEGER NOT NULL & quantity of a batch\\ \hline
 	\end{tabular}
 \end{table}
@@ -458,8 +458,8 @@
 		\hline
 		Name & Type & Description  \\ \hline
 		id & UUID NOT NULL & primary key\\ \hline
-		fermentingMustID & UUID NOT NULL & fermentation must batch ID\\ \hline
-		agedWIneID & UUID NOT NULL & aged wine batch ID\\ \hline
+		fermentingMustId & UUID NOT NULL & fermentation must batch ID\\ \hline
+		agedWIneId & UUID NOT NULL & aged wine batch ID\\ \hline
 		quantity & INTEGER NOT NULL & quantity of a batch\\ \hline
 	\end{tabular}
 \end{table}
@@ -471,7 +471,7 @@
 		Name & Type & Description  \\ \hline
 		id & UUID NOT NULL & primary key\\ \hline
 		quantity & INTEGER NOT NULL & quantity of a batch\\ \hline
-		organisationID & UUID NOT NULL & organisation id\\ \hline
+		organisationId & UUID NOT NULL & organisation id\\ \hline
 		isSpoiled & BOOLEAN NOT NULL & a binary value indicating whether a batch is spoiled\\ \hline
 		name & VARCHAR(255) & batch name\\ \hline
 		deleted & BOOLEAN NOT NULL & a binary value indicating whether the batch has been deleted\\ \hline
@@ -485,7 +485,7 @@
 		Name & Type & Description  \\ \hline
 		id & UUID NOT NULL & primary key\\ \hline
 		token & VARCHAR(255)\newline NOT NULL & refresh token\\ \hline
-		userID & UUID NOT NULL & the user ID associated with this refresh token\\ \hline
+		userId & UUID NOT NULL & the user ID associated with this refresh token\\ \hline
 		createdAt & TIMESTAMP NOT NULL & creation timestamp\\ \hline
 		expiresAt & TIMESTAMP NOT NULL & expiration timestamp\\ \hline
 	\end{tabular}
@@ -526,11 +526,11 @@
 		acidity & INTEGER & optional acidity level parameter\\ \hline
 		PH & INTEGER & optional PH level parameter\\ \hline
 		alcohol\_content & INTEGER & optional alcohol level parameter\\ \hline
-		blendedWineID & UUID & optional blended wine batch ID\\ \hline
-		agedWineID & UUID & optional aged wine batch ID\\ \hline
-		bottledWineID & UUID & optional bottled wine batch ID\\ \hline
-		fermentingMustID & UUID & optional fermenting must batch ID\\ \hline
-		mustID & UUID & optional must batch ID\\ \hline
+		blendedWineId & UUID & optional blended wine batch ID\\ \hline
+		agedWineId & UUID & optional aged wine batch ID\\ \hline
+		bottledWineId & UUID & optional bottled wine batch ID\\ \hline
+		fermentingMustId & UUID & optional fermenting must batch ID\\ \hline
+		mustId & UUID & optional must batch ID\\ \hline
 	\end{tabular}
 \end{table}
 
@@ -541,8 +541,8 @@
 		\hline
 		Name & Type & Description \\ \hline
 		id & UUID NOT NULL & primary key\\ \hline
-		harvestID & UUID NOT NULL & harvest id\\ \hline
-		mustID & UUID NOT NULL & must id\\ \hline
+		harvestId & UUID NOT NULL & harvest id\\ \hline
+		mustId & UUID NOT NULL & must id\\ \hline
 		quantity & INTEGER NOT NULL & quantity of a batch\\ \hline
 	\end{tabular}
 \end{table}
@@ -554,8 +554,8 @@
 		\hline
 		Name & Type & Description \\ \hline
 		id & UUID NOT NULL & primary key\\ \hline
-		mustID & UUID NOT NULL & must id\\ \hline
-		fermentationMustID & UUID NOT NULL & fermentation must id\\ \hline
+		mustId & UUID NOT NULL & must id\\ \hline
+		fermentationMustId & UUID NOT NULL & fermentation must id\\ \hline
 		quantity & INTEGER NOT NULL & quantity of a batch\\ \hline
 	\end{tabular}
 \end{table}
@@ -567,8 +567,8 @@
 		\hline
 		Name & Type & Description \\ \hline
 		id & UUID NOT NULL & primary key\\ \hline
-		ingredientsID & UUID NOT NULL & ingredient id\\ \hline
-		fermentingMustID & UUID NOT NULL & fermenting must id\\ \hline
+		ingredientsId & UUID NOT NULL & ingredient id\\ \hline
+		fermentingMustId & UUID NOT NULL & fermenting must id\\ \hline
 		quantity & INTEGER NOT NULL & quantity of added ingredient\\ \hline
 	\end{tabular}
 \end{table}
@@ -581,9 +581,9 @@
 		\hline
 		Name & Type & Description \\ \hline
 		id & UUID NOT NULL & primary key\\ \hline
-		fermentingMustID & UUID & optional fermenting must batch id\\ \hline
-		agedWineID & UUID & optional aged wine batch id\\ \hline
-		blendedWineID & UUID & optional blended wine batch id\\ \hline
+		fermentingMustId & UUID & optional fermenting must batch id\\ \hline
+		agedWineId & UUID & optional aged wine batch id\\ \hline
+		blendedWineId & UUID & optional blended wine batch id\\ \hline
 		quantity & INTEGER NOT NULL & quantity of a batch\\ \hline
 	\end{tabular}
 \end{table}
