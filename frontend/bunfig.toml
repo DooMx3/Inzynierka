@@ -1,0 +1,3 @@
+[test]
+preload = ["./svelte-loader.ts", "./src/setupTests.ts"]
+pathIgnorePatterns = ["node_modules", ".svelte-kit", "build"]
