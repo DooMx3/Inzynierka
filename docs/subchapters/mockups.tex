@@ -1,397 +1,404 @@
 \subsection{Graphical user interface design}
-The design of an application's interface is crucial, as it directly impacts the user experience. The goal is to ensure both ease of use and clarity of the individual interface elements. The designs are presented in the images from \ref{fig:landing_page} to \ref{fig:new_offering}.
-\FloatBarrier
+The design of an application's interface is crucial, as it directly impacts the user experience. The goal is to ensure both ease of use and clarity of the individual interface elements. Instead of listing the mockups only as a range of figure numbers, each screen is described next to the corresponding image. The views follow the same role structure as the requirements: guest, logged-in user, vineyard worker, oenologist and vineyard owner. Recurring layout elements---the top bar, the search field and the profile menu---are shared across authenticated screens so that moving between modules remains consistent.
+
 \subsubsection{Guest User:}
-\begin{figure}[ht]
+The public part of the application is the first contact with the winery. Figure~\ref{fig:landing_page} shows the landing page with the product slogan and buttons that lead to registration or sign-in. Figure~\ref{fig:landing_page_menu} is the same page with the profile menu opened, from which a guest can open the login form.
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/guest/landing_page.png}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/guest/landing_page.png}
     \caption{Landing page}
     \label{fig:landing_page}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/guest/landing_page_menu.png}
-    \caption{Landing page menu}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/guest/landing_page_menu.png}
+    \caption{Landing page with menu opened}
     \label{fig:landing_page_menu}
 \end{figure}
-\begin{figure}[ht]
+
+Figure~\ref{fig:login_page} contains the sign-in form with fields for login and password, a link to password recovery and a button that redirects to registration. Figure~\ref{fig:offerings_page} presents the winery offer as a list of wines available to customers who are not logged in.
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/guest/login_page.png}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/guest/login_page.png}
     \caption{Login page}
     \label{fig:login_page}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/guest/offerings_page.png}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/guest/offerings_page.png}
     \caption{Offerings page}
     \label{fig:offerings_page}
 \end{figure}
-\begin{figure}[ht]
+
+Figure~\ref{fig:qr_page} is the wine-details view opened after scanning a QR code from a bottle; it shows batch data such as grape variety, harvest and bottling information. Figure~\ref{fig:recover_page} is the password-recovery form, and Figure~\ref{fig:register_page} is the registration form used to create a new account.
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/guest/qr_page.png}
-    \caption{Qr page}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/guest/qr_page.png}
+    \caption{Wine details}
     \label{fig:qr_page}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/guest/recover_page.png}
-    \caption{Recover page}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/guest/recover_page.png}
+    \caption{Password recovery}
     \label{fig:recover_page}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/guest/register_page.png}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/guest/register_page.png}
     \caption{Register page}
     \label{fig:register_page}
 \end{figure}
 
-\FloatBarrier
 \subsubsection{Logged-in user:}
-\begin{figure}[ht]
+After a successful login the user lands on a dashboard. When the account does not belong to any organisation, the dashboard in Figure~\ref{fig:dashboard_inactive} explains that fact and offers either creating an organisation or waiting for an invitation. Figure~\ref{fig:dashboard_invited} shows the same dashboard after an owner has invited the user: a prompt asks to confirm joining.
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/loggedin/dashboard_inactive.png}
-    \caption{Logged-in user dashboard design}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/loggedin/dashboard_inactive.png}
+    \caption{Logged-in user dashboard}
     \label{fig:dashboard_inactive}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/loggedin/dashboard_invited.png}
-    \caption{Dashboard, user invited}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/loggedin/dashboard_invited.png}
+    \caption{Dashboard with pending invitation}
     \label{fig:dashboard_invited}
 \end{figure}
-\begin{figure}[ht]
+
+Figure~\ref{fig:dashboard_invite_form} is the form used to accept the invitation. Figure~\ref{fig:dashboard_organization} is the form for creating a new organisation, which is available only when the user has no current affiliation.
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/loggedin/dashboard_invite_form.png}
-    \caption{Invite form}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/loggedin/dashboard_invite_form.png}
+    \caption{Organisation invite form}
     \label{fig:dashboard_invite_form}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/loggedin/dashboard_organization.png}
-    \caption{Create new organization form}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/loggedin/dashboard_organization.png}
+    \caption{Creating new organization}
     \label{fig:dashboard_organization}
 \end{figure}
-\begin{figure}[ht]
+
+Account data are edited on the profile screens. Figure~\ref{fig:profile} shows first name, last name, e-mail and phone number in read-only mode. Figure~\ref{fig:profile_edit} is the same view in edit mode, and Figure~\ref{fig:profile_password} is the dedicated form for changing the password.
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/loggedin/profile.png}
-    \caption{Profile settings form}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/loggedin/profile.png}
+    \caption{Profile settings}
     \label{fig:profile}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/loggedin/profile_edit.png}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/loggedin/profile_edit.png}
     \caption{Profile settings in edit mode}
     \label{fig:profile_edit}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/loggedin/profile_password.png}
-    \caption{Change password form}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/loggedin/profile_password.png}
+    \caption{Changing password}
     \label{fig:profile_password}
 \end{figure}
 
-\FloatBarrier
 \subsubsection{Vineyard Worker:}
-\begin{figure}[ht]
+The worker module is organised around four lists: diseases, spraying, harvests and tasks. Each list has a matching form for adding a record and a form for editing an existing one. The first pair shows the list of recorded diseases and the form used to change a disease entry.
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/worker/diseases.png}
-    \caption{Diseases}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/worker/diseases.png}
+    \caption{List of recorded diseases}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/worker/diseases_editg.png}
-    \caption{Diseases edit}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/worker/diseases_new.png}
-    \caption{Diseases new}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/worker/edit_spray.png}
-    \caption{Edit spray}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/worker/harvest.png}
-    \caption{Harvest}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/worker/harvest_info_edit_harvest.png}
-    \caption{Harvest info edit harvest}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/worker/harvest_info_new_harvest.png}
-    \caption{Harvest info new harvest}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/worker/new_spraying.png}
-    \caption{New spraying}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/worker/spraying.png}
-    \caption{Spraying}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/worker/workers_page.png}
-    \caption{Workers page}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/worker/workers_page_edit.png}
-    \caption{Workers page edit}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/worker/workers_page_new.png}
-    \caption{Workers page new}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/worker/diseases_editg.png}
+    \caption{Editing disease record}
 \end{figure}
 
-\FloatBarrier
+The next screens continue that pattern: adding a new disease, editing a spraying, and browsing harvests. Dates, fields and substances are selected from existing organisation data so that workers do not type catalogue values by hand.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/worker/diseases_new.png}
+    \caption{Adding new disease record}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/worker/edit_spray.png}
+    \caption{Editing spray record}
+\end{figure}
+
+Harvest records store the field, grape variety, quantity and date. The list view is followed by the edit form and the form for adding a new harvest.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/worker/harvest.png}
+    \caption{List of recorded harvests}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/worker/harvest_info_edit_harvest.png}
+    \caption{Editing harvest record}
+\end{figure}
+
+Adding a harvest, adding a spraying and reviewing the spraying list close the field-work part of the module. The spraying form includes the substance, quantity, field and optional due date when the treatment is only planned.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/worker/harvest_info_new_harvest.png}
+    \caption{Adding harvest record}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/worker/new_spraying.png}
+    \caption{Adding spraying record}
+\end{figure}
+
+The last worker screens are the spraying list and the task list with its edit and create forms. A task can be marked as completed directly from the list, which is why the list is the main working view of this role.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/worker/spraying.png}
+    \caption{List of recorded sprayings}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/worker/workers_page.png}
+    \caption{List of recorded tasks}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/worker/workers_page_edit.png}
+    \caption{Editing task record}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/worker/workers_page_new.png}
+    \caption{Creating new task}
+\end{figure}
+
 \subsubsection{Oenologist:}
-\begin{figure}[ht]
+The oenologist works with successive production batches. The main menu opens the lists of must, fermenting must, aged wine, blended wine and bottled wine. Forms for creating and editing a batch share the same structure: equipment (location), source batches, quantity and a confirmation step. The first pair shows editing an aged-wine record and creating a fermentation batch.
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/aged_wine.png}
-    \caption{Aged wine}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/oenologist/aged_wine_edit.png}
+    \caption{Editing aged wine record}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/aged_wine_edit.png}
-    \caption{Aged wine edit}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/batch_create.png}
-    \caption{Batch create}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/batch_ingredients.png}
-    \caption{Batch ingredients}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/batch_ingredients_calc.png}
-    \caption{Batch ingredients calc}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/batch_ingredients_edit.png}
-    \caption{Batch ingredients edit}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/blendedd_edit.png}
-    \caption{Blendedd edit}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/blended_wine.png}
-    \caption{Blended wine}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/bottled.png}
-    \caption{Bottled}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/bottled_create.png}
-    \caption{Bottled create}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/bottled_edit.png}
-    \caption{Bottled edit}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/bottled_nutrients.png}
-    \caption{Bottled nutrients}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/fermenting_batch.png}
-    \caption{Fermenting batch}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/main_menu.png}
-    \caption{Main menu}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/must.png}
-    \caption{Must}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/must_edit.png}
-    \caption{Must edit}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/must_edit_confirmation.png}
-    \caption{Must edit confirmation}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/must_new.png}
-    \caption{Must new}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/must_new_extended.png}
-    \caption{Must new extended}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/must_new_extended_confirmation.png}
-    \caption{Must new extended confirmation}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/not_spoiled.png}
-    \caption{Not spoiled}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/record_parameters.png}
-    \caption{Record parameters}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/spoiled.png}
-    \caption{Spoiled}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/oenologist/wine_create.png}
-    \caption{Wine create}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/oenologist/batch_create.png}
+    \caption{Creating new fermentation batch record}
 \end{figure}
 
-\FloatBarrier
+Ingredients can be attached to a batch. The ingredients form includes a calculator for potassium metabisulfite, so that the oenologist does not have to compute the dose by hand. Editing a blended-wine record uses the same layout as the other production stages.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/oenologist/batch_ingredients_calc.png}
+    \caption{Batch ingredients form with potasium calculator}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/oenologist/blendedd_edit.png}
+    \caption{Editing blended wine record}
+\end{figure}
+
+The blended-wine list and the form for creating a bottled batch are the last steps before a wine leaves production. Nutrient information of a bottled batch is shown on a dedicated screen that can still be corrected by hand.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/oenologist/blended_wine.png}
+    \caption{List of recorded blended wine batches}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/oenologist/bottled_create.png}
+    \caption{Creating new bottled wine batch}
+\end{figure}
+
+The nutrients view and the oenologist main menu give an overview of the module. From the menu the user reaches every production stage without changing the surrounding navigation.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/oenologist/bottled_nutrients.png}
+    \caption{Nutrients of bottled wine}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/oenologist/main_menu.png}
+    \caption{Oenologist's main menu}
+\end{figure}
+
+Must batches have the most complete set of mockups, because they illustrate the pattern reused for later stages. Editing a must record is followed by a confirmation dialogue that prevents accidental overwrites.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/oenologist/must_edit.png}
+    \caption{Editing record of must batch}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/oenologist/must_edit_confirmation.png}
+    \caption{Confirmation dialog for editing a batch}
+\end{figure}
+
+Creating a must batch starts with a short form and can be expanded with additional fields. Both variants end with a confirmation step before the batch is stored.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/oenologist/must_new.png}
+    \caption{New must batch form}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/oenologist/must_new_extended.png}
+    \caption{New must batch form with extended fields}
+\end{figure}
+
+The confirmation of a new must batch, the screens for marking a wine as spoiled or not spoiled, and the parameters form are used during quality control. Chemical parameters include sugar, acidity, pH, temperature and alcohol content.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/oenologist/must_new_extended_confirmation.png}
+    \caption{Creating new must batch confirmation}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/oenologist/not_spoiled.png}
+    \caption{Marking wine not spoiled}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/oenologist/record_parameters.png}
+    \caption{Wine parameters form}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/oenologist/spoiled.png}
+    \caption{Marking wine spoiled}
+\end{figure}
+
+The last two production forms create an aged-wine batch and a blended-wine batch. In both cases the oenologist selects source batches, the target equipment and the quantity to be moved.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/oenologist/wine_create.png}
+    \caption{Creating new aged batch}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/owner/blended_wine_create.png}
+    \caption{Creating new blended wine batch}
+\end{figure}
+
 \subsubsection{Vineyard Owner:}
-\begin{figure}[ht]
+The owner screens combine staff administration, organisation settings, vineyard configuration and reporting. Inviting an employee and assigning roles are shown first, followed by the list of people who already belong to the organisation.
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/owner/add_employee.png}
-    \caption{Add employee}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/owner/add_employee.png}
+    \caption{Inviting employee to the organization}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/owner/blended_wine_create.png}
-    \caption{Blended wine create}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/owner/change_roles.png}
+    \caption{Changing employees' roles}
 \end{figure}
-\begin{figure}[ht]
+
+The employee list is the starting point for invitations, role changes and removals. QR codes are generated from a dedicated screen and can be previewed before printing or downloading.
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/owner/change_roles.png}
-    \caption{Change roles}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/owner/employees.png}
+    \caption{List of employees in the organisation}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/owner/employees.png}
-    \caption{Employees}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/owner/generate_qr.png}
+    \caption{QR code generator}
 \end{figure}
-\begin{figure}[ht]
+
+The generated QR preview is paired with the report form. The owner selects the report type and the period, which matches the BPMN process of report generation described earlier.
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/owner/generate_qr.png}
-    \caption{Generate qr}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/owner/qr_code.png}
+    \caption{Generated Qr code preview}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/owner/generate_report.png}
-    \caption{Generate report}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/owner/generate_report.png}
+    \caption{Generate report form}
 \end{figure}
-\begin{figure}[ht]
+
+Organisation data (name, address, logo, motto) can be viewed and edited. Removing the organisation is a destructive action and therefore uses a separate confirmation screen that requires the owner's password.
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/owner/organisation_info.png}
-    \caption{Organisation info}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/owner/organisation_info.png}
+    \caption{Organisation information}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/owner/organization_remove.png}
-    \caption{Organization remove}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/owner/organization_remove.png}
+    \caption{Confirmation of organization removal}
 \end{figure}
-\begin{figure}[ht]
+
+The owner dashboard is the home screen after login for this role. A success view is shown after a report has been generated and sent.
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/owner/owners_dashboard.png}
-    \caption{Owners dashboard}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/owner/owners_dashboard.png}
+    \caption{Owner dashboard}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/owner/qr_code.png}
-    \caption{Qr code}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/owner/report_confirmation.png}
+    \caption{Report generated successfully}
 \end{figure}
-\begin{figure}[ht]
+
+Fields, spraying substances and winery equipment are maintained as catalogues. Each catalogue has a list view, an edit form and a form for adding a new item. Inactive records remain linked to history but disappear from selectors used in new tasks.
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/owner/report_confirmation.png}
-    \caption{Report confirmation}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/owner/fields.png}
+    \caption{List of fields in the organisation}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/owner/fields.png}
-    \caption{List of fields}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/owner/edit_field.png}
+    \caption{Field's information form}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/owner/edit_field.png}
-    \caption{Edit field}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/owner/new_field.png}
+    \caption{Adding new field}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/owner/new_field.png}
-    \caption{Add new field}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/owner/substances.png}
+    \caption{List of substances in the organisation}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/owner/substances.png}
-    \caption{List of substances}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/owner/edit_substance.png}
+    \caption{Editing substance's name}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/owner/edit_substance.png}
-    \caption{Edit substance}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/owner/new_substance.png}
+    \caption{Adding new substance}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/owner/new_substance.png}
-    \caption{Add new substance}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/owner/equipment.png}
+    \caption{List of equipment in the organisation}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/owner/equipment.png}
-    \caption{List of equipment}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/owner/edit_equipment.png}
+    \caption{Editing equipment details}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/owner/edit_equipment.png}
-    \caption{Edit equipment}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/owner/new_equipment.png}
+    \caption{Adding new equimpent}
 \end{figure}
-\begin{figure}[ht]
+
+Offerings displayed on the public front page are managed in the last three screens: the list of current wines, the edit form and the form for adding a new offering with a batch and a price.
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/owner/new_equipment.png}
-    \caption{Add new equimpent}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/owner/offerings.png}
+    \caption{List of wine offerings}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/owner/offerings.png}
-    \caption{List of offerings}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/owner/edit_offering.png}
+    \caption{Offering edit form}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/owner/edit_offering.png}
-    \caption{Edit offering}
-\end{figure}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{pictures/mockups/owner/new_offering.png}
-    \caption{Add new offering}
+    \includegraphics[width=0.86\textwidth,height=0.36\textheight,keepaspectratio]{pictures/mockups/owner/new_offering.png}
+    \caption{New offering form}
     \label{fig:new_offering}
 \end{figure}
-\FloatBarrier

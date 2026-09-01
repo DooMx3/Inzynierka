@@ -1,35 +1,41 @@
 \subsection{Use Cases}
-Use case diagrams were developed to clearly define the system’s boundaries and the roles played by individual users within it. The system has been divided into main roles (actors), reflecting the actual staffing structure at the vineyard and winery \cite{armour2000advanced}. Use cases are shown in the images from \ref{fig:usecase_worker} to \ref{fig:usecase_logged}.
-\FloatBarrier
-\begin{figure}[ht]
+Use case diagrams were developed to clearly define the system’s boundaries and the roles played by individual users within it. The system has been divided into main roles (actors), reflecting the actual staffing structure at the vineyard and winery \cite{armour2000advanced}. Each diagram lists the operations available to a given actor. The vineyard worker and the vineyard owner are shown in Figure~\ref{fig:usecase_worker} and Figure~\ref{fig:usecase_owner}. The remaining roles---oenologist, guest and logged-in user---are shown in Figure~\ref{fig:usecase_oenologist}, Figure~\ref{fig:usecase_guest} and Figure~\ref{fig:usecase_logged}.
+
+The vineyard worker diagram covers day-to-day field work: tasks, spraying, plant diseases and harvest records, each with view, add, edit and delete operations. The vineyard owner diagram extends that set with organisation, staff, fields, substances, equipment, offerings, reports and QR codes.
+
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{pictures/worker_usecase.png}
+    \includegraphics[width=0.78\textwidth,height=0.38\textheight,keepaspectratio]{pictures/worker_usecase.png}
     \caption{Use case diagram of the vineyard worker.}
     \label{fig:usecase_worker}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{pictures/owner_usecase.png}
+	\includegraphics[width=0.72\textwidth,height=0.38\textheight,keepaspectratio]{pictures/owner_usecase.png}
 	\caption{Use case diagram of the vineyard owner.}
 	\label{fig:usecase_owner}
 \end{figure}
-\begin{figure}[ht]
+
+Figure~\ref{fig:usecase_oenologist} gathers production-stage operations of the oenologist: must, fermenting must, aged wine, blended wine and bottled wine, together with ingredients, chemical parameters, spoiled-batch handling and QR-based access to equipment. Because this actor has the largest number of use cases, the diagram occupies a page of its own.
+
+\begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{pictures/oenologist_use_case.jpg}
+	\includegraphics[width=0.55\textwidth,height=0.72\textheight,keepaspectratio]{pictures/oenologist_use_case.jpg}
 	\caption{Use case diagram of the oenologist.}
 	\label{fig:usecase_oenologist}
 \end{figure}
 
-\begin{figure}[ht]
+Figure~\ref{fig:usecase_guest} shows unauthenticated access: browsing offerings, registration, login, password recovery and reading wine details from a bottle QR code. Figure~\ref{fig:usecase_logged} adds account management for a user who is already authenticated: logout, profile and password changes, account deletion, creating an organisation and joining one after an invitation.
+
+\begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{pictures/guest_use_case.jpg}
+	\includegraphics[width=0.78\textwidth,height=0.36\textheight,keepaspectratio]{pictures/guest_use_case.jpg}
 	\caption{Use case diagram of the guest user.}
 	\label{fig:usecase_guest}
 \end{figure}
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{pictures/logged_usecase.drawio.png}
+	\includegraphics[width=0.70\textwidth,height=0.36\textheight,keepaspectratio]{pictures/logged_usecase.drawio.png}
 	\caption{Use case diagram of the logged-in user.}
 	\label{fig:usecase_logged}
 \end{figure}
-\FloatBarrier
