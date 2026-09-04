@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +17,11 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
+    public JwtService(@Value("${app.jwt.secret}") String secretKey) {
+        SECRET_KEY = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+    }
 
-    private static final Key SECRET_KEY = Keys.hmacShaKeyFor("MojeBardzoBezpieczneISecretHasloKtoreMaPonad32Znaki!".getBytes(StandardCharsets.UTF_8));
+    private final Key SECRET_KEY;
     private static final long EXPIRATION_TIME = 86400000;
 
     public String extractUsername(String token) {
