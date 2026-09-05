@@ -57,6 +57,7 @@ public class Organisation {
 
     @PrePersist
     void setCreatedAt() {
+        active = true;
         if (createdAt == null) {
             createdAt = LocalDateTime.now();
         }
