@@ -12,29 +12,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrganisationService {
 
-    private static final String DELETED_NAME = "DELETED_ORGANISATION";
-    private static final String DELETED_CITY = "DELETED";
-
     private final OrganisationRepository organisationRepository;
 
     @Transactional
     public void deleteOrganisation(UUID id) {
         Organisation organisation = organisationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Organisation not found: " + id));
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Organisation not found: " + id));
 
-        if (!organisation.isActive()) {
-            return;
-        }
-
-        organisation.setName(DELETED_NAME);
-        organisation.setTaxId(null);
-        organisation.setStreet(null);
-        organisation.setPostalCode(null);
-        organisation.setCity(DELETED_CITY);
-        organisation.setLogoPath(null);
-        organisation.setMotto(null);
         organisation.setActive(false);
-
-        organisationRepository.save(organisation);
     }
 }
