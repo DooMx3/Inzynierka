@@ -1,5 +1,7 @@
 package com.github.DooMx3.inzynierka.entities;
 
+import com.github.DooMx3.inzynierka.enums.InvitationStatus;
+import com.github.DooMx3.inzynierka.enums.MembershipStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,7 +27,9 @@ public class User implements UserDetails {
     @GeneratedValue
     @UuidGenerator(style = UuidGenerator.Style.TIME)
     private UUID id;
+    @Enumerated(EnumType.STRING)
     private MembershipStatus membershipStatus;
+    @Enumerated(EnumType.STRING)
     private InvitationStatus invitationStatus;
     private String firstname;
     private String lastname;
