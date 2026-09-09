@@ -1,4 +1,4 @@
-package com.github.DooMx3.inzynierka.entities;
+package com.github.DooMx3.inzynierka.enums;
 
 public enum MembershipStatus {
     NONE,
