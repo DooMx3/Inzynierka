@@ -84,12 +84,25 @@ public class OrganisationService {
     }
 
     @Transactional
-    public void deleteOrganisation(UUID id) {
+    public void deleteOrganisation(UUID id, User user) {
         Organisation organisation = organisationRepository.findById(id)
                 .orElseThrow(() ->
                         new IllegalArgumentException("Organisation not found: " + id));
 
+        if (user == null) {
+            throw new IllegalStateException("Authenticated user is required to delete an organisation");
+        }
+        if (user.getOrganisation() == null
+                || !id.equals(user.getOrganisation().getId())
+                || user.getRoles().stream().noneMatch(role -> RoleName.OWNER.name().equals(role.getName()))) {
+            throw new IllegalStateException("Only the organisation owner can delete the organisation");
+        }
+
         organisation.setActive(false);
+        user.setOrganisation(null);
+        user.setMembershipStatus(MembershipStatus.NONE);
+        user.getRoles().removeIf(role -> RoleName.OWNER.name().equals(role.getName()));
+        userRepository.save(user);
     }
 
     @Transactional

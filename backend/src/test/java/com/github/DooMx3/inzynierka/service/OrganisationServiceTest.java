@@ -6,6 +6,7 @@ import com.github.DooMx3.inzynierka.entities.Organisation;
 import com.github.DooMx3.inzynierka.entities.Role;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.enums.MembershipStatus;
+import com.github.DooMx3.inzynierka.enums.RoleName;
 import com.github.DooMx3.inzynierka.repositories.OrganisationRepository;
 import com.github.DooMx3.inzynierka.repositories.RoleRepository;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
@@ -16,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -50,18 +52,30 @@ class OrganisationServiceTest {
                 .motto("Tradycja")
                 .active(true)
                 .build();
+        Role ownerRole = new Role();
+        ownerRole.setName(RoleName.OWNER.name());
+        User user = User.builder()
+                .organisation(organisation)
+                .membershipStatus(MembershipStatus.MEMBER)
+                .roles(new java.util.HashSet<>(Set.of(ownerRole)))
+                .build();
 
         when(repository.findById(id))
                 .thenReturn(Optional.of(organisation));
 
-        service.deleteOrganisation(id);
+        service.deleteOrganisation(id, user);
 
         assertFalse(organisation.isActive());
         assertEquals("Winnica", organisation.getName());
         assertEquals("Lublin", organisation.getCity());
         assertEquals("Tradycja", organisation.getMotto());
+        assertNull(user.getOrganisation());
+        assertEquals(MembershipStatus.NONE, user.getMembershipStatus());
+        assertTrue(user.getRoles().stream()
+                .noneMatch(role -> RoleName.OWNER.name().equals(role.getName())));
 
         verify(repository).findById(id);
+        verify(userRepository).save(user);
     }
 
 
