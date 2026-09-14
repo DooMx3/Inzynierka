@@ -58,8 +58,11 @@ public class OrganisationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        organisationService.deleteOrganisation(id);
+    public ResponseEntity<Void> delete(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal User user
+    ) {
+        organisationService.deleteOrganisation(id, user);
         return ResponseEntity.noContent().build();
     }
 }
