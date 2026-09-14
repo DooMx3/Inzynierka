@@ -3,7 +3,10 @@ package com.github.DooMx3.inzynierka.service;
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationPatchRequest;
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationRequest;
 import com.github.DooMx3.inzynierka.entities.Organisation;
+import com.github.DooMx3.inzynierka.entities.User;
+import com.github.DooMx3.inzynierka.enums.MembershipStatus;
 import com.github.DooMx3.inzynierka.repositories.OrganisationRepository;
+import com.github.DooMx3.inzynierka.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +19,20 @@ import java.util.UUID;
 public class OrganisationService {
 
     private final OrganisationRepository organisationRepository;
+    private final UserRepository userRepository;
 
     @Transactional
-    public Organisation createOrganisation(OrganisationRequest request) {
+    public Organisation createOrganisation(OrganisationRequest request, User user) {
+        if (user == null) {
+            throw new IllegalStateException("Authenticated user is required to create an organisation");
+        }
+
+        if (user.getOrganisation() != null) {
+            throw new OrganisationAlreadyAssignedException(
+                    "You cannot create another organisation because you already belong to one"
+            );
+        }
+
         Organisation organisation = Organisation.builder()
                 .name(request.name())
                 .taxId(request.taxId())
@@ -29,7 +43,12 @@ public class OrganisationService {
                 .motto(request.motto())
                 .build();
 
-        return organisationRepository.save(organisation);
+        Organisation savedOrganisation = organisationRepository.save(organisation);
+        user.setOrganisation(savedOrganisation);
+        user.setMembershipStatus(MembershipStatus.MEMBER);
+        userRepository.save(user);
+
+        return savedOrganisation;
     }
 
     @Transactional
