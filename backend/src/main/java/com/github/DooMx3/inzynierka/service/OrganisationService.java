@@ -3,9 +3,12 @@ package com.github.DooMx3.inzynierka.service;
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationPatchRequest;
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationRequest;
 import com.github.DooMx3.inzynierka.entities.Organisation;
+import com.github.DooMx3.inzynierka.entities.Role;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.enums.MembershipStatus;
+import com.github.DooMx3.inzynierka.enums.RoleName;
 import com.github.DooMx3.inzynierka.repositories.OrganisationRepository;
+import com.github.DooMx3.inzynierka.repositories.RoleRepository;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -19,6 +22,7 @@ import java.util.UUID;
 public class OrganisationService {
 
     private final OrganisationRepository organisationRepository;
+    private final RoleRepository roleRepository;
     private final UserRepository userRepository;
 
     @Transactional
@@ -46,6 +50,9 @@ public class OrganisationService {
         Organisation savedOrganisation = organisationRepository.save(organisation);
         user.setOrganisation(savedOrganisation);
         user.setMembershipStatus(MembershipStatus.MEMBER);
+        Role ownerRole = roleRepository.findByName(RoleName.OWNER.name())
+                .orElseThrow(() -> new IllegalStateException("OWNER role is not configured"));
+        user.getRoles().add(ownerRole);
         userRepository.save(user);
 
         return savedOrganisation;

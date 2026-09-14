@@ -3,9 +3,11 @@ package com.github.DooMx3.inzynierka.service;
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationPatchRequest;
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationRequest;
 import com.github.DooMx3.inzynierka.entities.Organisation;
+import com.github.DooMx3.inzynierka.entities.Role;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.enums.MembershipStatus;
 import com.github.DooMx3.inzynierka.repositories.OrganisationRepository;
+import com.github.DooMx3.inzynierka.repositories.RoleRepository;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +29,9 @@ class OrganisationServiceTest {
 
     @Mock
     private OrganisationRepository repository;
+
+    @Mock
+    private RoleRepository roleRepository;
 
     @Mock
     private UserRepository userRepository;
@@ -81,6 +86,11 @@ class OrganisationServiceTest {
         when(repository.save(any(Organisation.class)))
                 .thenReturn(saved);
 
+        Role ownerRole = new Role();
+        ownerRole.setName("OWNER");
+        when(roleRepository.findByName("OWNER"))
+                .thenReturn(Optional.of(ownerRole));
+
         User user = User.builder().build();
 
         Organisation result = service.createOrganisation(request, user);
@@ -90,8 +100,10 @@ class OrganisationServiceTest {
         assertTrue(result.isActive());
         assertSame(saved, user.getOrganisation());
         assertEquals(MembershipStatus.MEMBER, user.getMembershipStatus());
+        assertTrue(user.getRoles().contains(ownerRole));
 
         verify(repository).save(any(Organisation.class));
+        verify(roleRepository).findByName("OWNER");
         verify(userRepository).save(user);
     }
 
@@ -116,7 +128,7 @@ class OrganisationServiceTest {
                 "Authenticated user is required to create an organisation",
                 exception.getMessage()
         );
-        verifyNoInteractions(repository, userRepository);
+        verifyNoInteractions(repository, roleRepository, userRepository);
     }
 
     @Test
@@ -147,7 +159,7 @@ class OrganisationServiceTest {
                 "You cannot create another organisation because you already belong to one",
                 exception.getMessage()
         );
-        verifyNoInteractions(repository, userRepository);
+        verifyNoInteractions(repository, roleRepository, userRepository);
     }
 
     @Test
