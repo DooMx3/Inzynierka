@@ -46,6 +46,10 @@ public class User implements UserDetails {
     )
     private Set<Role> roles = new HashSet<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organisation_id")
+    private Organisation organisation;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
