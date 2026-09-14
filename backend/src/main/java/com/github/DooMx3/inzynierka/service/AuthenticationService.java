@@ -22,9 +22,11 @@ public class AuthenticationService {
 
     public void register(RegisterRequest request, HttpServletResponse response) {
         var user = User.builder()
-                .firstname(request.firstname())
+                .firstName(request.firstName())
+                .lastName(request.lastName())
+                .phoneNumber(request.phoneNumber())
                 .email(request.email())
-                .password(passwordEncoder.encode(request.password()))
+                .passwordHash(passwordEncoder.encode(request.password()))
                 .build();
         repository.save(user);
 
