@@ -3,10 +3,12 @@ package com.github.DooMx3.inzynierka.controller;
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationPatchRequest;
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationRequest;
 import com.github.DooMx3.inzynierka.entities.Organisation;
+import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.service.OrganisationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -20,10 +22,11 @@ public class OrganisationController {
 
     @PostMapping
     public ResponseEntity<Organisation> create(
-            @RequestBody @Valid OrganisationRequest request
+            @RequestBody @Valid OrganisationRequest request,
+            @AuthenticationPrincipal User user
     ) {
         return ResponseEntity.ok(
-                organisationService.createOrganisation(request)
+                organisationService.createOrganisation(request, user)
         );
     }
 
