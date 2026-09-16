@@ -7,6 +7,7 @@ import com.github.DooMx3.inzynierka.entities.Role;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.enums.MembershipStatus;
 import com.github.DooMx3.inzynierka.enums.RoleName;
+import com.github.DooMx3.inzynierka.exceptions.OrganisationAlreadyAssignedException;
 import com.github.DooMx3.inzynierka.repositories.OrganisationRepository;
 import com.github.DooMx3.inzynierka.repositories.RoleRepository;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
