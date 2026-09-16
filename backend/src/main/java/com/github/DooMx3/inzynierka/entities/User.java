@@ -3,6 +3,7 @@ package com.github.DooMx3.inzynierka.entities;
 import com.github.DooMx3.inzynierka.enums.InvitationStatus;
 import com.github.DooMx3.inzynierka.enums.MembershipStatus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,10 +32,15 @@ public class User implements UserDetails {
     private MembershipStatus membershipStatus;
     @Enumerated(EnumType.STRING)
     private InvitationStatus invitationStatus;
+    @Column(nullable = false)
     private String firstname;
+    @Column(nullable = false)
     private String lastname;
     private String phoneNumber;
+    @Column(unique = true, nullable = false)
     private String email;
+    @Column(nullable = false)
+    @NotNull
     private String password;
     private boolean active;
 
