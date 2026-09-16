@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -31,33 +32,42 @@ public class OrganisationController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Organisation> getById(@PathVariable UUID id) {
+    @PreAuthorize("hasAuthority('OWNER')")
+    public ResponseEntity<Organisation> getById(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal User user
+    ) {
         return ResponseEntity.ok(
-                organisationService.getOrganisation(id)
+                organisationService.getOrganisation(id, user)
         );
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('OWNER')")
     public ResponseEntity<Organisation> update(
             @PathVariable UUID id,
-            @RequestBody @Valid OrganisationRequest request
+            @RequestBody @Valid OrganisationRequest request,
+            @AuthenticationPrincipal User user
     ) {
         return ResponseEntity.ok(
-                organisationService.updateOrganisation(id, request)
+                organisationService.updateOrganisation(id, request, user)
         );
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("hasAuthority('OWNER')")
     public ResponseEntity<Organisation> patch(
             @PathVariable UUID id,
-            @RequestBody @Valid OrganisationPatchRequest request
+            @RequestBody @Valid OrganisationPatchRequest request,
+            @AuthenticationPrincipal User user
     ) {
         return ResponseEntity.ok(
-                organisationService.patchOrganisation(id, request)
+                organisationService.patchOrganisation(id, request, user)
         );
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('OWNER')")
     public ResponseEntity<Void> delete(
             @PathVariable UUID id,
             @AuthenticationPrincipal User user

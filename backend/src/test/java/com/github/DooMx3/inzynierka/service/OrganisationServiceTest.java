@@ -187,6 +187,12 @@ class OrganisationServiceTest {
                 .motto("Stare motto")
                 .active(true)
                 .build();
+        Role ownerRole = new Role();
+        ownerRole.setName(RoleName.OWNER.name());
+        User user = User.builder()
+                .organisation(organisation)
+                .roles(new java.util.HashSet<>(Set.of(ownerRole)))
+                .build();
 
         OrganisationPatchRequest request = new OrganisationPatchRequest(
                 null,
@@ -203,7 +209,7 @@ class OrganisationServiceTest {
         when(repository.save(organisation))
                 .thenReturn(organisation);
 
-        Organisation result = service.patchOrganisation(id, request);
+        Organisation result = service.patchOrganisation(id, request, user);
 
         assertEquals("Stara nazwa", result.getName());
         assertEquals("Lublin", result.getCity());

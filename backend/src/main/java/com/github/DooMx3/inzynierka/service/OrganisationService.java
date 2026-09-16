@@ -13,6 +13,7 @@ import com.github.DooMx3.inzynierka.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -59,14 +60,15 @@ public class OrganisationService {
     }
 
     @Transactional
-    public Organisation getOrganisation(UUID id) {
-        return organisationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Organisation not found: " + id));
+    public Organisation getOrganisation(UUID id, User user) {
+        Organisation organisation = findOrganisation(id);
+        requireOwner(organisation, user);
+        return organisation;
     }
 
     @Transactional
-    public Organisation updateOrganisation(UUID id, OrganisationRequest request) {
-        Organisation organisation = getOrganisation(id);
+    public Organisation updateOrganisation(UUID id, OrganisationRequest request, User user) {
+        Organisation organisation = getOrganisation(id, user);
 
         if (!organisation.isActive()) {
             throw new IllegalStateException("Cannot update an inactive organisation");
@@ -85,18 +87,7 @@ public class OrganisationService {
 
     @Transactional
     public void deleteOrganisation(UUID id, User user) {
-        Organisation organisation = organisationRepository.findById(id)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Organisation not found: " + id));
-
-        if (user == null) {
-            throw new IllegalStateException("Authenticated user is required to delete an organisation");
-        }
-        if (user.getOrganisation() == null
-                || !id.equals(user.getOrganisation().getId())
-                || user.getRoles().stream().noneMatch(role -> RoleName.OWNER.name().equals(role.getName()))) {
-            throw new IllegalStateException("Only the organisation owner can delete the organisation");
-        }
+        Organisation organisation = getOrganisation(id, user);
 
         organisation.setActive(false);
         user.setOrganisation(null);
@@ -108,9 +99,10 @@ public class OrganisationService {
     @Transactional
     public Organisation patchOrganisation(
             UUID id,
-            @Valid OrganisationPatchRequest request
+            @Valid OrganisationPatchRequest request,
+            User user
     ) {
-        Organisation organisation = getOrganisation(id);
+        Organisation organisation = getOrganisation(id, user);
 
         if (!organisation.isActive()) {
             throw new IllegalStateException(
@@ -141,5 +133,26 @@ public class OrganisationService {
         }
 
         return organisationRepository.save(organisation);
+    }
+
+    private Organisation findOrganisation(UUID id) {
+        return organisationRepository.findById(id)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Organisation not found: " + id));
+    }
+
+    private void requireOwner(Organisation organisation, User user) {
+        if (user == null) {
+            throw new AccessDeniedException("Authenticated user is required");
+        }
+
+        boolean ownsOrganisation = user.getOrganisation() != null
+                && organisation.getId().equals(user.getOrganisation().getId())
+                && user.getRoles().stream()
+                .anyMatch(role -> RoleName.OWNER.name().equals(role.getName()));
+
+        if (!ownsOrganisation) {
+            throw new AccessDeniedException("Only the organisation owner can access the organisation");
+        }
     }
 }
