@@ -14,9 +14,7 @@ Wszystkie przykłady używają formatu JSON:
 Content-Type: application/json
 ```
 
-Endpointy `/api/auth/**` oraz `/api/organisations/**` są obecnie dostępne bez
-uwierzytelnienia. Dostęp do organizacji jest otwarty wyłącznie na potrzeby
-testów i powinien zostać zmieniony przed wdrożeniem.
+Endpointy `/api/auth/**` są dostępne bez uwierzytelnienia.
 
 ## Uwierzytelnianie
 
