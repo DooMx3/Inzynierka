@@ -1,7 +1,7 @@
 package com.github.DooMx3.inzynierka.service;
 
-import com.github.DooMx3.inzynierka.entities.AuthenticationRequest;
-import com.github.DooMx3.inzynierka.entities.RegisterRequest;
+import com.github.DooMx3.inzynierka.dto.user.AuthenticationRequest;
+import com.github.DooMx3.inzynierka.dto.user.RegisterRequest;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.enums.MembershipStatus;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
