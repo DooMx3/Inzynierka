@@ -3,6 +3,7 @@ package com.github.DooMx3.inzynierka.service;
 import com.github.DooMx3.inzynierka.dto.user.AuthenticationRequest;
 import com.github.DooMx3.inzynierka.dto.user.RegisterRequest;
 import com.github.DooMx3.inzynierka.entities.User;
+import com.github.DooMx3.inzynierka.enums.InvitationStatus;
 import com.github.DooMx3.inzynierka.enums.MembershipStatus;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
 import jakarta.servlet.http.Cookie;
@@ -22,11 +23,16 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public void register(RegisterRequest request, HttpServletResponse response) {
-        var user = User.builder()
+        if(repository.existsByEmail(request.email())) {
+            throw new IllegalArgumentException("Email already exists");
+        }
+        User user = User.builder()
                 .firstname(request.firstname())
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
                 .membershipStatus(MembershipStatus.NONE)
+                .invitationStatus(InvitationStatus.NONE)
+                .active(true)
                 .build();
         repository.save(user);
 
