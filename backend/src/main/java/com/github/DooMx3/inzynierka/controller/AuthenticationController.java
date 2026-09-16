@@ -1,7 +1,7 @@
 package com.github.DooMx3.inzynierka.controller;
 
-import com.github.DooMx3.inzynierka.entities.AuthenticationRequest;
-import com.github.DooMx3.inzynierka.entities.RegisterRequest;
+import com.github.DooMx3.inzynierka.dto.user.AuthenticationRequest;
+import com.github.DooMx3.inzynierka.dto.user.RegisterRequest;
 import com.github.DooMx3.inzynierka.service.AuthenticationService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
