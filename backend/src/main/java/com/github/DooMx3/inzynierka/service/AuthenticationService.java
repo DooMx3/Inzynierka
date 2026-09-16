@@ -3,6 +3,7 @@ package com.github.DooMx3.inzynierka.service;
 import com.github.DooMx3.inzynierka.entities.AuthenticationRequest;
 import com.github.DooMx3.inzynierka.entities.RegisterRequest;
 import com.github.DooMx3.inzynierka.entities.User;
+import com.github.DooMx3.inzynierka.enums.MembershipStatus;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,6 +26,7 @@ public class AuthenticationService {
                 .firstname(request.firstname())
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
+                .membershipStatus(MembershipStatus.NONE)
                 .build();
         repository.save(user);
 
