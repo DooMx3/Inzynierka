@@ -2,6 +2,8 @@
 
 Sugeruję robić branche na poszczególne funkcjonalności, u mnie na froncie to nie ma takiego znaczenia, ale u was na backendzie to myślę że będzie bardziej potrzebne.
 
+[![Backend Tests](https://github.com/DooMx3/Inzynierka/actions/workflows/backend-tests.yml/badge.svg)](https://github.com/DooMx3/Inzynierka/actions/workflows/backend-tests.yml)
+
 [![Build status](https://github.com/DooMx3/Inzynierka/actions/workflows/latex-release.yml/badge.svg)](https://github.com/DooMx3/Inzynierka/actions/workflows/latex-release.yml)
 
 ## Database visual editor
