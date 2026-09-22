@@ -2,6 +2,7 @@ package com.github.DooMx3.inzynierka.service;
 
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationPatchRequest;
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationRequest;
+import com.github.DooMx3.inzynierka.dto.organisation.OrganisationInvitationRequest;
 import com.github.DooMx3.inzynierka.entities.Organisation;
 import com.github.DooMx3.inzynierka.entities.Role;
 import com.github.DooMx3.inzynierka.entities.User;
@@ -215,5 +216,36 @@ class OrganisationServiceTest {
         assertEquals("Stara nazwa", result.getName());
         assertEquals("Lublin", result.getCity());
         assertEquals("Nowe motto", result.getMotto());
+    }
+
+    @Test
+    void shouldInviteUserToOrganisation() {
+        UUID organisationId = UUID.randomUUID();
+        Organisation organisation = Organisation.builder().id(organisationId).active(true).build();
+        Role ownerRole = new Role();
+        ownerRole.setName(RoleName.OWNER.name());
+        User owner = User.builder()
+                .id(UUID.randomUUID())
+                .organisation(organisation)
+                .roles(new java.util.HashSet<>(Set.of(ownerRole)))
+                .build();
+        User invitedUser = User.builder()
+                .id(UUID.randomUUID())
+                .email("worker@example.com")
+                .membershipStatus(MembershipStatus.NONE)
+                .build();
+
+        when(repository.findById(organisationId)).thenReturn(Optional.of(organisation));
+        when(userRepository.findByEmail(invitedUser.getEmail())).thenReturn(Optional.of(invitedUser));
+
+        service.inviteUser(
+                organisationId,
+                new OrganisationInvitationRequest(invitedUser.getEmail()),
+                owner
+        );
+
+        assertSame(organisation, invitedUser.getOrganisation());
+        assertEquals(MembershipStatus.PENDING, invitedUser.getMembershipStatus());
+        verify(userRepository).save(invitedUser);
     }
 }

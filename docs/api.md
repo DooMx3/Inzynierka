@@ -267,6 +267,36 @@ Błędy:
 - `500 Internal Server Error` — organizacja nie istnieje lub identyfikator
   ma nieprawidłowy format.
 
+### Wysłanie zaproszenia do organizacji
+
+```http
+POST /api/organisations/{id}/invitations
+```
+
+Wymaga uwierzytelnionego właściciela organizacji.
+
+Body:
+
+```json
+{
+  "email": "pracownik@example.com"
+}
+```
+
+Odpowiedź:
+
+- `204 No Content` — zaproszenie zostało utworzone.
+
+Błędy:
+
+- `400 Bad Request` — niepoprawny adres e-mail, konto nie istnieje albo
+  użytkownik należy już do organizacji lub ma oczekujące zaproszenie,
+- `403 Forbidden` — żądający nie jest właścicielem wskazanej organizacji.
+
+Po wysłaniu zaproszenia użytkownik otrzymuje `membershipStatus = PENDING`
+i zostaje przypisany do wskazanej organizacji. Po zaakceptowaniu zaproszenia
+status powinien zmienić się na `MEMBER`.
+
 ## Zasady wspólne
 
 Wartości generowane przez backend (`id`, `active`, `createdAt`) nie powinny być
