@@ -1,6 +1,7 @@
 package com.github.DooMx3.inzynierka.controller;
 
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationPatchRequest;
+import com.github.DooMx3.inzynierka.dto.organisation.OrganisationInvitationRequest;
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationRequest;
 import com.github.DooMx3.inzynierka.entities.Organisation;
 import com.github.DooMx3.inzynierka.entities.User;
@@ -73,6 +74,17 @@ public class OrganisationController {
             @AuthenticationPrincipal User user
     ) {
         organisationService.deleteOrganisation(id, user);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/invitations")
+    @PreAuthorize("hasAuthority('OWNER')")
+    public ResponseEntity<Void> invite(
+            @PathVariable UUID id,
+            @RequestBody @Valid OrganisationInvitationRequest request,
+            @AuthenticationPrincipal User user
+    ) {
+        organisationService.inviteUser(id, request, user);
         return ResponseEntity.noContent().build();
     }
 }
