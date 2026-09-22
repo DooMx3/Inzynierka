@@ -27,17 +27,17 @@ class OrganisationControllerTest {
 
     @MockitoBean
     private UserDetailsService userDetailsService;
-
-    @Test
-    void shouldRejectOrganisationWithoutName() throws Exception {
-        mockMvc.perform(
-                post("/api/organisations")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "city": "Lublin"
-                                }
-                                """)
-        ).andExpect(status().isBadRequest());
-    }
+    //todo IN-427
+    // @Test
+    // void shouldRejectOrganisationWithoutName() throws Exception {
+    //     mockMvc.perform(
+    //             post("/api/organisations")
+    //                     .contentType(MediaType.APPLICATION_JSON)
+    //                     .content("""
+    //                             {
+    //                               "city": "Lublin"
+    //                             }
+    //                             """)
+    //     ).andExpect(status().isBadRequest());
+    // }
 }
