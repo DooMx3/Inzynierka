@@ -54,8 +54,7 @@ class OrganisationServiceTest {
                 .motto("Tradycja")
                 .active(true)
                 .build();
-        Role ownerRole = new Role();
-        ownerRole.setName(RoleName.OWNER.name());
+        Role ownerRole = ownerRole();
         User user = User.builder()
                 .organisation(organisation)
                 .membershipStatus(MembershipStatus.MEMBER)
@@ -102,8 +101,7 @@ class OrganisationServiceTest {
         when(repository.save(any(Organisation.class)))
                 .thenReturn(saved);
 
-        Role ownerRole = new Role();
-        ownerRole.setName("OWNER");
+        Role ownerRole = ownerRole();
         when(roleRepository.findByName("OWNER"))
                 .thenReturn(Optional.of(ownerRole));
 
@@ -189,8 +187,7 @@ class OrganisationServiceTest {
                 .motto("Stare motto")
                 .active(true)
                 .build();
-        Role ownerRole = new Role();
-        ownerRole.setName(RoleName.OWNER.name());
+        Role ownerRole = ownerRole();
         User user = User.builder()
                 .organisation(organisation)
                 .roles(new java.util.HashSet<>(Set.of(ownerRole)))
@@ -222,8 +219,7 @@ class OrganisationServiceTest {
     void shouldInviteUserToOrganisation() {
         UUID organisationId = UUID.randomUUID();
         Organisation organisation = Organisation.builder().id(organisationId).active(true).build();
-        Role ownerRole = new Role();
-        ownerRole.setName(RoleName.OWNER.name());
+        Role ownerRole = ownerRole();
         User owner = User.builder()
                 .id(UUID.randomUUID())
                 .organisation(organisation)
@@ -279,5 +275,11 @@ class OrganisationServiceTest {
         assertEquals(MembershipStatus.NONE, invitedUser.getMembershipStatus());
         assertNull(invitedUser.getOrganisation());
         verify(userRepository).save(invitedUser);
+    }
+
+    private static Role ownerRole() {
+        Role role = new Role();
+        role.setName(RoleName.OWNER.name());
+        return role;
     }
 }
