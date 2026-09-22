@@ -99,8 +99,7 @@
 		Name & Type & Description  \\ \hline
 		id & UUID NOT NULL & primary key\\ \hline
 		organisationId & UUID & the ID of the organisation to which the user belongs\\ \hline
-		membershipStatus & VARCHAR(8) Enum(NONE,\newline PENDING, MEMBER) & user status\\ \hline
-		Invitation & VARCHAR(8) Enum(PENDING, \newline ACCEPTED, NONE) & the invitation status of a particular user\\ \hline
+		membershipStatus & VARCHAR(8) Enum(NONE,\newline PENDING, MEMBER) & user's organisation membership status; PENDING means an invitation is awaiting a response\\ \hline
 		firstName & VARCHAR(128)\newline NOT NULL & user's first name\\ \hline
 		lastName & VARCHAR(128)\newline NOT NULL & user's last name\\ \hline
 		phoneNumber & VARCHAR(16) & user's phone number\\ \hline

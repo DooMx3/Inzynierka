@@ -42,7 +42,7 @@ To include db schama in doc export is as png and save in pictures as db-diagram.
 4. change phone number: modifies phoneNumber in user
 5. delete account: removes record from user
 6. create an organization: checks if user's role != owner; creates record in organization; assigns organizationId in user; assigns role = owner
-7. join organization: reads user.email; owner adds user; user.membershipStatus = PENDING; ...
+7. join organization: reads user.email; owner adds user; user.membershipStatus = PENDING; after acceptance it becomes MEMBER; ...
 
 ### Vineyard Worker
 
