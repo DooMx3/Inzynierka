@@ -1,6 +1,5 @@
 package com.github.DooMx3.inzynierka.entities;
 
-import com.github.DooMx3.inzynierka.enums.InvitationStatus;
 import com.github.DooMx3.inzynierka.enums.MembershipStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -30,8 +29,6 @@ public class User implements UserDetails {
     private UUID id;
     @Enumerated(EnumType.STRING)
     private MembershipStatus membershipStatus;
-    @Enumerated(EnumType.STRING)
-    private InvitationStatus invitationStatus;
     @Column(nullable = false)
     private String firstname;
     @Column(nullable = false)
