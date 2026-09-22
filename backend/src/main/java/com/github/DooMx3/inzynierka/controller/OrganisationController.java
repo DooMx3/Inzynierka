@@ -2,6 +2,7 @@ package com.github.DooMx3.inzynierka.controller;
 
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationPatchRequest;
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationInvitationRequest;
+import com.github.DooMx3.inzynierka.dto.organisation.PendingInvitationResponse;
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationRequest;
 import com.github.DooMx3.inzynierka.entities.Organisation;
 import com.github.DooMx3.inzynierka.entities.User;
@@ -14,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/organisations")
@@ -85,6 +87,28 @@ public class OrganisationController {
             @AuthenticationPrincipal User user
     ) {
         organisationService.inviteUser(id, request, user);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/invitations")
+    @PreAuthorize("hasAuthority('OWNER')")
+    public ResponseEntity<List<PendingInvitationResponse>> getPendingInvitations(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal User user
+    ) {
+        return ResponseEntity.ok(
+                organisationService.getPendingInvitations(id, user)
+        );
+    }
+
+    @DeleteMapping("/{id}/invitations/{userId}")
+    @PreAuthorize("hasAuthority('OWNER')")
+    public ResponseEntity<Void> cancelInvitation(
+            @PathVariable UUID id,
+            @PathVariable UUID userId,
+            @AuthenticationPrincipal User user
+    ) {
+        organisationService.cancelInvitation(id, userId, user);
         return ResponseEntity.noContent().build();
     }
 }

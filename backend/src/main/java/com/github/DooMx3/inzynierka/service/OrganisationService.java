@@ -2,6 +2,7 @@ package com.github.DooMx3.inzynierka.service;
 
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationPatchRequest;
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationInvitationRequest;
+import com.github.DooMx3.inzynierka.dto.organisation.PendingInvitationResponse;
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationRequest;
 import com.github.DooMx3.inzynierka.entities.Organisation;
 import com.github.DooMx3.inzynierka.entities.Role;
@@ -19,6 +20,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -158,6 +161,34 @@ public class OrganisationService {
         invitedUser.setOrganisation(organisation);
         invitedUser.setMembershipStatus(MembershipStatus.PENDING);
         userRepository.save(invitedUser);
+    }
+
+    @Transactional
+    public void cancelInvitation(UUID organisationId, UUID userId, User owner) {
+        Organisation organisation = getOrganisation(organisationId, owner);
+        User invitedUser = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (invitedUser.getOrganisation() == null
+                || !organisationId.equals(invitedUser.getOrganisation().getId())
+                || invitedUser.getMembershipStatus() != MembershipStatus.PENDING) {
+            throw new IllegalArgumentException("Pending invitation not found");
+        }
+
+        invitedUser.setOrganisation(null);
+        invitedUser.setMembershipStatus(MembershipStatus.NONE);
+        userRepository.save(invitedUser);
+    }
+
+    @Transactional
+    public List<PendingInvitationResponse> getPendingInvitations(UUID organisationId, User owner) {
+        Organisation organisation = getOrganisation(organisationId, owner);
+        return userRepository.findByOrganisationAndMembershipStatus(
+                        organisation,
+                        MembershipStatus.PENDING
+                ).stream()
+                .map(PendingInvitationResponse::from)
+                .collect(Collectors.toList());
     }
 
     private Organisation findOrganisation(UUID id) {

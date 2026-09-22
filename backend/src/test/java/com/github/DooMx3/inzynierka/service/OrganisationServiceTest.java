@@ -248,4 +248,36 @@ class OrganisationServiceTest {
         assertEquals(MembershipStatus.PENDING, invitedUser.getMembershipStatus());
         verify(userRepository).save(invitedUser);
     }
+
+    @Test
+    void shouldCancelPendingInvitation() {
+        UUID organisationId = UUID.randomUUID();
+        Organisation organisation = Organisation.builder().id(organisationId).build();
+        Role ownerRole = new Role();
+        ownerRole.setName(RoleName.OWNER.name());
+        User owner = User.builder()
+                .id(UUID.randomUUID())
+                .organisation(organisation)
+                .roles(new java.util.HashSet<>(Set.of(ownerRole)))
+                .build();
+        User invitedUser = User.builder()
+                .id(UUID.randomUUID())
+                .organisation(organisation)
+                .email("worker@example.com")
+                .membershipStatus(MembershipStatus.PENDING)
+                .build();
+
+        when(repository.findById(organisationId)).thenReturn(Optional.of(organisation));
+        when(userRepository.findById(invitedUser.getId())).thenReturn(Optional.of(invitedUser));
+
+        service.cancelInvitation(
+                organisationId,
+                invitedUser.getId(),
+                owner
+        );
+
+        assertEquals(MembershipStatus.NONE, invitedUser.getMembershipStatus());
+        assertNull(invitedUser.getOrganisation());
+        verify(userRepository).save(invitedUser);
+    }
 }
