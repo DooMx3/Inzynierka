@@ -2,9 +2,8 @@ package com.github.DooMx3.inzynierka.controller;
 
 import com.github.DooMx3.inzynierka.service.JwtService;
 import com.github.DooMx3.inzynierka.service.OrganisationService;
-import com.github.DooMx3.inzynierka.entities.Organisation;
-import com.github.DooMx3.inzynierka.entities.Role;
 import com.github.DooMx3.inzynierka.entities.User;
+import com.github.DooMx3.inzynierka.exceptions.OrganisationAlreadyAssignedException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -15,7 +14,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.HashSet;
-import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -61,18 +59,14 @@ class OrganisationControllerTest {
     }
 
     @Test
-    void shouldCreateOrganisationForOwnerUser() throws Exception {
+    void shouldReturnConflictWhenOrganisationCreationIsRejected() throws Exception {
         User user = User.builder()
                 .email("owner@example.com")
-                .roles(new HashSet<>(Set.of(ownerRole())))
-                .build();
-        Organisation organisation = Organisation.builder()
-                .name("Winnica Nad Wisłą")
-                .city("Lublin")
-                .active(true)
                 .build();
         when(organisationService.createOrganisation(any(), any(User.class)))
-                .thenReturn(organisation);
+                .thenThrow(new OrganisationAlreadyAssignedException(
+                        "You cannot create another organisation because you already belong to one"
+                ));
 
         mockMvc.perform(
                 post("/api/organisations")
@@ -85,7 +79,7 @@ class OrganisationControllerTest {
                                   "city": "Lublin"
                                 }
                                 """)
-        ).andExpect(status().isOk());
+        ).andExpect(status().isConflict());
 
         verify(organisationService).createOrganisation(any(), any(User.class));
     }
@@ -98,9 +92,4 @@ class OrganisationControllerTest {
         );
     }
 
-    private static Role ownerRole() {
-        Role role = new Role();
-        role.setName("OWNER");
-        return role;
-    }
 }
