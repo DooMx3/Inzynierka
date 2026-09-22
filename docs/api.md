@@ -297,6 +297,45 @@ Po wysłaniu zaproszenia użytkownik otrzymuje `membershipStatus = PENDING`
 i zostaje przypisany do wskazanej organizacji. Po zaakceptowaniu zaproszenia
 status powinien zmienić się na `MEMBER`.
 
+### Lista oczekujących zaproszeń
+
+```http
+GET /api/organisations/{id}/invitations
+```
+
+Wymaga właściciela organizacji. Zwraca listę oczekujących zaproszeń bez danych
+wrażliwych użytkowników:
+
+```json
+[
+  {
+    "userId": "c0a86510-a080-161c-81a0-801935740000",
+    "email": "pracownik@example.com",
+    "firstname": "Jan",
+    "lastname": "Kowalski"
+  }
+]
+```
+
+### Anulowanie zaproszenia
+
+```http
+DELETE /api/organisations/{id}/invitations/{userId}
+```
+
+Wymaga właściciela organizacji. Anulowanie usuwa przypisanie użytkownika do
+organizacji i zmienia jego `membershipStatus` z `PENDING` na `NONE`.
+
+Odpowiedź:
+
+- `204 No Content` — zaproszenie zostało anulowane.
+
+Błędy:
+
+- `400 Bad Request` — użytkownik nie istnieje albo nie ma oczekującego
+  zaproszenia w tej organizacji,
+- `403 Forbidden` — żądający nie jest właścicielem organizacji.
+
 ## Zasady wspólne
 
 Wartości generowane przez backend (`id`, `active`, `createdAt`) nie powinny być
