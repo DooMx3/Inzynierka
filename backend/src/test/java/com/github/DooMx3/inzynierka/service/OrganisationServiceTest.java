@@ -12,12 +12,14 @@ import com.github.DooMx3.inzynierka.exceptions.OrganisationAlreadyAssignedExcept
 import com.github.DooMx3.inzynierka.repositories.OrganisationRepository;
 import com.github.DooMx3.inzynierka.repositories.RoleRepository;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -43,142 +45,163 @@ class OrganisationServiceTest {
     @InjectMocks
     private OrganisationService service;
 
-    @Test
-    void shouldDeactivateOrganisationWithoutChangingOtherFields() {
-        UUID id = UUID.randomUUID();
+    @Nested
+    class CreateOrganisation {
 
-        Organisation organisation = Organisation.builder()
-                .id(id)
-                .name("Winnica")
-                .city("Lublin")
-                .motto("Tradycja")
-                .active(true)
-                .build();
-        Role ownerRole = ownerRole();
-        User user = User.builder()
-                .organisation(organisation)
-                .membershipStatus(MembershipStatus.MEMBER)
-                .roles(new java.util.HashSet<>(Set.of(ownerRole)))
-                .build();
+        @Test
+        void shouldCreateOrganisation() {
+            // arrange
+            OrganisationRequest request = new OrganisationRequest(
+                    "Winnica Nad Wisłą",
+                    "1234567890",
+                    "ul. Winna 1",
+                    "20-001",
+                    "Lublin",
+                    null,
+                    "Tradycja"
+            );
 
-        when(repository.findById(id))
-                .thenReturn(Optional.of(organisation));
+            Organisation saved = Organisation.builder()
+                    .name(request.name())
+                    .city(request.city())
+                    .active(true)
+                    .build();
 
-        service.deleteOrganisation(id, user);
-
-        assertFalse(organisation.isActive());
-        assertEquals("Winnica", organisation.getName());
-        assertEquals("Lublin", organisation.getCity());
-        assertEquals("Tradycja", organisation.getMotto());
-        assertNull(user.getOrganisation());
-        assertEquals(MembershipStatus.NONE, user.getMembershipStatus());
-        assertTrue(user.getRoles().stream()
-                .noneMatch(role -> RoleName.OWNER.name().equals(role.getName())));
-
-        verify(repository).findById(id);
-        verify(userRepository).save(user);
-    }
-
-
-    @Test
-    void shouldCreateOrganisation() {
-        OrganisationRequest request = new OrganisationRequest(
-                "Winnica Nad Wisłą",
-                "1234567890",
-                "ul. Winna 1",
-                "20-001",
-                "Lublin",
-                null,
-                "Tradycja"
-        );
-
-        Organisation saved = Organisation.builder()
-                .name(request.name())
-                .city(request.city())
-                .active(true)
-                .build();
-
-        when(repository.save(any(Organisation.class)))
-                .thenReturn(saved);
+            when(repository.save(any(Organisation.class)))
+                    .thenReturn(saved);
 
         Role ownerRole = ownerRole();
         when(roleRepository.findByName("OWNER"))
                 .thenReturn(Optional.of(ownerRole));
 
-        User user = User.builder().build();
+            User user = User.builder().build();
 
-        Organisation result = service.createOrganisation(request, user);
+            // act
+            Organisation result = service.createOrganisation(request, user);
 
-        assertEquals("Winnica Nad Wisłą", result.getName());
-        assertEquals("Lublin", result.getCity());
-        assertTrue(result.isActive());
-        assertSame(saved, user.getOrganisation());
-        assertEquals(MembershipStatus.MEMBER, user.getMembershipStatus());
-        assertTrue(user.getRoles().contains(ownerRole));
+            // assert
+            assertEquals("Winnica Nad Wisłą", result.getName());
+            assertEquals("Lublin", result.getCity());
+            assertTrue(result.isActive());
+            assertSame(saved, user.getOrganisation());
+            assertEquals(MembershipStatus.MEMBER, user.getMembershipStatus());
+            assertTrue(user.getRoles().contains(ownerRole));
 
-        verify(repository).save(any(Organisation.class));
-        verify(roleRepository).findByName("OWNER");
-        verify(userRepository).save(user);
+            verify(repository).save(any(Organisation.class));
+            verify(roleRepository).findByName("OWNER");
+            verify(userRepository).save(user);
+        }
+
+        @Test
+        void shouldRejectOrganisationCreationWithoutAuthenticatedUser() {
+            // arrange
+            OrganisationRequest request = new OrganisationRequest(
+                    "Winnica Nad Wisłą",
+                    "1234567890",
+                    "ul. Winna 1",
+                    "20-001",
+                    "Lublin",
+                    null,
+                    "Tradycja"
+            );
+
+            // act & assert
+            IllegalStateException exception = assertThrows(
+                    IllegalStateException.class,
+                    () -> service.createOrganisation(request, null)
+            );
+
+            assertEquals(
+                    "Authenticated user is required to create an organisation",
+                    exception.getMessage()
+            );
+            verifyNoInteractions(repository, roleRepository, userRepository);
+        }
+
+        @Test
+        void shouldRejectOrganisationCreationForUserAlreadyAssignedToOrganisation() {
+            // arrange
+            Organisation existingOrganisation = Organisation.builder()
+                    .id(UUID.randomUUID())
+                    .name("Istniejąca winnica")
+                    .build();
+            User user = User.builder()
+                    .organisation(existingOrganisation)
+                    .build();
+            OrganisationRequest request = new OrganisationRequest(
+                    "Winnica Nad Wisłą",
+                    "1234567890",
+                    "ul. Winna 1",
+                    "20-001",
+                    "Lublin",
+                    null,
+                    "Tradycja"
+            );
+
+            // act & assert
+            OrganisationAlreadyAssignedException exception = assertThrows(
+                    OrganisationAlreadyAssignedException.class,
+                    () -> service.createOrganisation(request, user)
+            );
+
+            assertEquals(
+                    "You cannot create another organisation because you already belong to one",
+                    exception.getMessage()
+            );
+            verifyNoInteractions(repository, roleRepository, userRepository);
+        }
     }
 
-    @Test
-    void shouldRejectOrganisationCreationWithoutAuthenticatedUser() {
-        OrganisationRequest request = new OrganisationRequest(
-                "Winnica Nad Wisłą",
-                "1234567890",
-                "ul. Winna 1",
-                "20-001",
-                "Lublin",
-                null,
-                "Tradycja"
-        );
+    @Nested
+    class DeleteOrganisation {
 
-        IllegalStateException exception = assertThrows(
-                IllegalStateException.class,
-                () -> service.createOrganisation(request, null)
-        );
+        @Test
+        void shouldDeactivateOrganisationWithoutChangingOtherFields() {
+            // arrange
+            UUID id = UUID.randomUUID();
 
-        assertEquals(
-                "Authenticated user is required to create an organisation",
-                exception.getMessage()
-        );
-        verifyNoInteractions(repository, roleRepository, userRepository);
+            Organisation organisation = Organisation.builder()
+                    .id(id)
+                    .name("Winnica")
+                    .city("Lublin")
+                    .motto("Tradycja")
+                    .active(true)
+                    .build();
+            Role ownerRole = ownerRole();
+            User user = User.builder()
+                    .organisation(organisation)
+                    .membershipStatus(MembershipStatus.MEMBER)
+                    .roles(new HashSet<>(Set.of(ownerRole)))
+                    .build();
+
+            when(repository.findById(id))
+                    .thenReturn(Optional.of(organisation));
+
+            // act
+            service.deleteOrganisation(id, user);
+
+            // assert
+            assertFalse(organisation.isActive());
+            assertEquals("Winnica", organisation.getName());
+            assertEquals("Lublin", organisation.getCity());
+            assertEquals("Tradycja", organisation.getMotto());
+            assertNull(user.getOrganisation());
+            assertEquals(MembershipStatus.NONE, user.getMembershipStatus());
+            assertTrue(user.getRoles().stream()
+                    .noneMatch(role -> RoleName.OWNER.name().equals(role.getName())));
+
+            verify(repository).findById(id);
+            verify(userRepository).save(user);
+        }
     }
 
-    @Test
-    void shouldRejectOrganisationCreationForUserAlreadyAssignedToOrganisation() {
-        Organisation existingOrganisation = Organisation.builder()
-                .id(UUID.randomUUID())
-                .name("Istniejąca winnica")
-                .build();
-        User user = User.builder()
-                .organisation(existingOrganisation)
-                .build();
-        OrganisationRequest request = new OrganisationRequest(
-                "Winnica Nad Wisłą",
-                "1234567890",
-                "ul. Winna 1",
-                "20-001",
-                "Lublin",
-                null,
-                "Tradycja"
-        );
+    @Nested
+    class PatchOrganisation {
 
-        OrganisationAlreadyAssignedException exception = assertThrows(
-                OrganisationAlreadyAssignedException.class,
-                () -> service.createOrganisation(request, user)
-        );
-
-        assertEquals(
-                "You cannot create another organisation because you already belong to one",
-                exception.getMessage()
-        );
-        verifyNoInteractions(repository, roleRepository, userRepository);
-    }
-
-    @Test
-    void shouldUpdateOnlyProvidedPatchFields() {
-        UUID id = UUID.randomUUID();
+        @Test
+        void shouldUpdateOnlyProvidedPatchFields() {
+            // arrange
+            UUID id = UUID.randomUUID();
 
         Organisation organisation = Organisation.builder()
                 .id(id)
@@ -193,26 +216,29 @@ class OrganisationServiceTest {
                 .roles(new java.util.HashSet<>(Set.of(ownerRole)))
                 .build();
 
-        OrganisationPatchRequest request = new OrganisationPatchRequest(
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                "Nowe motto"
-        );
+            OrganisationPatchRequest request = new OrganisationPatchRequest(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "Nowe motto"
+            );
 
-        when(repository.findById(id))
-                .thenReturn(Optional.of(organisation));
-        when(repository.save(organisation))
-                .thenReturn(organisation);
+            when(repository.findById(id))
+                    .thenReturn(Optional.of(organisation));
+            when(repository.save(organisation))
+                    .thenReturn(organisation);
 
-        Organisation result = service.patchOrganisation(id, request, user);
+            // act
+            Organisation result = service.patchOrganisation(id, request, user);
 
-        assertEquals("Stara nazwa", result.getName());
-        assertEquals("Lublin", result.getCity());
-        assertEquals("Nowe motto", result.getMotto());
+            // assert
+            assertEquals("Stara nazwa", result.getName());
+            assertEquals("Lublin", result.getCity());
+            assertEquals("Nowe motto", result.getMotto());
+        }
     }
 
     @Test
