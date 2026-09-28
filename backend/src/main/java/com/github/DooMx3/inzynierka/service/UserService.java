@@ -98,6 +98,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
     public List<UserInvitationResponse> getInvitations(User authenticatedUser) {
         User user = loadAuthenticatedUser(authenticatedUser);
         if (user.getMembershipStatus() != MembershipStatus.PENDING
@@ -111,6 +112,7 @@ public class UserService {
         ));
     }
 
+    @Transactional
     public void acceptInvitation(UUID organisationId, User authenticatedUser) {
         User user = requirePendingInvitation(authenticatedUser, organisationId);
         if (!user.getOrganisation().isActive()) {
@@ -121,6 +123,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
     public void rejectInvitation(UUID organisationId, User authenticatedUser) {
         User user = requirePendingInvitation(authenticatedUser, organisationId);
         user.setOrganisation(null);
