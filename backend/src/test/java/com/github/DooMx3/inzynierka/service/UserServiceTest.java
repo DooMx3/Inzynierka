@@ -2,8 +2,11 @@ package com.github.DooMx3.inzynierka.service;
 
 import com.github.DooMx3.inzynierka.dto.user.ChangePasswordRequest;
 import com.github.DooMx3.inzynierka.dto.user.DeactivateUserRequest;
+import com.github.DooMx3.inzynierka.dto.user.ResetPasswordRequest;
 import com.github.DooMx3.inzynierka.dto.user.UserPatchRequest;
+import com.github.DooMx3.inzynierka.entities.PasswordResetToken;
 import com.github.DooMx3.inzynierka.entities.User;
+import com.github.DooMx3.inzynierka.repositories.PasswordResetTokenRepository;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -13,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,6 +27,12 @@ class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private PasswordResetTokenRepository passwordResetTokenRepository;
+
+    @Mock
+    private EmailService emailService;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -178,15 +188,100 @@ class UserServiceTest {
             assertEquals(NEW_PHONE_NUMBER, existingUser.getPhoneNumber());
             verify(userRepository).save(existingUser);
         }
+        @Test
+        void shouldThrowExceptionWhenUserNotFound() {
+            // arrange
+            when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
+
+            // act & assert
+            UserPatchRequest userPatchRequest = new UserPatchRequest(NEW_EMAIL, NEW_PHONE_NUMBER);
+            assertThrows(IllegalArgumentException.class, () -> service.patchUser(userPatchRequest, EMAIL));
+        }
     }
 
-    @Test
-    void shouldThrowExceptionWhenUserNotFound() {
-        // arrange
-        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
+    @Nested
+    class sendPasswordResetEmail {
+        @Test
+        void shouldThrowExceptionWhenUserNotFound() {
+            // arrange
+            when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
 
-        // act & assert
-        UserPatchRequest userPatchRequest = new UserPatchRequest(NEW_EMAIL, NEW_PHONE_NUMBER);
-        assertThrows(IllegalArgumentException.class, () -> service.patchUser(userPatchRequest, EMAIL));
+            // act & assert
+            assertThrows(IllegalArgumentException.class, () -> service.sendPasswordResetEmail(EMAIL));
+        }
+
+        @Test
+        void shouldSendPasswordResetEmailWhenUserExists() {
+            // arrange
+            User user = new User();
+            user.setEmail(EMAIL);
+            when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+
+            // act
+            service.sendPasswordResetEmail(EMAIL);
+
+            // assert
+            verify(userRepository).findByEmail(EMAIL);
+            verify(emailService).sendPasswordResetEmail(eq(EMAIL), anyString());
+            verify(passwordResetTokenRepository).save(any());
+        }
     }
+
+    @Nested
+    class resetPassword {
+        @Test
+        void shouldThrowExceptionWhenTokenIsInvalid() {
+            // arrange
+            when(passwordResetTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.empty());
+
+            // act & assert
+            assertThrows(IllegalArgumentException.class, () -> service.resetPassword(new ResetPasswordRequest("invalidToken", NEW_PASSWORD)));
+        }
+
+        @Test
+        void shouldThrowExceptionWhenTokenIsAlreadyUsed() {
+            // arrange
+            PasswordResetToken token = new PasswordResetToken();
+            token.setUsed(true);
+            token.setExpiryDate(Instant.now().plusSeconds(3600));
+            when(passwordResetTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(token));
+
+            // act & assert
+            assertThrows(IllegalArgumentException.class, () -> service.resetPassword(new ResetPasswordRequest("validToken", NEW_PASSWORD)));
+        }
+
+        @Test
+        void shouldThrowExceptionWhenTokenIsExpired() {
+            // arrange
+            PasswordResetToken token = new PasswordResetToken();
+            token.setUsed(false);
+            token.setExpiryDate(Instant.now().minusSeconds(3600));
+            when(passwordResetTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(token));
+
+            // act & assert
+            assertThrows(IllegalArgumentException.class, () -> service.resetPassword(new ResetPasswordRequest("validToken", NEW_PASSWORD)));
+        }
+
+        @Test
+        void shouldResetPasswordWhenTokenIsValid() {
+            // arrange
+            User user = new User();
+            PasswordResetToken token = new PasswordResetToken();
+            token.setUsed(false);
+            token.setExpiryDate(Instant.now().plusSeconds(3600));
+            token.setUser(user);
+            when(passwordResetTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(token));
+            when(passwordEncoder.encode(NEW_PASSWORD)).thenReturn(ENCODED_NEW_PASSWORD);
+
+            // act
+            service.resetPassword(new ResetPasswordRequest("validToken", NEW_PASSWORD));
+
+            // assert
+            assertTrue(token.isUsed());
+            assertEquals(ENCODED_NEW_PASSWORD, user.getPassword());
+            verify(passwordResetTokenRepository).save(token);
+            verify(userRepository).save(user);
+        }
+    }
+
 }
