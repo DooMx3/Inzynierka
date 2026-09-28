@@ -4,6 +4,7 @@ import com.github.DooMx3.inzynierka.dto.user.ChangePasswordRequest;
 import com.github.DooMx3.inzynierka.dto.user.DeactivateUserRequest;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,71 +36,79 @@ class UserServiceTest {
 
     private static final String EMAIL = "example@example.com";
 
-    @Test
-    void shouldThrowExceptionWhenOldPasswordDoesNotMatch() {
-        // arrange
-        ChangePasswordRequest request = new ChangePasswordRequest(OLD_PASSWORD, NEW_PASSWORD);
-        User user = new User();
-        user.setPassword(ENCODED_OLD_PASSWORD);
-        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(OLD_PASSWORD, ENCODED_OLD_PASSWORD)).thenReturn(false);
+    @Nested
+    class ChangePassword {
 
-        // assert
-        assertThrows(IllegalArgumentException.class, () -> service.changePassword(request, EMAIL));
-        verify(userRepository, never()).save(any());
+        @Test
+        void shouldThrowExceptionWhenOldPasswordDoesNotMatch() {
+            // arrange
+            ChangePasswordRequest request = new ChangePasswordRequest(OLD_PASSWORD, NEW_PASSWORD);
+            User user = new User();
+            user.setPassword(ENCODED_OLD_PASSWORD);
+            when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+            when(passwordEncoder.matches(OLD_PASSWORD, ENCODED_OLD_PASSWORD)).thenReturn(false);
+
+            // assert
+            assertThrows(IllegalArgumentException.class, () -> service.changePassword(request, EMAIL));
+            verify(userRepository, never()).save(any());
+        }
+
+        @Test
+        void shouldChangePasswordWhenOldPasswordMatches() {
+            // arrange
+            ChangePasswordRequest request = new ChangePasswordRequest(OLD_PASSWORD, NEW_PASSWORD);
+            User user = new User();
+            user.setPassword(ENCODED_OLD_PASSWORD);
+            when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+            when(passwordEncoder.matches(OLD_PASSWORD, ENCODED_OLD_PASSWORD)).thenReturn(true);
+            when(passwordEncoder.encode(NEW_PASSWORD)).thenReturn(ENCODED_NEW_PASSWORD);
+
+            // act
+            service.changePassword(request, EMAIL);
+
+            // assert
+            assertEquals(ENCODED_NEW_PASSWORD, user.getPassword());
+            verify(userRepository).save(user);
+        }
     }
 
-    @Test
-    void shouldChangePasswordWhenOldPasswordMatches() {
-        // arrange
-        ChangePasswordRequest request = new ChangePasswordRequest(OLD_PASSWORD, NEW_PASSWORD);
-        User user = new User();
-        user.setPassword(ENCODED_OLD_PASSWORD);
-        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(OLD_PASSWORD, ENCODED_OLD_PASSWORD)).thenReturn(true);
-        when(passwordEncoder.encode(NEW_PASSWORD)).thenReturn(ENCODED_NEW_PASSWORD);
+    @Nested
+    class DeactivateUser {
 
-        // act
-        service.changePassword(request, EMAIL);
+        @Test
+        void shouldDeactivateUserWhenPasswordMatches() {
+            // arrange
+            User user = new User();
+            user.setPassword(ENCODED_OLD_PASSWORD);
+            user.setActive(true);
+            DeactivateUserRequest request = new DeactivateUserRequest(OLD_PASSWORD);
+            when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+            when(passwordEncoder.matches(OLD_PASSWORD, ENCODED_OLD_PASSWORD)).thenReturn(true);
 
-        // assert
-        assertEquals(ENCODED_NEW_PASSWORD, user.getPassword());
-        verify(userRepository).save(user);
-    }
+            // act
+            service.deactivateUser(request, EMAIL);
 
-    @Test
-    void shouldDeactivateUserWhenPasswordMatches() {
-        // arrange
-        User user = new User();
-        user.setPassword(ENCODED_OLD_PASSWORD);
-        user.setActive(true);
-        DeactivateUserRequest request = new DeactivateUserRequest(OLD_PASSWORD);
-        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(OLD_PASSWORD, ENCODED_OLD_PASSWORD)).thenReturn(true);
+            // assert
+            assertFalse(user.isActive());
+            verify(userRepository).save(user);
+        }
 
-        // act
-        service.deactivateUser(request, EMAIL);
+        @Test
+        void shouldThrowExceptionWhenDeactivatePasswordDoesNotMatch() {
+            // arrange
+            User user = new User();
+            user.setPassword(ENCODED_OLD_PASSWORD);
+            user.setActive(true);
+            DeactivateUserRequest request = new DeactivateUserRequest(OLD_PASSWORD);
 
-        // assert
-        assertFalse(user.isActive());
-        verify(userRepository).save(user);
-    }
+            // act
+            when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+            when(passwordEncoder.matches(OLD_PASSWORD, ENCODED_OLD_PASSWORD)).thenReturn(false);
 
-    @Test
-    void shouldThrowExceptionWhenDeactivatePasswordDoesNotMatch() {
-        // arrange
-        User user = new User();
-        user.setPassword(ENCODED_OLD_PASSWORD);
-        user.setActive(true);
-        DeactivateUserRequest request = new DeactivateUserRequest(OLD_PASSWORD);
-
-        // act
-        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(OLD_PASSWORD, ENCODED_OLD_PASSWORD)).thenReturn(false);
-
-        // assert
-        assertThrows(IllegalArgumentException.class, () -> service.deactivateUser(request, EMAIL));
-        assertTrue(user.isActive());
-        verify(userRepository, never()).save(user);
+            // assert
+            assertThrows(IllegalArgumentException.class, () -> service.deactivateUser(request, EMAIL));
+            assertTrue(user.isActive());
+            verify(userRepository, never()).save(user);
+        }
     }
 }
