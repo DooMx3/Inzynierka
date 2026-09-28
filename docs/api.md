@@ -336,6 +336,48 @@ Błędy:
   zaproszenia w tej organizacji,
 - `403 Forbidden` — żądający nie jest właścicielem organizacji.
 
+### Lista zaproszeń bieżącego użytkownika
+
+```http
+GET /api/user/invitations
+```
+
+Zwraca oczekujące zaproszenie bieżącego użytkownika. Ponieważ użytkownik może
+należeć tylko do jednej organizacji, lista zawiera zero albo jeden element:
+
+```json
+[
+  {
+    "organisationId": "c0a86510-a080-161c-81a0-801935740000",
+    "organisationName": "Winnica Nad Wisłą"
+  }
+]
+```
+
+### Akceptowanie zaproszenia
+
+```http
+POST /api/user/invitations/{organisationId}/accept
+```
+
+Po poprawnym zaakceptowaniu status użytkownika zmienia się z `PENDING` na
+`MEMBER`. Odpowiedź: `204 No Content`.
+
+### Odrzucanie zaproszenia
+
+```http
+DELETE /api/user/invitations/{organisationId}
+```
+
+Po odrzuceniu użytkownik zostaje odłączony od organizacji, a jego status zmienia
+się z `PENDING` na `NONE`. Odpowiedź: `204 No Content`.
+
+Dla akceptacji i odrzucenia:
+
+- `400 Bad Request` — zaproszenie nie istnieje albo nie dotyczy wskazanej
+  organizacji,
+- `401 Unauthorized` — brak uwierzytelnienia.
+
 ## Zasady wspólne
 
 Wartości generowane przez backend (`id`, `active`, `createdAt`) nie powinny być
