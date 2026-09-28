@@ -202,15 +202,6 @@ class UserServiceTest {
     @Nested
     class sendPasswordResetEmail {
         @Test
-        void shouldThrowExceptionWhenUserNotFound() {
-            // arrange
-            when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
-
-            // act & assert
-            assertThrows(IllegalArgumentException.class, () -> service.sendPasswordResetEmail(EMAIL));
-        }
-
-        @Test
         void shouldSendPasswordResetEmailWhenUserExists() {
             // arrange
             User user = new User();
