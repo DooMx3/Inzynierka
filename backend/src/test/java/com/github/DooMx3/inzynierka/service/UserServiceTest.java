@@ -278,52 +278,55 @@ class UserServiceTest {
         }
     }
 
-        // assert
-        assertThrows(IllegalArgumentException.class, () -> service.deactivateUser(request, EMAIL));
-        assertTrue(user.isActive());
-        verify(userRepository, never()).save(user);
-    }
+    @Nested
+    class UserInvitation {
+        @Test
+        void shouldAcceptPendingInvitation() {
+            // arrange
+            UUID userId = UUID.randomUUID();
+            UUID organisationId = UUID.randomUUID();
+            Organisation organisation = Organisation.builder()
+                    .id(organisationId)
+                    .name("Winnica")
+                    .active(true)
+                    .build();
+            User user = User.builder()
+                    .id(userId)
+                    .organisation(organisation)
+                    .membershipStatus(MembershipStatus.PENDING)
+                    .build();
+            when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-    @Test
-    void shouldAcceptPendingInvitation() {
-        UUID userId = UUID.randomUUID();
-        UUID organisationId = UUID.randomUUID();
-        Organisation organisation = Organisation.builder()
-                .id(organisationId)
-                .name("Winnica")
-                .active(true)
-                .build();
-        User user = User.builder()
-                .id(userId)
-                .organisation(organisation)
-                .membershipStatus(MembershipStatus.PENDING)
-                .build();
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+            // act
+            service.acceptInvitation(organisationId, user);
 
-        service.acceptInvitation(organisationId, user);
+            // assert
+            assertEquals(MembershipStatus.MEMBER, user.getMembershipStatus());
+            verify(userRepository).save(user);
+        }
 
-        assertEquals(MembershipStatus.MEMBER, user.getMembershipStatus());
-        verify(userRepository).save(user);
-    }
+        @Test
+        void shouldRejectPendingInvitation() {
+            // arrange
+            UUID userId = UUID.randomUUID();
+            UUID organisationId = UUID.randomUUID();
+            Organisation organisation = Organisation.builder()
+                    .id(organisationId)
+                    .build();
+            User user = User.builder()
+                    .id(userId)
+                    .organisation(organisation)
+                    .membershipStatus(MembershipStatus.PENDING)
+                    .build();
+            when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-    @Test
-    void shouldRejectPendingInvitation() {
-        UUID userId = UUID.randomUUID();
-        UUID organisationId = UUID.randomUUID();
-        Organisation organisation = Organisation.builder()
-                .id(organisationId)
-                .build();
-        User user = User.builder()
-                .id(userId)
-                .organisation(organisation)
-                .membershipStatus(MembershipStatus.PENDING)
-                .build();
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+            // act
+            service.rejectInvitation(organisationId, user);
 
-        service.rejectInvitation(organisationId, user);
-
-        assertNull(user.getOrganisation());
-        assertEquals(MembershipStatus.NONE, user.getMembershipStatus());
-        verify(userRepository).save(user);
+            // assert
+            assertNull(user.getOrganisation());
+            assertEquals(MembershipStatus.NONE, user.getMembershipStatus());
+            verify(userRepository).save(user);
+        }
     }
 }
