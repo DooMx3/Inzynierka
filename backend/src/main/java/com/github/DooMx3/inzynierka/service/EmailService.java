@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 public class EmailService {
     private final JavaMailSender mailSender;
 
-    @Async
+    @Async("mailExecutor")
     public void sendPasswordResetEmail(String toAddress, String resetLink) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
