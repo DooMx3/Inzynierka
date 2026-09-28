@@ -2,6 +2,7 @@ package com.github.DooMx3.inzynierka.service;
 
 import com.github.DooMx3.inzynierka.dto.user.ChangePasswordRequest;
 import com.github.DooMx3.inzynierka.dto.user.DeactivateUserRequest;
+import com.github.DooMx3.inzynierka.dto.user.UserPatchRequest;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
 import org.junit.jupiter.api.Nested;
@@ -35,6 +36,10 @@ class UserServiceTest {
     private static final String ENCODED_NEW_PASSWORD = "encodedNewPassword";
 
     private static final String EMAIL = "example@example.com";
+    private static final String NEW_EMAIL = "example2@example.com";
+
+    private static final String PHONE_NUMBER = "123456789";
+    private static final String NEW_PHONE_NUMBER = "987654321";
 
     @Nested
     class ChangePassword {
@@ -69,6 +74,16 @@ class UserServiceTest {
             // assert
             assertEquals(ENCODED_NEW_PASSWORD, user.getPassword());
             verify(userRepository).save(user);
+        }
+
+        @Test
+        void shouldThrowExceptionWhenUserNotFound() {
+            // arrange
+            when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
+
+            // act & assert
+            ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest(NEW_EMAIL, NEW_PHONE_NUMBER);
+            assertThrows(IllegalArgumentException.class, () -> service.changePassword(changePasswordRequest, EMAIL));
         }
     }
 
@@ -110,5 +125,68 @@ class UserServiceTest {
             assertTrue(user.isActive());
             verify(userRepository, never()).save(user);
         }
+
+        @Test
+        void shouldThrowExceptionWhenUserNotFound() {
+            // arrange
+            when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
+
+            // act & assert
+            DeactivateUserRequest deactivateUserRequest = new DeactivateUserRequest(OLD_PASSWORD);
+            assertThrows(IllegalArgumentException.class, () -> service.deactivateUser(deactivateUserRequest, EMAIL));
+        }
+    }
+
+    @Nested
+    class PatchUser {
+
+        @Test
+        void shouldThrowExceptionWhenEmailIsAlreadyInUse() {
+            // arrange
+            User existingUser = new User();
+            existingUser.setEmail(EMAIL);
+            existingUser.setPhoneNumber(PHONE_NUMBER);
+            User newUser = new User();
+            newUser.setEmail(NEW_EMAIL);
+            newUser.setPhoneNumber(NEW_PHONE_NUMBER);
+            when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(existingUser));
+            when(userRepository.findByEmail(NEW_EMAIL)).thenReturn(Optional.of(newUser));
+
+            // act
+            UserPatchRequest request = new UserPatchRequest(NEW_EMAIL, NEW_PHONE_NUMBER);
+            assertThrows(IllegalArgumentException.class, () -> service.patchUser(request, EMAIL));
+
+            // assert
+            verify(userRepository, never()).save(existingUser);
+        }
+
+        @Test
+        void shouldPatchUserWhenEmailIsNotInUse() {
+            // arrange
+            User existingUser = new User();
+            existingUser.setEmail(EMAIL);
+            existingUser.setPhoneNumber(PHONE_NUMBER);
+            when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(existingUser));
+            when(userRepository.findByEmail(NEW_EMAIL)).thenReturn(Optional.empty());
+
+            // act
+            UserPatchRequest request = new UserPatchRequest(NEW_EMAIL, NEW_PHONE_NUMBER);
+            service.patchUser(request, EMAIL);
+
+            // assert
+            assertEquals(NEW_EMAIL, existingUser.getEmail());
+            assertEquals(NEW_PHONE_NUMBER, existingUser.getPhoneNumber());
+            verify(userRepository).save(existingUser);
+        }
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUserNotFound() {
+        // arrange
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
+
+        // act & assert
+        UserPatchRequest userPatchRequest = new UserPatchRequest(NEW_EMAIL, NEW_PHONE_NUMBER);
+        assertThrows(IllegalArgumentException.class, () -> service.patchUser(userPatchRequest, EMAIL));
     }
 }
