@@ -3,6 +3,8 @@ package com.github.DooMx3.inzynierka.service;
 import com.github.DooMx3.inzynierka.dto.user.ChangePasswordRequest;
 import com.github.DooMx3.inzynierka.dto.user.DeactivateUserRequest;
 import com.github.DooMx3.inzynierka.entities.User;
+import com.github.DooMx3.inzynierka.entities.Organisation;
+import com.github.DooMx3.inzynierka.enums.MembershipStatus;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -101,5 +104,48 @@ class UserServiceTest {
         assertThrows(IllegalArgumentException.class, () -> service.deactivateUser(request, EMAIL));
         assertTrue(user.isActive());
         verify(userRepository, never()).save(user);
+    }
+
+    @Test
+    void shouldAcceptPendingInvitation() {
+        UUID userId = UUID.randomUUID();
+        UUID organisationId = UUID.randomUUID();
+        Organisation organisation = Organisation.builder()
+                .id(organisationId)
+                .name("Winnica")
+                .active(true)
+                .build();
+        User user = User.builder()
+                .id(userId)
+                .organisation(organisation)
+                .membershipStatus(MembershipStatus.PENDING)
+                .build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        service.acceptInvitation(organisationId, user);
+
+        assertEquals(MembershipStatus.MEMBER, user.getMembershipStatus());
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void shouldRejectPendingInvitation() {
+        UUID userId = UUID.randomUUID();
+        UUID organisationId = UUID.randomUUID();
+        Organisation organisation = Organisation.builder()
+                .id(organisationId)
+                .build();
+        User user = User.builder()
+                .id(userId)
+                .organisation(organisation)
+                .membershipStatus(MembershipStatus.PENDING)
+                .build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        service.rejectInvitation(organisationId, user);
+
+        assertNull(user.getOrganisation());
+        assertEquals(MembershipStatus.NONE, user.getMembershipStatus());
+        verify(userRepository).save(user);
     }
 }
