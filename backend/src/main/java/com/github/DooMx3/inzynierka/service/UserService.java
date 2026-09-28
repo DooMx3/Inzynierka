@@ -66,16 +66,17 @@ public class UserService {
     }
 
     public void sendPasswordResetEmail(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("There is no such user"));
-        PasswordResetToken token = new PasswordResetToken();
-        token.setUser(user);
-        String rawToken = UUID.randomUUID().toString();
-        token.setTokenHash(DigestUtils.sha256Hex(rawToken));
-        token.setExpiryDate(Instant.now().plus(EXPIRATION_MINUTES, ChronoUnit.MINUTES));
-        passwordResetTokenRepository.save(token);
+        userRepository.findByEmail(email).ifPresent(user -> {
+            PasswordResetToken token = new PasswordResetToken();
+            token.setUser(user);
+            String rawToken = UUID.randomUUID().toString();
+            token.setTokenHash(DigestUtils.sha256Hex(rawToken));
+            token.setExpiryDate(Instant.now().plus(EXPIRATION_MINUTES, ChronoUnit.MINUTES));
+            passwordResetTokenRepository.save(token);
 
-        String resetLink = resetPasswordBaseUrl + "?token=" + rawToken;
-        emailService.sendPasswordResetEmail(user.getEmail(), resetLink);
+            String resetLink = resetPasswordBaseUrl + "?token=" + rawToken;
+            emailService.sendPasswordResetEmail(user.getEmail(), resetLink);
+        });
     }
 
     @Transactional
