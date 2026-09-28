@@ -259,7 +259,10 @@ Notatki:
 - Jest to soft delete.
 - Rekord organizacji pozostaje w bazie.
 - `id` i pozostałe dane organizacji pozostają zachowane.
-- Zmieniane jest tylko `active` na `false`.
+- Organizacja zostaje oznaczona jako nieaktywna (`active = false`).
+- Oczekujące zaproszenia do tej organizacji są czyszczone: zaproszeni
+  użytkownicy zostają odłączeni, a ich `membershipStatus` zmienia się
+  z `PENDING` na `NONE`.
 - Nie należy wywoływać fizycznego `delete` bezpośrednio na repozytorium.
 
 Błędy:

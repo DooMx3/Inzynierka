@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -173,9 +174,17 @@ class OrganisationServiceTest {
                     .membershipStatus(MembershipStatus.MEMBER)
                     .roles(new HashSet<>(Set.of(ownerRole)))
                     .build();
+            User invitedUser = User.builder()
+                    .organisation(organisation)
+                    .membershipStatus(MembershipStatus.PENDING)
+                    .build();
 
             when(repository.findById(id))
                     .thenReturn(Optional.of(organisation));
+            when(userRepository.findByOrganisationAndMembershipStatus(
+                    organisation,
+                    MembershipStatus.PENDING
+            )).thenReturn(List.of(invitedUser));
 
             // act
             service.deleteOrganisation(id, user);
@@ -189,8 +198,15 @@ class OrganisationServiceTest {
             assertEquals(MembershipStatus.NONE, user.getMembershipStatus());
             assertTrue(user.getRoles().stream()
                     .noneMatch(role -> RoleName.OWNER.name().equals(role.getName())));
+            assertNull(invitedUser.getOrganisation());
+            assertEquals(MembershipStatus.NONE, invitedUser.getMembershipStatus());
 
             verify(repository).findById(id);
+            verify(userRepository).findByOrganisationAndMembershipStatus(
+                    organisation,
+                    MembershipStatus.PENDING
+            );
+            verify(userRepository).saveAll(List.of(invitedUser));
             verify(userRepository).save(user);
         }
     }

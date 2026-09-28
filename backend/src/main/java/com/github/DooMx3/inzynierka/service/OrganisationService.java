@@ -94,6 +94,16 @@ public class OrganisationService {
     public void deleteOrganisation(UUID id, User user) {
         Organisation organisation = getOrganisation(id, user);
 
+        List<User> pendingInvitations = userRepository.findByOrganisationAndMembershipStatus(
+                organisation,
+                MembershipStatus.PENDING
+        );
+        pendingInvitations.forEach(invitedUser -> {
+            invitedUser.setOrganisation(null);
+            invitedUser.setMembershipStatus(MembershipStatus.NONE);
+        });
+        userRepository.saveAll(pendingInvitations);
+
         organisation.setActive(false);
         user.setOrganisation(null);
         user.setMembershipStatus(MembershipStatus.NONE);
