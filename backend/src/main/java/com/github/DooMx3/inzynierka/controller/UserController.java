@@ -2,6 +2,9 @@ package com.github.DooMx3.inzynierka.controller;
 
 import com.github.DooMx3.inzynierka.dto.user.ChangePasswordRequest;
 import com.github.DooMx3.inzynierka.dto.user.UserInvitationResponse;
+import com.github.DooMx3.inzynierka.dto.user.DeactivateUserRequest;
+import com.github.DooMx3.inzynierka.dto.user.ForgotPasswordRequest;
+import com.github.DooMx3.inzynierka.dto.user.ResetPasswordRequest;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.service.UserService;
 import jakarta.validation.Valid;
@@ -23,10 +26,31 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @PostMapping
+    @PostMapping("/change-password")
     public ResponseEntity<String> changePassword(@RequestBody @Valid ChangePasswordRequest request, @AuthenticationPrincipal User user) {
         service.changePassword(request, user.getEmail());
         return ResponseEntity.ok("Password changed successfully");
+    }
+
+    @PostMapping("/deactivate")
+    public ResponseEntity<String> deactivateUser(@RequestBody @Valid DeactivateUserRequest request, @AuthenticationPrincipal User user) {
+        service.deactivateUser(request, user.getEmail());
+        return ResponseEntity.ok("User deactivated successfully");
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        service.sendPasswordResetEmail(request.email());
+
+        return ResponseEntity.ok(
+                "If an account with that email exists, a password reset link has been sent."
+        );
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String > resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        service.resetPassword(request);
+        return ResponseEntity.ok("Password reset successfully.");
     }
 
     @GetMapping("/invitations")
