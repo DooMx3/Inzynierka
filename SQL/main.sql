@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS "user" (
 	"id" UUID NOT NULL,
 	"organisationId" UUID,
 	-- Enum { NONE, PENDING, MEMBER }
-	-- Invitation status sent by the Owner. Before sending: NONE, after sending: PENDING, after accepting: MEMBER, after rejecting: NONE.
+	-- NONE means no organisation, PENDING means an invitation awaits a response, MEMBER means accepted membership.
 	"membershipStatus" VARCHAR(8) DEFAULT 'NONE',
 	-- User''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''s name
 	"firstName" VARCHAR(128) NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS "user" (
 
 
 COMMENT ON COLUMN "user"."membershipStatus" IS 'Enum { NONE, PENDING, MEMBER }
-Invitation status sent by the Owner. Before sending: NONE, after sending: PENDING, after accepting: MEMBER, after rejecting: NONE.';
+NONE means no organisation, PENDING means an invitation awaits a response, MEMBER means accepted membership.';
 COMMENT ON COLUMN "user"."firstName" IS 'User''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''s name';
 COMMENT ON COLUMN "user"."lastName" IS 'User''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''s surname';
 

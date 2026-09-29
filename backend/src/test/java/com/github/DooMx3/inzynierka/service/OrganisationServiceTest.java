@@ -2,6 +2,7 @@ package com.github.DooMx3.inzynierka.service;
 
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationPatchRequest;
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationRequest;
+import com.github.DooMx3.inzynierka.dto.organisation.OrganisationInvitationRequest;
 import com.github.DooMx3.inzynierka.entities.Organisation;
 import com.github.DooMx3.inzynierka.entities.Role;
 import com.github.DooMx3.inzynierka.entities.User;
@@ -19,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -27,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -69,10 +72,9 @@ class OrganisationServiceTest {
             when(repository.save(any(Organisation.class)))
                     .thenReturn(saved);
 
-            Role ownerRole = new Role();
-            ownerRole.setName("OWNER");
-            when(roleRepository.findByName("OWNER"))
-                    .thenReturn(Optional.of(ownerRole));
+        Role ownerRole = ownerRole();
+        when(roleRepository.findByName("OWNER"))
+                .thenReturn(Optional.of(ownerRole));
 
             User user = User.builder().build();
 
@@ -167,16 +169,23 @@ class OrganisationServiceTest {
                     .motto("Tradycja")
                     .active(true)
                     .build();
-            Role ownerRole = new Role();
-            ownerRole.setName(RoleName.OWNER.name());
+            Role ownerRole = ownerRole();
             User user = User.builder()
                     .organisation(organisation)
                     .membershipStatus(MembershipStatus.MEMBER)
                     .roles(new HashSet<>(Set.of(ownerRole)))
                     .build();
+            User invitedUser = User.builder()
+                    .organisation(organisation)
+                    .membershipStatus(MembershipStatus.PENDING)
+                    .build();
 
             when(repository.findById(id))
                     .thenReturn(Optional.of(organisation));
+            when(userRepository.findByOrganisationAndMembershipStatus(
+                    organisation,
+                    MembershipStatus.PENDING
+            )).thenReturn(List.of(invitedUser));
 
             // act
             service.deleteOrganisation(id, user);
@@ -190,8 +199,15 @@ class OrganisationServiceTest {
             assertEquals(MembershipStatus.NONE, user.getMembershipStatus());
             assertTrue(user.getRoles().stream()
                     .noneMatch(role -> RoleName.OWNER.name().equals(role.getName())));
+            assertNull(invitedUser.getOrganisation());
+            assertEquals(MembershipStatus.NONE, invitedUser.getMembershipStatus());
 
             verify(repository).findById(id);
+            verify(userRepository).findByOrganisationAndMembershipStatus(
+                    organisation,
+                    MembershipStatus.PENDING
+            );
+            verify(userRepository).saveAll(List.of(invitedUser));
             verify(userRepository).save(user);
         }
     }
@@ -204,19 +220,18 @@ class OrganisationServiceTest {
             // arrange
             UUID id = UUID.randomUUID();
 
-            Organisation organisation = Organisation.builder()
-                    .id(id)
-                    .name("Stara nazwa")
-                    .city("Lublin")
-                    .motto("Stare motto")
-                    .active(true)
-                    .build();
-            Role ownerRole = new Role();
-            ownerRole.setName(RoleName.OWNER.name());
-            User user = User.builder()
-                    .organisation(organisation)
-                    .roles(new HashSet<>(Set.of(ownerRole)))
-                    .build();
+        Organisation organisation = Organisation.builder()
+                .id(id)
+                .name("Stara nazwa")
+                .city("Lublin")
+                .motto("Stare motto")
+                .active(true)
+                .build();
+        Role ownerRole = ownerRole();
+        User user = User.builder()
+                .organisation(organisation)
+                .roles(new java.util.HashSet<>(Set.of(ownerRole)))
+                .build();
 
             OrganisationPatchRequest request = new OrganisationPatchRequest(
                     null,
@@ -241,5 +256,177 @@ class OrganisationServiceTest {
             assertEquals("Lublin", result.getCity());
             assertEquals("Nowe motto", result.getMotto());
         }
+    }
+
+    @Nested
+    class OrganisationInvitation {
+        @Test
+        void shouldInviteUserToOrganisation() {
+            // arrange
+            UUID organisationId = UUID.randomUUID();
+            Organisation organisation = Organisation.builder().id(organisationId).active(true).build();
+            Role ownerRole = ownerRole();
+            User owner = User.builder()
+                    .id(UUID.randomUUID())
+                    .organisation(organisation)
+                    .roles(new java.util.HashSet<>(Set.of(ownerRole)))
+                    .build();
+            User invitedUser = User.builder()
+                    .id(UUID.randomUUID())
+                    .email("worker@example.com")
+                    .membershipStatus(MembershipStatus.NONE)
+                    .build();
+
+            when(repository.findById(organisationId)).thenReturn(Optional.of(organisation));
+            when(userRepository.findByEmail(invitedUser.getEmail())).thenReturn(Optional.of(invitedUser));
+
+            // act
+            service.inviteUser(
+                    organisationId,
+                    new OrganisationInvitationRequest(invitedUser.getEmail()),
+                    owner
+            );
+
+            // assert
+            assertSame(organisation, invitedUser.getOrganisation());
+            assertEquals(MembershipStatus.PENDING, invitedUser.getMembershipStatus());
+            verify(userRepository).save(invitedUser);
+        }
+
+        @Test
+        void shouldRejectInvitationWhenAccountDoesNotExist() {
+            // arrange
+            UUID organisationId = UUID.randomUUID();
+            Organisation organisation = Organisation.builder()
+                    .id(organisationId)
+                    .active(true)
+                    .build();
+            User owner = User.builder()
+                    .id(UUID.randomUUID())
+                    .organisation(organisation)
+                    .roles(new HashSet<>(Set.of(ownerRole())))
+                    .build();
+            OrganisationInvitationRequest request =
+                    new OrganisationInvitationRequest("missing@example.com");
+
+            when(repository.findById(organisationId)).thenReturn(Optional.of(organisation));
+            when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
+
+            // act & assert
+            IllegalArgumentException exception = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> service.inviteUser(organisationId, request, owner)
+            );
+
+            assertEquals("No user exists with the provided email", exception.getMessage());
+            verify(userRepository, never()).save(any(User.class));
+        }
+
+        @Test
+        void shouldRejectRepeatedInvitation() {
+            // arange
+            UUID organisationId = UUID.randomUUID();
+            Organisation organisation = Organisation.builder()
+                    .id(organisationId)
+                    .active(true)
+                    .build();
+            User owner = User.builder()
+                    .id(UUID.randomUUID())
+                    .organisation(organisation)
+                    .roles(new HashSet<>(Set.of(ownerRole())))
+                    .build();
+            User invitedUser = User.builder()
+                    .id(UUID.randomUUID())
+                    .email("worker@example.com")
+                    .organisation(organisation)
+                    .membershipStatus(MembershipStatus.PENDING)
+                    .build();
+            OrganisationInvitationRequest request =
+                    new OrganisationInvitationRequest(invitedUser.getEmail());
+
+            when(repository.findById(organisationId)).thenReturn(Optional.of(organisation));
+            when(userRepository.findByEmail(request.email())).thenReturn(Optional.of(invitedUser));
+
+            // act & assert
+            IllegalArgumentException exception = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> service.inviteUser(organisationId, request, owner)
+            );
+
+            assertEquals(
+                    "User already belongs to an organisation or has a pending invitation",
+                    exception.getMessage()
+            );
+            assertEquals(MembershipStatus.PENDING, invitedUser.getMembershipStatus());
+            assertSame(organisation, invitedUser.getOrganisation());
+            verify(userRepository, never()).save(any(User.class));
+        }
+
+        @Test
+        void shouldRejectInvitationWhenRequesterIsNotOrganisationOwner() {
+            // arrange
+            UUID organisationId = UUID.randomUUID();
+            Organisation organisation = Organisation.builder()
+                    .id(organisationId)
+                    .active(true)
+                    .build();
+            User requester = User.builder()
+                    .id(UUID.randomUUID())
+                    .organisation(organisation)
+                    .membershipStatus(MembershipStatus.MEMBER)
+                    .build();
+            OrganisationInvitationRequest request =
+                    new OrganisationInvitationRequest("worker@example.com");
+
+            when(repository.findById(organisationId)).thenReturn(Optional.of(organisation));
+
+            // act & assert
+            assertThrows(
+                    org.springframework.security.access.AccessDeniedException.class,
+                    () -> service.inviteUser(organisationId, request, requester)
+            );
+
+            verifyNoInteractions(userRepository);
+        }
+
+        @Test
+        void shouldCancelPendingInvitation() {
+            // arrange
+            UUID organisationId = UUID.randomUUID();
+            Organisation organisation = Organisation.builder().id(organisationId).build();
+            Role ownerRole = ownerRole();
+            User owner = User.builder()
+                    .id(UUID.randomUUID())
+                    .organisation(organisation)
+                    .roles(new java.util.HashSet<>(Set.of(ownerRole)))
+                    .build();
+            User invitedUser = User.builder()
+                    .id(UUID.randomUUID())
+                    .organisation(organisation)
+                    .email("worker@example.com")
+                    .membershipStatus(MembershipStatus.PENDING)
+                    .build();
+
+            when(repository.findById(organisationId)).thenReturn(Optional.of(organisation));
+            when(userRepository.findById(invitedUser.getId())).thenReturn(Optional.of(invitedUser));
+
+            // act
+            service.cancelInvitation(
+                    organisationId,
+                    invitedUser.getId(),
+                    owner
+            );
+
+            // assert
+            assertEquals(MembershipStatus.NONE, invitedUser.getMembershipStatus());
+            assertNull(invitedUser.getOrganisation());
+            verify(userRepository).save(invitedUser);
+        }
+    }
+
+    private static Role ownerRole() {
+        Role role = new Role();
+        role.setName(RoleName.OWNER.name());
+        return role;
     }
 }

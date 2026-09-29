@@ -40,6 +40,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(401).body(Map.of("error", "Invalid credentials"));
     }
 
+    @ExceptionHandler(OrganisationAlreadyAssignedException.class)
+    public ResponseEntity<Map<String, String>> handleOrganisationAlreadyAssigned(
+            OrganisationAlreadyAssignedException ex
+    ) {
+        return ResponseEntity.status(409).body(Map.of("error", ex.getMessage()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGeneric(Exception ex) {
         log.error("Unhandled exception", ex);
