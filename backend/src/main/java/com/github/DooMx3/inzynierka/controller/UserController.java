@@ -88,26 +88,54 @@ public class UserController {
         return ResponseEntity.ok("Password reset successfully.");
     }
 
+    @Operation(
+            summary = "Get current user's invitations",
+            description = "Returns the pending organisation invitation for the authenticated user, or an empty list if there is none."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Pending invitations returned"),
+            @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content)
+    })
     @GetMapping("/invitations")
     public ResponseEntity<List<UserInvitationResponse>> getInvitations(
-            @AuthenticationPrincipal User user
+            @Parameter(hidden = true) @AuthenticationPrincipal User user
     ) {
         return ResponseEntity.ok(service.getInvitations(user));
     }
 
+    @Operation(
+            summary = "Accept organisation invitation",
+            description = "Accepts the authenticated user's pending invitation to the specified organisation."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Invitation accepted", content = @Content),
+            @ApiResponse(responseCode = "400", description = "No pending invitation for this organisation, or the organisation is inactive", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content)
+    })
     @PostMapping("/invitations/{organisationId}/accept")
     public ResponseEntity<Void> acceptInvitation(
+            @Parameter(description = "ID of the organisation whose invitation should be accepted")
             @PathVariable UUID organisationId,
-            @AuthenticationPrincipal User user
+            @Parameter(hidden = true) @AuthenticationPrincipal User user
     ) {
         service.acceptInvitation(organisationId, user);
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(
+            summary = "Reject organisation invitation",
+            description = "Rejects the authenticated user's pending invitation to the specified organisation."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Invitation rejected", content = @Content),
+            @ApiResponse(responseCode = "400", description = "No pending invitation for this organisation", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content)
+    })
     @DeleteMapping("/invitations/{organisationId}")
     public ResponseEntity<Void> rejectInvitation(
+            @Parameter(description = "ID of the organisation whose invitation should be rejected")
             @PathVariable UUID organisationId,
-            @AuthenticationPrincipal User user
+            @Parameter(hidden = true) @AuthenticationPrincipal User user
     ) {
         service.rejectInvitation(organisationId, user);
         return ResponseEntity.noContent().build();
