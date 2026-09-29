@@ -139,34 +139,64 @@ public class OrganisationController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(
+            summary = "Invite a user to the organisation",
+            description = "Creates a pending invitation for an existing user identified by email. Requires the OWNER authority for this organisation."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Invitation created", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Invalid email, account not found, or user already belongs to an organisation or has a pending invitation", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied; organisation OWNER authority required", content = @Content)
+    })
     @PostMapping("/{id}/invitations")
     @PreAuthorize("hasAuthority('OWNER')")
     public ResponseEntity<Void> invite(
-            @PathVariable UUID id,
+            @Parameter(description = "Organisation ID") @PathVariable UUID id,
             @RequestBody @Valid OrganisationInvitationRequest request,
-            @AuthenticationPrincipal User user
+            @Parameter(hidden = true) @AuthenticationPrincipal User user
     ) {
         organisationService.inviteUser(id, request, user);
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(
+            summary = "List pending organisation invitations",
+            description = "Returns the users with pending invitations for this organisation. Requires the OWNER authority for this organisation."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Pending invitations returned"),
+            @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied; organisation OWNER authority required", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Organisation not found", content = @Content)
+    })
     @GetMapping("/{id}/invitations")
     @PreAuthorize("hasAuthority('OWNER')")
     public ResponseEntity<List<PendingInvitationResponse>> getPendingInvitations(
-            @PathVariable UUID id,
-            @AuthenticationPrincipal User user
+            @Parameter(description = "Organisation ID") @PathVariable UUID id,
+            @Parameter(hidden = true) @AuthenticationPrincipal User user
     ) {
         return ResponseEntity.ok(
                 organisationService.getPendingInvitations(id, user)
         );
     }
 
+    @Operation(
+            summary = "Cancel an organisation invitation",
+            description = "Cancels a pending invitation and clears the invited user's organisation membership. Requires the OWNER authority for this organisation."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Invitation cancelled", content = @Content),
+            @ApiResponse(responseCode = "400", description = "User not found or no pending invitation exists for this organisation", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access denied; organisation OWNER authority required", content = @Content)
+    })
     @DeleteMapping("/{id}/invitations/{userId}")
     @PreAuthorize("hasAuthority('OWNER')")
     public ResponseEntity<Void> cancelInvitation(
-            @PathVariable UUID id,
-            @PathVariable UUID userId,
-            @AuthenticationPrincipal User user
+            @Parameter(description = "Organisation ID") @PathVariable UUID id,
+            @Parameter(description = "ID of the invited user") @PathVariable UUID userId,
+            @Parameter(hidden = true) @AuthenticationPrincipal User user
     ) {
         organisationService.cancelInvitation(id, userId, user);
         return ResponseEntity.noContent().build();
