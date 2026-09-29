@@ -6,6 +6,8 @@ import com.github.DooMx3.inzynierka.dto.user.ResetPasswordRequest;
 import com.github.DooMx3.inzynierka.dto.user.UserPatchRequest;
 import com.github.DooMx3.inzynierka.entities.PasswordResetToken;
 import com.github.DooMx3.inzynierka.entities.User;
+import com.github.DooMx3.inzynierka.entities.Organisation;
+import com.github.DooMx3.inzynierka.enums.MembershipStatus;
 import com.github.DooMx3.inzynierka.repositories.PasswordResetTokenRepository;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
 import org.junit.jupiter.api.Nested;
@@ -18,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -275,4 +278,55 @@ class UserServiceTest {
         }
     }
 
+    @Nested
+    class UserInvitation {
+        @Test
+        void shouldAcceptPendingInvitation() {
+            // arrange
+            UUID userId = UUID.randomUUID();
+            UUID organisationId = UUID.randomUUID();
+            Organisation organisation = Organisation.builder()
+                    .id(organisationId)
+                    .name("Winnica")
+                    .active(true)
+                    .build();
+            User user = User.builder()
+                    .id(userId)
+                    .organisation(organisation)
+                    .membershipStatus(MembershipStatus.PENDING)
+                    .build();
+            when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+            // act
+            service.acceptInvitation(organisationId, user);
+
+            // assert
+            assertEquals(MembershipStatus.MEMBER, user.getMembershipStatus());
+            verify(userRepository).save(user);
+        }
+
+        @Test
+        void shouldRejectPendingInvitation() {
+            // arrange
+            UUID userId = UUID.randomUUID();
+            UUID organisationId = UUID.randomUUID();
+            Organisation organisation = Organisation.builder()
+                    .id(organisationId)
+                    .build();
+            User user = User.builder()
+                    .id(userId)
+                    .organisation(organisation)
+                    .membershipStatus(MembershipStatus.PENDING)
+                    .build();
+            when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+            // act
+            service.rejectInvitation(organisationId, user);
+
+            // assert
+            assertNull(user.getOrganisation());
+            assertEquals(MembershipStatus.NONE, user.getMembershipStatus());
+            verify(userRepository).save(user);
+        }
+    }
 }
