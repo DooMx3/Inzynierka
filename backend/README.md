@@ -27,4 +27,5 @@
     ```
 
 # Additional information
-In dev environment, the application uses a local mail server (Mailpit) to send emails. You can access the Mailpit web interface at http://localhost:8025 to view sent emails.
+- In dev environment, the application uses a local mail server (Mailpit) to send emails. You can access the Mailpit web interface at http://localhost:8025 to view sent emails.
+- Api documentation is available at http://localhost:8080/swagger-ui.html
