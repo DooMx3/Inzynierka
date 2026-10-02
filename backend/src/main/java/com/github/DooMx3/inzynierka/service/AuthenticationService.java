@@ -4,6 +4,7 @@ import com.github.DooMx3.inzynierka.dto.user.AuthenticationRequest;
 import com.github.DooMx3.inzynierka.dto.user.RegisterRequest;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.enums.MembershipStatus;
+import com.github.DooMx3.inzynierka.exceptions.ResourceAlreadyExistsException;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,7 +24,8 @@ public class AuthenticationService {
 
   public void register(RegisterRequest request, HttpServletResponse response) {
     if (repository.existsByEmail(request.email())) {
-      throw new IllegalArgumentException("Email already exists");
+      throw new ResourceAlreadyExistsException(
+          "User with email " + request.email() + " already exists");
     }
     User user =
         User.builder()
