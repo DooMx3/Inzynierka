@@ -4,7 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -36,7 +37,7 @@ public class GlobalExceptionHandler {
     return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
   }
 
-  @ExceptionHandler(BadCredentialsException.class)
+  @ExceptionHandler(InvalidCredentialsException.class)
   public ResponseEntity<Map<String, String>> handleBadCredentials() {
     return ResponseEntity.status(401).body(Map.of("error", "Invalid credentials"));
   }
@@ -45,6 +46,29 @@ public class GlobalExceptionHandler {
   public ResponseEntity<Map<String, String>> handleOrganisationAlreadyAssigned(
       OrganisationAlreadyAssignedException ex) {
     return ResponseEntity.status(409).body(Map.of("error", ex.getMessage()));
+  }
+
+  @ExceptionHandler(AuthorizationDeniedException.class)
+  public ResponseEntity<Map<String, String>> handleAuthorizationDenied(
+      AuthorizationDeniedException ex) {
+    return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
+  }
+
+  @ExceptionHandler(ResourceNotFoundException.class)
+  public ResponseEntity<Map<String, String>> handleResourceNotFound(ResourceNotFoundException ex) {
+    return ResponseEntity.status(404).body(Map.of("error", ex.getMessage()));
+  }
+
+  @ExceptionHandler(ResourceAlreadyExistsException.class)
+  public ResponseEntity<Map<String, String>> handleResourceAlreadyExists(
+      ResourceAlreadyExistsException ex) {
+    return ResponseEntity.status(409).body(Map.of("error", ex.getMessage()));
+  }
+
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<Map<String, String>> handleHttpMessageNotReadable(
+      HttpMessageNotReadableException ex) {
+    return ResponseEntity.badRequest().body(Map.of("error", "Malformed request body"));
   }
 
   @ExceptionHandler(Exception.class)
