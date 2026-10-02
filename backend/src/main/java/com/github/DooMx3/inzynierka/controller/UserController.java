@@ -5,6 +5,7 @@ import com.github.DooMx3.inzynierka.dto.user.UserInvitationResponse;
 import com.github.DooMx3.inzynierka.dto.user.DeactivateUserRequest;
 import com.github.DooMx3.inzynierka.dto.user.ForgotPasswordRequest;
 import com.github.DooMx3.inzynierka.dto.user.ResetPasswordRequest;
+import com.github.DooMx3.inzynierka.dto.user.UserInfoResponse;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,8 +39,8 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content)
     })
     @GetMapping("/info")
-    public ResponseEntity<User> getUser(@Parameter(hidden = true) @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(user);
+    public ResponseEntity<UserInfoResponse> getUser(@Parameter(hidden = true) @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(UserInfoResponse.from(user));
     }
 
     @Operation(summary = "Change password", description = "Changes the password of the authenticated user.")
