@@ -1,6 +1,7 @@
 package com.github.DooMx3.inzynierka.entities;
 
 import com.github.DooMx3.inzynierka.enums.MembershipStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -38,6 +39,7 @@ public class User implements UserDetails {
     private String email;
     @Column(nullable = false)
     @NotNull
+    @JsonIgnore
     private String password;
     private boolean active;
 
