@@ -5,6 +5,12 @@
 	<groupId>com.github.DooMx3</groupId>
 	<artifactId>inzynierka</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>4.1.1</version>
+		<relativePath/>
+	</parent>
 	<properties>
 		<java.version>25</java.version>
 		<jjwt.version>0.11.5</jjwt.version>
@@ -43,6 +49,7 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<version>1.18.48</version>
+			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
