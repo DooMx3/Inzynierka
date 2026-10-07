@@ -27,7 +27,27 @@
     ```
 
 # Additional information
+
+## Creating SQL migrations with Liquibase
+
+Create a new SQL file under `src/main/resources/db/migration`, for example `V6__add_organisation_website.sql`:
+
+```sql
+ALTER TABLE organisation
+    ADD COLUMN website VARCHAR(255);
+```
+
+Then add a new changeset to `src/main/resources/db/changelog/db.changelog-master.xml`:
+
+```xml
+<changeSet id="V6" author="inzynierka">
+    <sqlFile path="../migration/V6__add_organisation_website.sql"
+             relativeToChangelogFile="true"/>
+</changeSet>
+```
+
+Give every changeset a unique ID and add a new migration instead of editing one that may already have been applied. Liquibase records executed changesets and does not run them again.
+
+## Other
 - In dev environment, the application uses a local mail server (Mailpit) to send emails. You can access the Mailpit web interface at http://localhost:8025 to view sent emails.
 - Api documentation is available at http://localhost:8080/swagger-ui.html
-- Liquibase applies the database changes from `src/main/resources/db/changelog/db.changelog-master.xml` on application startup. The changelog currently reuses the existing SQL migration files under `src/main/resources/db/migration`.
-- When switching an existing database from Flyway, back it up first. If its schema already includes all five migrations, run Liquibase `changelog-sync` once against that database with this changelog before starting the new application. This records the changesets as already applied; it does not execute or modify their SQL. Do not use this baseline on an empty or partially migrated database.
