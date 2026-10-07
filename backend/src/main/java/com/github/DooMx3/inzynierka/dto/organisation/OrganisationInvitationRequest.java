@@ -3,8 +3,4 @@ package com.github.DooMx3.inzynierka.dto.organisation;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-public record OrganisationInvitationRequest(
-        @NotBlank
-        @Email
-        String email
-) {}
+public record OrganisationInvitationRequest(@NotBlank @Email String email) {}

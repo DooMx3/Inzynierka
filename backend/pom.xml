@@ -168,6 +168,28 @@
 					</execution>
 				</executions>
 			</plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>3.10.3</version>
+                <configuration>
+                    <java>
+                        <googleJavaFormat>
+                        </googleJavaFormat>
+                        <removeUnusedImports/>
+                        <trimTrailingWhitespace/>
+                        <endWithNewline/>f
+                    </java>
+                </configuration>
+                <executions>
+                    <execution>
+                      <phase>compile</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
 
