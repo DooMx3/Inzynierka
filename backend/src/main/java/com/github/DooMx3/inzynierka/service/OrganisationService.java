@@ -9,8 +9,7 @@ import com.github.DooMx3.inzynierka.entities.Role;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.enums.MembershipStatus;
 import com.github.DooMx3.inzynierka.enums.RoleName;
-import com.github.DooMx3.inzynierka.exceptions.OrganisationAlreadyAssignedException;
-import com.github.DooMx3.inzynierka.exceptions.ResourceNotFoundException;
+import com.github.DooMx3.inzynierka.exceptions.*;
 import com.github.DooMx3.inzynierka.repositories.OrganisationRepository;
 import com.github.DooMx3.inzynierka.repositories.RoleRepository;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
@@ -20,7 +19,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -34,7 +32,7 @@ public class OrganisationService {
   @Transactional
   public Organisation createOrganisation(OrganisationRequest request, User user) {
     if (user == null) {
-      throw new IllegalStateException("Authenticated user is required to create an organisation");
+      throw new UnauthorizedException("Authenticated user is required to create an organisation");
     }
 
     if (user.getOrganisation() != null) {
@@ -78,7 +76,7 @@ public class OrganisationService {
     Organisation organisation = getOrganisation(id, user);
 
     if (!organisation.isActive()) {
-      throw new IllegalStateException("Cannot update an inactive organisation");
+      throw new InactiveResourceException("Cannot update an inactive organisation");
     }
 
     organisation.setName(request.name());
@@ -119,7 +117,7 @@ public class OrganisationService {
     Organisation organisation = getOrganisation(id, user);
 
     if (!organisation.isActive()) {
-      throw new IllegalStateException("Cannot update an inactive organisation");
+      throw new InactiveResourceException("Cannot update an inactive organisation");
     }
 
     if (request.name() != null) {
@@ -151,21 +149,21 @@ public class OrganisationService {
   public void inviteUser(UUID organisationId, OrganisationInvitationRequest request, User owner) {
     Organisation organisation = getOrganisation(organisationId, owner);
     if (!organisation.isActive()) {
-      throw new IllegalStateException("Cannot invite a user to an inactive organisation");
+      throw new InactiveResourceException("Cannot invite a user to an inactive organisation");
     }
 
     User invitedUser =
         userRepository
             .findByEmail(request.email())
             .orElseThrow(
-                () -> new IllegalArgumentException("No user exists with the provided email"));
+                () -> new ResourceNotFoundException("No user exists with the provided email"));
 
     if (invitedUser.getId() != null && invitedUser.getId().equals(owner.getId())) {
-      throw new IllegalArgumentException("You cannot invite yourself");
+      throw new SelfInvitationException("You cannot invite yourself");
     }
     if (invitedUser.getOrganisation() != null
         || invitedUser.getMembershipStatus() != MembershipStatus.NONE) {
-      throw new IllegalArgumentException(
+      throw new ResourceConflictException(
           "User already belongs to an organisation or has a pending invitation");
     }
 
@@ -180,12 +178,12 @@ public class OrganisationService {
     User invitedUser =
         userRepository
             .findById(userId)
-            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
     if (invitedUser.getOrganisation() == null
         || !organisationId.equals(invitedUser.getOrganisation().getId())
         || invitedUser.getMembershipStatus() != MembershipStatus.PENDING) {
-      throw new IllegalArgumentException("Pending invitation not found");
+      throw new ResourceNotFoundException("Pending invitation not found");
     }
 
     invitedUser.setOrganisation(null);
@@ -211,7 +209,7 @@ public class OrganisationService {
 
   private void requireOwner(Organisation organisation, User user) {
     if (user == null) {
-      throw new AccessDeniedException("Authenticated user is required");
+      throw new UnauthorizedException("Authenticated user is required");
     }
 
     boolean ownsOrganisation =
@@ -221,7 +219,8 @@ public class OrganisationService {
                 .anyMatch(role -> RoleName.OWNER.name().equals(role.getName()));
 
     if (!ownsOrganisation) {
-      throw new AccessDeniedException("Only the organisation owner can access the organisation");
+      throw new InsufficientPermissionException(
+          "Only the organisation owner can access the organisation");
     }
   }
 }

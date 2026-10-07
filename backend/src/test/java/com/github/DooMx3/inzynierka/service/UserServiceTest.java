@@ -11,6 +11,10 @@ import com.github.DooMx3.inzynierka.entities.Organisation;
 import com.github.DooMx3.inzynierka.entities.PasswordResetToken;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.enums.MembershipStatus;
+import com.github.DooMx3.inzynierka.exceptions.InvalidCredentialsException;
+import com.github.DooMx3.inzynierka.exceptions.ResourceConflictException;
+import com.github.DooMx3.inzynierka.exceptions.ResourceNotFoundException;
+import com.github.DooMx3.inzynierka.exceptions.UnauthorizedException;
 import com.github.DooMx3.inzynierka.repositories.PasswordResetTokenRepository;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
 import java.time.Instant;
@@ -61,7 +65,7 @@ class UserServiceTest {
       when(passwordEncoder.matches(OLD_PASSWORD, ENCODED_OLD_PASSWORD)).thenReturn(false);
 
       // assert
-      assertThrows(IllegalArgumentException.class, () -> service.changePassword(request, EMAIL));
+      assertThrows(InvalidCredentialsException.class, () -> service.changePassword(request, EMAIL));
       verify(userRepository, never()).save(any());
     }
 
@@ -92,7 +96,7 @@ class UserServiceTest {
       ChangePasswordRequest changePasswordRequest =
           new ChangePasswordRequest(NEW_EMAIL, NEW_PHONE_NUMBER);
       assertThrows(
-          IllegalArgumentException.class,
+          ResourceNotFoundException.class,
           () -> service.changePassword(changePasswordRequest, EMAIL));
     }
   }
@@ -131,7 +135,7 @@ class UserServiceTest {
       when(passwordEncoder.matches(OLD_PASSWORD, ENCODED_OLD_PASSWORD)).thenReturn(false);
 
       // assert
-      assertThrows(IllegalArgumentException.class, () -> service.deactivateUser(request, EMAIL));
+      assertThrows(InvalidCredentialsException.class, () -> service.deactivateUser(request, EMAIL));
       assertTrue(user.isActive());
       verify(userRepository, never()).save(user);
     }
@@ -144,7 +148,7 @@ class UserServiceTest {
       // act & assert
       DeactivateUserRequest deactivateUserRequest = new DeactivateUserRequest(OLD_PASSWORD);
       assertThrows(
-          IllegalArgumentException.class,
+          ResourceNotFoundException.class,
           () -> service.deactivateUser(deactivateUserRequest, EMAIL));
     }
   }
@@ -166,7 +170,7 @@ class UserServiceTest {
 
       // act
       UserPatchRequest request = new UserPatchRequest(NEW_EMAIL, NEW_PHONE_NUMBER);
-      assertThrows(IllegalArgumentException.class, () -> service.patchUser(request, EMAIL));
+      assertThrows(ResourceConflictException.class, () -> service.patchUser(request, EMAIL));
 
       // assert
       verify(userRepository, never()).save(existingUser);
@@ -199,7 +203,7 @@ class UserServiceTest {
       // act & assert
       UserPatchRequest userPatchRequest = new UserPatchRequest(NEW_EMAIL, NEW_PHONE_NUMBER);
       assertThrows(
-          IllegalArgumentException.class, () -> service.patchUser(userPatchRequest, EMAIL));
+          ResourceNotFoundException.class, () -> service.patchUser(userPatchRequest, EMAIL));
     }
   }
 
@@ -231,7 +235,7 @@ class UserServiceTest {
 
       // act & assert
       assertThrows(
-          IllegalArgumentException.class,
+          UnauthorizedException.class,
           () -> service.resetPassword(new ResetPasswordRequest("invalidToken", NEW_PASSWORD)));
     }
 
@@ -246,7 +250,7 @@ class UserServiceTest {
 
       // act & assert
       assertThrows(
-          IllegalArgumentException.class,
+          UnauthorizedException.class,
           () -> service.resetPassword(new ResetPasswordRequest("validToken", NEW_PASSWORD)));
     }
 
@@ -261,7 +265,7 @@ class UserServiceTest {
 
       // act & assert
       assertThrows(
-          IllegalArgumentException.class,
+          UnauthorizedException.class,
           () -> service.resetPassword(new ResetPasswordRequest("validToken", NEW_PASSWORD)));
     }
 

@@ -8,6 +8,7 @@ import com.github.DooMx3.inzynierka.dto.user.UserPatchRequest;
 import com.github.DooMx3.inzynierka.entities.PasswordResetToken;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.enums.MembershipStatus;
+import com.github.DooMx3.inzynierka.exceptions.*;
 import com.github.DooMx3.inzynierka.repositories.PasswordResetTokenRepository;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
 import jakarta.transaction.Transactional;
@@ -39,9 +40,9 @@ public class UserService {
     User user =
         userRepository
             .findByEmail(email)
-            .orElseThrow(() -> new IllegalArgumentException("There is no such user"));
+            .orElseThrow(() -> new ResourceNotFoundException("There is no such user"));
     if (!passwordEncoder.matches(request.oldPassword(), user.getPassword())) {
-      throw new IllegalArgumentException("Old password is incorrect");
+      throw new InvalidCredentialsException("Old password is incorrect");
     }
     user.setPassword(passwordEncoder.encode(request.newPassword()));
     userRepository.save(user);
@@ -51,9 +52,9 @@ public class UserService {
     User user =
         userRepository
             .findByEmail(email)
-            .orElseThrow(() -> new IllegalArgumentException("There is no such user"));
+            .orElseThrow(() -> new ResourceNotFoundException("There is no such user"));
     if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-      throw new IllegalArgumentException("Password is incorrect");
+      throw new InvalidCredentialsException("Password is incorrect");
     }
     user.setActive(false);
     userRepository.save(user);
@@ -63,11 +64,11 @@ public class UserService {
     User existingUser =
         userRepository
             .findByEmail(email)
-            .orElseThrow(() -> new IllegalArgumentException("There is no such user"));
+            .orElseThrow(() -> new ResourceNotFoundException("There is no such user"));
     if (request.email() != null) {
       Optional<User> byEmail = userRepository.findByEmail(request.email());
       if (byEmail.isPresent()) {
-        throw new IllegalArgumentException("Email is already in use");
+        throw new ResourceConflictException("Email is already in use");
       }
       existingUser.setEmail(request.email());
     }
@@ -99,12 +100,12 @@ public class UserService {
     PasswordResetToken token =
         passwordResetTokenRepository
             .findByTokenHash(DigestUtils.sha256Hex(request.token()))
-            .orElseThrow(() -> new IllegalArgumentException("Invalid token"));
+            .orElseThrow(() -> new UnauthorizedException("Invalid token"));
     if (token.isExpired()) {
-      throw new IllegalArgumentException("Token is expired");
+      throw new UnauthorizedException("Token is expired");
     }
     if (token.isUsed()) {
-      throw new IllegalArgumentException("Token is already used");
+      throw new UnauthorizedException("Token is already used");
     }
     token.setUsed(true);
     passwordResetTokenRepository.save(token);
@@ -129,7 +130,7 @@ public class UserService {
   public void acceptInvitation(UUID organisationId, User authenticatedUser) {
     User user = requirePendingInvitation(authenticatedUser, organisationId);
     if (!user.getOrganisation().isActive()) {
-      throw new IllegalArgumentException("The organisation is inactive");
+      throw new InactiveResourceException("The organisation is inactive");
     }
 
     user.setMembershipStatus(MembershipStatus.MEMBER);
@@ -146,11 +147,11 @@ public class UserService {
 
   private User loadAuthenticatedUser(User authenticatedUser) {
     if (authenticatedUser == null || authenticatedUser.getId() == null) {
-      throw new IllegalStateException("Authenticated user is required");
+      throw new UnauthorizedException("Authenticated user is required");
     }
     return userRepository
         .findById(authenticatedUser.getId())
-        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        .orElseThrow(() -> new ResourceNotFoundException("User not found"));
   }
 
   private User requirePendingInvitation(User authenticatedUser, UUID organisationId) {
@@ -158,7 +159,7 @@ public class UserService {
     if (user.getMembershipStatus() != MembershipStatus.PENDING
         || user.getOrganisation() == null
         || !organisationId.equals(user.getOrganisation().getId())) {
-      throw new IllegalArgumentException("Pending invitation not found");
+      throw new ResourceNotFoundException("Pending invitation not found");
     }
     return user;
   }
