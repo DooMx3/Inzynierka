@@ -100,6 +100,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-liquibase</artifactId>
+			<version>${springboot.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>
@@ -177,7 +178,7 @@
                         </googleJavaFormat>
                         <removeUnusedImports/>
                         <trimTrailingWhitespace/>
-                        <endWithNewline/>f
+                        <endWithNewline/>
                     </java>
                 </configuration>
                 <executions>
