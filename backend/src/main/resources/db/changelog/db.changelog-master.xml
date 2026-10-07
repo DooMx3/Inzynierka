@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="V1" author="inzynierka">
+        <sqlFile path="../migration/V1__create_initial_schema.sql"
+                 relativeToChangelogFile="true"/>
+    </changeSet>
+    <changeSet id="V2" author="inzynierka">
+        <sqlFile path="../migration/V2__add_organisation_to_user.sql"
+                 relativeToChangelogFile="true"/>
+    </changeSet>
+    <changeSet id="V3" author="inzynierka">
+        <sqlFile path="../migration/V3__set_default_membership_status.sql"
+                 relativeToChangelogFile="true"/>
+    </changeSet>
+    <changeSet id="V4" author="inzynierka">
+        <sqlFile path="../migration/V4__add_password_reset_token_table.sql"
+                 relativeToChangelogFile="true"/>
+    </changeSet>
+    <changeSet id="V5" author="inzynierka">
+        <sqlFile path="../migration/V5__merge_invitation_into_membership_status.sql"
+                 relativeToChangelogFile="true"/>
+    </changeSet>
+</databaseChangeLog>
