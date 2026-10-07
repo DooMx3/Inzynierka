@@ -19,7 +19,7 @@
    axllent/mailpit
    ```
 
-
+[README.md](../README.md)
 2. Run app:
 
     ```bash
