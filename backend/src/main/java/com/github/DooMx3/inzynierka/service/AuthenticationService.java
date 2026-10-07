@@ -16,45 +16,45 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
-    private final UserRepository repository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
-    private final AuthenticationManager authenticationManager;
+  private final UserRepository repository;
+  private final PasswordEncoder passwordEncoder;
+  private final JwtService jwtService;
+  private final AuthenticationManager authenticationManager;
 
-    public void register(RegisterRequest request, HttpServletResponse response) {
-        if(repository.existsByEmail(request.email())) {
-            throw new IllegalArgumentException("Email already exists");
-        }
-        User user = User.builder()
-                .firstname(request.firstname())
-                .email(request.email())
-                .password(passwordEncoder.encode(request.password()))
-                .membershipStatus(MembershipStatus.NONE)
-                .active(true)
-                .build();
-        repository.save(user);
-
-        String jwtToken = jwtService.generateToken(user);
-        addJwtCookie(response, jwtToken);
+  public void register(RegisterRequest request, HttpServletResponse response) {
+    if (repository.existsByEmail(request.email())) {
+      throw new IllegalArgumentException("Email already exists");
     }
+    User user =
+        User.builder()
+            .firstname(request.firstname())
+            .email(request.email())
+            .password(passwordEncoder.encode(request.password()))
+            .membershipStatus(MembershipStatus.NONE)
+            .active(true)
+            .build();
+    repository.save(user);
 
-    public void authenticate(AuthenticationRequest request, HttpServletResponse response) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.email(), request.password())
-        );
-        var user = repository.findByEmail(request.email()).orElseThrow();
+    String jwtToken = jwtService.generateToken(user);
+    addJwtCookie(response, jwtToken);
+  }
 
-        String jwtToken = jwtService.generateToken(user);
-        addJwtCookie(response, jwtToken);
-    }
+  public void authenticate(AuthenticationRequest request, HttpServletResponse response) {
+    authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(request.email(), request.password()));
+    var user = repository.findByEmail(request.email()).orElseThrow();
 
-    private void addJwtCookie(HttpServletResponse response, String token) {
-        Cookie cookie = new Cookie("jwt", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false);
-        cookie.setPath("/");
-        cookie.setMaxAge(86400);
+    String jwtToken = jwtService.generateToken(user);
+    addJwtCookie(response, jwtToken);
+  }
 
-        response.addCookie(cookie);
-    }
+  private void addJwtCookie(HttpServletResponse response, String token) {
+    Cookie cookie = new Cookie("jwt", token);
+    cookie.setHttpOnly(true);
+    cookie.setSecure(false);
+    cookie.setPath("/");
+    cookie.setMaxAge(86400);
+
+    response.addCookie(cookie);
+  }
 }
