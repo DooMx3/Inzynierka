@@ -15,7 +15,7 @@ import com.github.DooMx3.inzynierka.entities.Role;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.enums.MembershipStatus;
 import com.github.DooMx3.inzynierka.enums.RoleName;
-import com.github.DooMx3.inzynierka.exceptions.OrganisationAlreadyAssignedException;
+import com.github.DooMx3.inzynierka.exceptions.*;
 import com.github.DooMx3.inzynierka.repositories.OrganisationRepository;
 import com.github.DooMx3.inzynierka.repositories.RoleRepository;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
@@ -98,9 +98,9 @@ class OrganisationServiceTest {
               "Tradycja");
 
       // act & assert
-      IllegalStateException exception =
+      UnauthorizedException exception =
           assertThrows(
-              IllegalStateException.class, () -> service.createOrganisation(request, null));
+              UnauthorizedException.class, () -> service.createOrganisation(request, null));
 
       assertEquals(
           "Authenticated user is required to create an organisation", exception.getMessage());
@@ -284,9 +284,9 @@ class OrganisationServiceTest {
       when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 
       // act & assert
-      IllegalArgumentException exception =
+      ResourceNotFoundException exception =
           assertThrows(
-              IllegalArgumentException.class,
+              ResourceNotFoundException.class,
               () -> service.inviteUser(organisationId, request, owner));
 
       assertEquals("No user exists with the provided email", exception.getMessage());
@@ -318,9 +318,9 @@ class OrganisationServiceTest {
       when(userRepository.findByEmail(request.email())).thenReturn(Optional.of(invitedUser));
 
       // act & assert
-      IllegalArgumentException exception =
+      ResourceConflictException exception =
           assertThrows(
-              IllegalArgumentException.class,
+              ResourceConflictException.class,
               () -> service.inviteUser(organisationId, request, owner));
 
       assertEquals(
@@ -349,7 +349,7 @@ class OrganisationServiceTest {
 
       // act & assert
       assertThrows(
-          org.springframework.security.access.AccessDeniedException.class,
+          InsufficientPermissionException.class,
           () -> service.inviteUser(organisationId, request, requester));
 
       verifyNoInteractions(userRepository);
