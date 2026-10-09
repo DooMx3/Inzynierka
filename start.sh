@@ -39,12 +39,25 @@ if [[ "$runtime" == "podman" ]]; then
   export DOCKER_HOST="unix://${socket}"
 fi
 
+no_frontend=0
+if [[ "${1:-}" == "--no-frontend" ]]; then
+  no_frontend=1
+elif [[ -n "${1:-}" ]]; then
+  echo "Unknown argument: $1" >&2
+  exit 1
+fi
+
 echo "Building backend image with Maven ($runtime)..."
 mvn -f backend/pom.xml spring-boot:build-image
 
-echo "Starting stack with $runtime compose..."
-compose up --build -d
+if [[ "$no_frontend" == 1 ]]; then
+  echo "Starting stack without frontend ($runtime compose)..."
+  compose up -d postgres mailpit backend
+else
+  echo "Starting stack with $runtime compose..."
+  compose up --build -d
+  echo "Frontend: http://localhost:3000"
+fi
 
-echo "Frontend: http://localhost:3000"
 echo "Backend:  http://localhost:8080"
 echo "Mailpit:  http://localhost:8025"
