@@ -1,0 +1,70 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: inzynierka-psql
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: backend
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d backend"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: inzynierka-mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    restart: unless-stopped
+
+  # mvn -f backend/pom.xml spring-boot:build-image
+  backend:
+    image: docker.io/library/inzynierka:0.0.1-SNAPSHOT
+    pull_policy: never
+    container_name: inzynierka-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/backend
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_MAIL_HOST: mailpit
+      SPRING_MAIL_PORT: "1025"
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mailpit:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: inzynierka-frontend
+    environment:
+      HOST: 0.0.0.0
+      PORT: "3000"
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
