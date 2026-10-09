@@ -32,7 +32,7 @@ services:
       start_period: 5s
     restart: unless-stopped
 
-  # mvn -f backend/pom.xml spring-boot:build-image
+  # Built by start.sh: mvn -f backend/pom.xml spring-boot:build-image
   backend:
     image: docker.io/library/inzynierka:0.0.1-SNAPSHOT
     pull_policy: never
