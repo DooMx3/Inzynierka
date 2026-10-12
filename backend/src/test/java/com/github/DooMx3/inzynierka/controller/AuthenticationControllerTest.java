@@ -39,7 +39,7 @@ class AuthenticationControllerTest {
             {
               "firstname": "Jan",
               "email": "jan.kowalski@example.com",
-              "password": "Secret123!"
+              "password": "Superextrasecurepassword1!"
             }
             """;
 
@@ -86,7 +86,7 @@ class AuthenticationControllerTest {
       RegisterRequest captured = captor.getValue();
       assertThat(captured.firstname()).isEqualTo("Jan");
       assertThat(captured.email()).isEqualTo("jan.kowalski@example.com");
-      assertThat(captured.password()).isEqualTo("Secret123!");
+      assertThat(captured.password()).isEqualTo("Superextrasecurepassword1!");
     }
 
     @Test
