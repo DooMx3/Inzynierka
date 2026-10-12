@@ -86,7 +86,7 @@ class UserControllerTest {
         """
             {
               "oldPassword": "Secret123!",
-              "newPassword": "NewSecret456!"
+              "newPassword": "Superextrasecurepassword1!"
             }
             """;
 
@@ -107,7 +107,7 @@ class UserControllerTest {
 
       assertThat(captor.getValue()).isNotNull();
       assertThat(captor.getValue().oldPassword()).isEqualTo("Secret123!");
-      assertThat(captor.getValue().newPassword()).isEqualTo("NewSecret456!");
+      assertThat(captor.getValue().newPassword()).isEqualTo("Superextrasecurepassword1!");
     }
 
     @Test
@@ -338,7 +338,7 @@ class UserControllerTest {
         """
             {
               "token": "valid-reset-token",
-              "newPassword": "NewSecret456!"
+              "newPassword": "Superextrasecurepassword1!"
             }
             """;
 
@@ -358,7 +358,7 @@ class UserControllerTest {
 
       assertThat(captor.getValue()).isNotNull();
       assertThat(captor.getValue().token()).isEqualTo("valid-reset-token");
-      assertThat(captor.getValue().newPassword()).isEqualTo("NewSecret456!");
+      assertThat(captor.getValue().newPassword()).isEqualTo("Superextrasecurepassword1!");
     }
 
     @Test
