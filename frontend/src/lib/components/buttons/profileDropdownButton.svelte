@@ -6,11 +6,13 @@
         class: className = "",
         onClick: onClickFunction = () => {},
         accountName = "Profile",
+        expanded = false,
     } = $props();
 </script>
 
 <button
-    onclick={() => onClickFunction()}
+    aria-expanded={expanded}
+    onclick={(event) => onClickFunction(event)}
     class="flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-200 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 cursor-pointer ${className}"
     aria-label="Profile Dropdown"
 >

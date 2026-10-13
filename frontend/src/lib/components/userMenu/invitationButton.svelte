@@ -12,6 +12,6 @@
     onClick={onClickFunction}
     svg={vineryIcon}
     text="You have been <span class='font-bold'>invited!</span> Click to review details"
-    class="border-2 border-dashed border-zinc-400 bg-zinc-800/60 w-1/3 h-1/2"
+    class="border-2 border-dashed border-[#c4b6a6] w-72 h-56"
     {disabled}
 />

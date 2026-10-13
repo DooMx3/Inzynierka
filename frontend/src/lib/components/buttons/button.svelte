@@ -8,14 +8,18 @@
         text = "",
         isMenuButton = false,
         isFolded = true,
+        type = "button",
+        gentle = false,
     } = $props();
 </script>
 
 <button
+    {type}
     class={[
         className,
         "rounded-lg p-2 flex h-12 items-center cursor-pointer shadow-lg overflow-hidden",
-        "transition-all duration-300 ease-in-out hover:scale-110",
+        "transition-all duration-300 ease-in-out",
+        gentle ? "hover:scale-[1.02]" : "hover:scale-110",
         isFolded ? "w-12 justify-center gap-0" : "w-full gap-2",
     ]}
     onclick={() => onClickFunction()}
@@ -28,7 +32,7 @@
         <span
             class={[
                 "overflow-hidden whitespace-nowrap transition-all duration-300",
-                isFolded ? "max-w-0 opacity-0" : "max-w-40 opacity-100",
+                isFolded ? "max-w-0 opacity-0" : isMenuButton ? "max-w-40 opacity-100" : "max-w-full opacity-100",
             ]}
         >
             {text}

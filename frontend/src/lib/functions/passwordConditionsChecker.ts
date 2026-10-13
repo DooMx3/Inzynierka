@@ -5,24 +5,24 @@ export type PasswordCondition = {
 
 export const passwordConditions: PasswordCondition[] = [
     {
-        description: "At least 8 characters long",
-        isValid: (password) => password.length >= 8,
+        description: "At least 16 characters",
+        isValid: (password) => password.length >= 16,
     },
     {
-        description: "Contains at least one uppercase letter",
+        description: "At least one uppercase letter",
         isValid: (password) => /[A-Z]/.test(password),
     },
     {
-        description: "Contains at least one lowercase letter",
+        description: "At least one lowercase letter",
         isValid: (password) => /[a-z]/.test(password),
     },
     {
-        description: "Contains at least one number",
+        description: "At least one number",
         isValid: (password) => /[0-9]/.test(password),
     },
     {
-        description: "Contains at least one special character",
-        isValid: (password) => /[!@#$%^&*(),.?":{}|<>]/.test(password),
+        description: "At least one special character",
+        isValid: (password) => /[^A-Za-z0-9]/.test(password),
     },
 ];
 
@@ -31,4 +31,8 @@ export const checkPasswordConditions = (password: string) => {
         description: condition.description,
         isValid: condition.isValid(password),
     }));
+};
+
+export const isPasswordReadyForRegistration = (password: string) => {
+    return checkPasswordConditions(password).every((condition) => condition.isValid);
 };

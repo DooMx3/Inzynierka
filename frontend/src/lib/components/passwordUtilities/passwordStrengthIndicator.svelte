@@ -1,7 +1,7 @@
 <script lang="ts">
     import { checkPasswordStrength } from "$lib/functions/passwordStrengthChecker";
 
-    let { password, userInput, class: className } = $props();
+    let { password, userInput, class: className = "" } = $props();
 
     let score = $state(-1);
 

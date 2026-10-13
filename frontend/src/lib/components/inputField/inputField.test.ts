@@ -34,8 +34,8 @@ describe('Input field', () => {
         const input = screen.getByPlaceholderText('Enter your username');
         const field = input.parentElement;
 
-        expect(field).toHaveClass('bg-zinc-700', 'border-zinc-500', 'text-zinc-400', 'rounded-full');
-        expect(input).toHaveClass('text-zinc-300', 'placeholder:text-zinc-500');
+        expect(field).toHaveClass('bg-white', 'border-[#c4b6a6]', 'text-zinc-700', 'rounded-full');
+        expect(input).toHaveClass('text-zinc-800', 'placeholder:text-zinc-400');
     });
 
     it('Check label position top', () => {
@@ -99,9 +99,62 @@ describe('Input field', () => {
         expect(input).toHaveValue('jan.kowalski');
     });
 
+    it('Check invalid field uses a red border and red text', () => {
+        render(InputField, {
+            label: 'Password',
+            placeholder: 'Password',
+            invalid: true,
+        });
+
+        const input = screen.getByLabelText('Password');
+        const field = input.parentElement;
+
+        expect(input).toHaveAttribute('aria-invalid', 'true');
+        expect(input).toHaveClass('text-red-700/80');
+        expect(field).toHaveClass('border-red-500', 'text-red-700/80');
+        expect(screen.getByText('Password')).toHaveClass('text-red-700/80');
+    });
+
     it('Check input type', () => {
         render(InputField, { type: 'password', placeholder: 'Password' });
 
         expect(screen.getByPlaceholderText('Password')).toHaveAttribute('type', 'password');
+    });
+
+    it('keeps non-password fields without a visibility toggle', () => {
+        render(InputField, { label: 'Email', type: 'email', placeholder: 'Email' });
+
+        expect(screen.queryByRole('button', { name: 'Show password' })).not.toBeInTheDocument();
+    });
+
+    it('reveals and hides a password from the visibility toggle', async () => {
+        const { container } = render(InputField, {
+            label: 'Password',
+            type: 'password',
+            placeholder: 'Password',
+        });
+
+        const input = screen.getByLabelText('Password');
+        expect(input).toHaveAttribute('type', 'password');
+        expect(container.querySelectorAll('path')).toHaveLength(3);
+
+        await fireEvent.click(screen.getByRole('button', { name: 'Show password' }));
+
+        expect(input).toHaveAttribute('type', 'text');
+        expect(screen.getByRole('button', { name: 'Hide password' })).toHaveAttribute(
+            'aria-pressed',
+            'true',
+        );
+
+        await fireEvent.input(input, { target: { value: 'secret-pass' } });
+        expect(input).toHaveValue('secret-pass');
+
+        await fireEvent.click(screen.getByRole('button', { name: 'Hide password' }));
+
+        expect(input).toHaveAttribute('type', 'password');
+        expect(screen.getByRole('button', { name: 'Show password' })).toHaveAttribute(
+            'aria-pressed',
+            'false',
+        );
     });
 });

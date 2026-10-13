@@ -49,7 +49,7 @@
 </script>
 
 <span
-    class="absolute top-0 left-0 flex flex-col gap-2 w-72 h-full p-2 bg-gray-100 shadow-lg transition-all duration-300 ease-in-out"
+    class="absolute top-0 left-0 flex flex-col gap-2 w-72 h-full p-2 bg-[#f7f1ea] shadow-lg transition-all duration-300 ease-in-out"
     class:!w-16={menu.folded}
 >
     <div class="flex w-full items-center">

@@ -50,7 +50,7 @@ describe('Menu bar', () => {
             'w-72',
             'h-full',
             'p-2',
-            'bg-gray-100',
+            'bg-[#f7f1ea]',
         );
         expect(getSidebar(container)).not.toHaveClass('rounded-lg');
     });

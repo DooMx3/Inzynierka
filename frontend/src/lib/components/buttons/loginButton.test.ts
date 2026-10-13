@@ -33,6 +33,14 @@ describe('Login button', () => {
         expect(btn.lastElementChild).toHaveTextContent('Login');
     });
 
+    it('uses a small hover scale', () => {
+        render(LoginButton);
+
+        const btn = screen.getByRole('button', { name: 'Login' });
+        expect(btn).toHaveClass('hover:scale-[1.02]');
+        expect(btn).not.toHaveClass('hover:scale-110');
+    });
+
     it('Check if text is present', () => {
         render(LoginButton);
 
