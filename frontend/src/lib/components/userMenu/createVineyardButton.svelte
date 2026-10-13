@@ -11,7 +11,7 @@
 <UserMenu
     onClick={onClickFunction}
     svg={addIcon}
-    text="Create <span class='text-green-400'>new</span> vineyard"
-    class="border-2 border-dashed border-zinc-400 bg-zinc-800/60 w-1/3 h-1/2"
+    text="Create <span class='text-green-700'>new</span> vineyard"
+    class="border-2 border-dashed border-[#c4b6a6] w-72 h-56"
     {disabled}
 />

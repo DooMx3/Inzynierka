@@ -225,7 +225,8 @@ Shows avatar + name + chevron. `accountName` is `"Profile"` if you skip it. Ther
 ```svelte
 <script lang="ts">
     import InputField from "$lib/components/inputField/inputField.svelte";
-    import loginIcon from "$lib/assets/login.svg?raw";
+    
+<PasswordStrengthIndicator password={password} />import loginIcon from "$lib/assets/login.svg?raw";
 
     let username = $state("");
     let email = $state("");

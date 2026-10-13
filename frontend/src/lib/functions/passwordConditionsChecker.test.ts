@@ -1,5 +1,8 @@
 import { describe, it, expect } from "bun:test";
-import { checkPasswordConditions } from "./passwordConditionsChecker";
+import {
+    checkPasswordConditions,
+    isPasswordReadyForRegistration,
+} from "./passwordConditionsChecker";
 
 describe("checkPasswordConditions", () => {
     it("should return an array of condition results for a given password", () => {
@@ -21,16 +24,23 @@ describe("checkPasswordConditions", () => {
     });
 
     it("should validate conditions correctly for a strong password", () => {
-        const password = "Str0ngP@ssw0rd!";
+        const password = "Str0ngP@ssw0rd!!";
         const result = checkPasswordConditions(password);
         const validConditions = result.filter((condition) => condition.isValid);
         expect(validConditions.length).toBe(result.length);
     });
 
     it("should validate conditions correctly for a password with mixed characters", () => {
-        const password = "Abcdef1!";
+        const password = "Abcdefghij1!ABCD";
         const result = checkPasswordConditions(password);
         const validConditions = result.filter((condition) => condition.isValid);
         expect(validConditions.length).toBe(result.length);
+    });
+
+    it("should reject a password that is too short for registration", () => {
+        const password = "Abcdef1!";
+        const result = checkPasswordConditions(password);
+        expect(result[0]?.isValid).toBe(false);
+        expect(isPasswordReadyForRegistration(password)).toBe(false);
     });
 });

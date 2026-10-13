@@ -33,6 +33,14 @@ describe('Create account button', () => {
         expect(btn.lastElementChild).toHaveTextContent('Create free account');
     });
 
+    it('uses a small hover scale', () => {
+        render(CreateAccountButton);
+
+        const btn = screen.getByRole('button', { name: 'Create free account' });
+        expect(btn).toHaveClass('hover:scale-[1.02]');
+        expect(btn).not.toHaveClass('hover:scale-110');
+    });
+
     it('Check if text is present', () => {
         render(CreateAccountButton);
 

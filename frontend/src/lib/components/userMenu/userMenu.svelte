@@ -11,8 +11,8 @@
 <button
     class={[
         className,
-        "rounded-lg p-4 flex flex-col gap-3 items-center justify-center shadow-lg overflow-hidden bg-black",
-        "fill-white stroke-white text-white",
+        "rounded-lg p-4 flex flex-col gap-3 items-center justify-center shadow-md overflow-hidden bg-[#f7f1ea]",
+        "fill-zinc-800 stroke-zinc-800 text-zinc-800",
         "transition-all duration-300 ease-in-out",
         disabled
             ? "opacity-40 cursor-not-allowed grayscale"

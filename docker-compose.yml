@@ -43,6 +43,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: password
       SPRING_MAIL_HOST: mailpit
       SPRING_MAIL_PORT: "1025"
+      APP_RESET_PASSWORD_URL: http://localhost:3000/reset-password
     ports:
       - "8080:8080"
     depends_on:
@@ -59,6 +60,7 @@ services:
     environment:
       HOST: 0.0.0.0
       PORT: "3000"
+      API_PROXY_TARGET: http://backend:8080
     ports:
       - "3000:3000"
     depends_on:

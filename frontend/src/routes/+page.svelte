@@ -1,7 +1,5 @@
 <script lang="ts">
-import SearchButton from "$lib/components/tableComponents/searchButton/searchButton.svelte";
+    import UserHome from "$lib/components/userHome/userHome.svelte";
 </script>
 
-<span class="flex w-fit">
-    <SearchButton />
-</span>
+<UserHome />

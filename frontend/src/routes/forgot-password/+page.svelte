@@ -1,0 +1,9 @@
+<script lang="ts">
+    import ForgotPasswordForm from "$lib/components/forgotPasswordForm/forgotPasswordForm.svelte";
+</script>
+
+<div class="flex h-full min-h-full items-center justify-center overflow-y-auto p-8">
+    <div class="w-full max-w-md">
+        <ForgotPasswordForm />
+    </div>
+</div>

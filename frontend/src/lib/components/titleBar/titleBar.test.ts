@@ -1,8 +1,17 @@
 import { render, screen, fireEvent } from '@testing-library/svelte';
-import { describe, it, expect } from 'bun:test';
+import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
 import TitleBar from './titleBar.svelte';
+import { setUser } from '$lib/stores/session.svelte';
 
 describe('Title bar', () => {
+    beforeEach(() => {
+        setUser({ id: '1', firstname: 'Henryk', email: 'henryk@example.com' });
+    });
+
+    afterEach(() => {
+        setUser(null);
+    });
+
     it('Check logo is present', () => {
         render(TitleBar);
 
@@ -46,7 +55,7 @@ describe('Title bar', () => {
             'justify-center',
             'h-24',
             'w-full',
-            'bg-zinc-800',
+            'bg-[#eae0d5]',
         );
     });
 
@@ -98,5 +107,16 @@ describe('Title bar', () => {
 
         const btn = screen.getByRole('button', { name: 'Profile Dropdown' });
         expect(btn).toHaveTextContent('Henryk');
+    });
+
+    it('hides the profile dropdown until someone signs in', () => {
+        setUser(null);
+        render(TitleBar);
+
+        expect(screen.queryByRole('button', { name: 'Profile Dropdown' })).not.toBeInTheDocument();
+        const signIn = screen.getByRole('link', { name: 'Sign in' });
+        expect(signIn).toHaveAttribute('href', '/auth');
+        expect(signIn.querySelector('svg')).toBeInTheDocument();
+        expect(signIn).toHaveClass('bg-[#e4d3c0]', 'text-[#4a3428]', 'transition-colors', 'duration-200');
     });
 });

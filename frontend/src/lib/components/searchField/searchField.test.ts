@@ -26,8 +26,8 @@ describe('Search field', () => {
         const input = screen.getByPlaceholderText('Search');
         const field = input.parentElement;
 
-        expect(field).toHaveClass('bg-zinc-700', 'border-zinc-500', 'text-zinc-400', 'rounded-full');
-        expect(input).toHaveClass('text-zinc-300', 'placeholder:text-zinc-500');
+        expect(field).toHaveClass('bg-white', 'border-[#c4b6a6]', 'text-zinc-700', 'rounded-full');
+        expect(input).toHaveClass('text-zinc-800', 'placeholder:text-zinc-400');
     });
 
     it('Check label is absent', () => {
