@@ -51,3 +51,4 @@ Give every changeset a unique ID and add a new migration instead of editing one 
 ## Other
 - In dev environment, the application uses a local mail server (Mailpit) to send emails. You can access the Mailpit web interface at http://localhost:8025 to view sent emails.
 - Api documentation is available at http://localhost:8080/swagger-ui.html
+- Code is formated using Spotless. You can run `mvn spotless:apply` to format the code. You can use open-java-format plugin in your IDE to format the code automatically on save.
