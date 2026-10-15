@@ -8,9 +8,6 @@
     <a href="https://github.com/DooMx3/Inzynierka/actions/workflows/backend-tests.yml">
       <img src="https://github.com/DooMx3/Inzynierka/actions/workflows/backend-tests.yml/badge.svg" alt="Backend Tests" />
     </a>
-    <a href="https://github.com/DooMx3/Inzynierka/actions/workflows/latex-release.yml">
-      <img src="https://github.com/DooMx3/Inzynierka/actions/workflows/latex-release.yml/badge.svg" alt="Doc build status" />
-    </a>
   </p>
 
 </div>
