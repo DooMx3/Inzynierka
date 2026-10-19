@@ -8,6 +8,7 @@ import com.github.DooMx3.inzynierka.dto.user.UserPatchRequest;
 import com.github.DooMx3.inzynierka.entities.PasswordResetToken;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.enums.MembershipStatus;
+import com.github.DooMx3.inzynierka.enums.RoleName;
 import com.github.DooMx3.inzynierka.exceptions.*;
 import com.github.DooMx3.inzynierka.repositories.PasswordResetTokenRepository;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
@@ -162,5 +163,21 @@ public class UserService {
       throw new ResourceNotFoundException("Pending invitation not found");
     }
     return user;
+  }
+
+  public void addRoleToUser(User user, RoleName role) {
+    if (user == null || role == null) {
+      throw new IllegalArgumentException("User and role name must not be null or empty");
+    }
+    user.getRoles().add(role);
+    userRepository.save(user);
+  }
+
+  public void removeRoleFromUser(User user, RoleName role) {
+    if (user == null || role == null) {
+      throw new IllegalArgumentException("User and role name must not be null or empty");
+    }
+    user.getRoles().remove(role);
+    userRepository.save(user);
   }
 }

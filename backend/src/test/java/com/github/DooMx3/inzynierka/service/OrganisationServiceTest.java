@@ -11,13 +11,11 @@ import com.github.DooMx3.inzynierka.dto.organisation.OrganisationInvitationReque
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationPatchRequest;
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationRequest;
 import com.github.DooMx3.inzynierka.entities.Organisation;
-import com.github.DooMx3.inzynierka.entities.Role;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.enums.MembershipStatus;
 import com.github.DooMx3.inzynierka.enums.RoleName;
 import com.github.DooMx3.inzynierka.exceptions.*;
 import com.github.DooMx3.inzynierka.repositories.OrganisationRepository;
-import com.github.DooMx3.inzynierka.repositories.RoleRepository;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
 import java.util.HashSet;
 import java.util.List;
@@ -35,8 +33,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class OrganisationServiceTest {
 
   @Mock private OrganisationRepository repository;
-
-  @Mock private RoleRepository roleRepository;
 
   @Mock private UserRepository userRepository;
 
@@ -63,9 +59,6 @@ class OrganisationServiceTest {
 
       when(repository.save(any(Organisation.class))).thenReturn(saved);
 
-      Role ownerRole = ownerRole();
-      when(roleRepository.findByName("OWNER")).thenReturn(Optional.of(ownerRole));
-
       User user = User.builder().build();
 
       // act
@@ -77,10 +70,9 @@ class OrganisationServiceTest {
       assertTrue(result.isActive());
       assertSame(saved, user.getOrganisation());
       assertEquals(MembershipStatus.MEMBER, user.getMembershipStatus());
-      assertTrue(user.getRoles().contains(ownerRole));
+      assertTrue(user.getRoles().contains(RoleName.OWNER));
 
       verify(repository).save(any(Organisation.class));
-      verify(roleRepository).findByName("OWNER");
       verify(userRepository).save(user);
     }
 
@@ -104,7 +96,7 @@ class OrganisationServiceTest {
 
       assertEquals(
           "Authenticated user is required to create an organisation", exception.getMessage());
-      verifyNoInteractions(repository, roleRepository, userRepository);
+      verifyNoInteractions(repository, userRepository);
     }
 
     @Test
@@ -132,7 +124,7 @@ class OrganisationServiceTest {
       assertEquals(
           "You cannot create another organisation because you already belong to one",
           exception.getMessage());
-      verifyNoInteractions(repository, roleRepository, userRepository);
+      verifyNoInteractions(repository, userRepository);
     }
   }
 
@@ -152,12 +144,11 @@ class OrganisationServiceTest {
               .motto("Tradycja")
               .active(true)
               .build();
-      Role ownerRole = ownerRole();
       User user =
           User.builder()
               .organisation(organisation)
               .membershipStatus(MembershipStatus.MEMBER)
-              .roles(new HashSet<>(Set.of(ownerRole)))
+              .roles(new HashSet<>(Set.of(RoleName.OWNER)))
               .build();
       User invitedUser =
           User.builder()
@@ -180,8 +171,7 @@ class OrganisationServiceTest {
       assertEquals("Tradycja", organisation.getMotto());
       assertNull(user.getOrganisation());
       assertEquals(MembershipStatus.NONE, user.getMembershipStatus());
-      assertTrue(
-          user.getRoles().stream().noneMatch(role -> RoleName.OWNER.name().equals(role.getName())));
+      assertTrue(user.getRoles().stream().noneMatch(RoleName.OWNER::equals));
       assertNull(invitedUser.getOrganisation());
       assertEquals(MembershipStatus.NONE, invitedUser.getMembershipStatus());
 
@@ -209,11 +199,10 @@ class OrganisationServiceTest {
               .motto("Stare motto")
               .active(true)
               .build();
-      Role ownerRole = ownerRole();
       User user =
           User.builder()
               .organisation(organisation)
-              .roles(new java.util.HashSet<>(Set.of(ownerRole)))
+              .roles(new java.util.HashSet<>(Set.of(RoleName.OWNER)))
               .build();
 
       OrganisationPatchRequest request =
@@ -239,12 +228,11 @@ class OrganisationServiceTest {
       // arrange
       UUID organisationId = UUID.randomUUID();
       Organisation organisation = Organisation.builder().id(organisationId).active(true).build();
-      Role ownerRole = ownerRole();
       User owner =
           User.builder()
               .id(UUID.randomUUID())
               .organisation(organisation)
-              .roles(new java.util.HashSet<>(Set.of(ownerRole)))
+              .roles(new java.util.HashSet<>(Set.of(RoleName.OWNER)))
               .build();
       User invitedUser =
           User.builder()
@@ -275,7 +263,7 @@ class OrganisationServiceTest {
           User.builder()
               .id(UUID.randomUUID())
               .organisation(organisation)
-              .roles(new HashSet<>(Set.of(ownerRole())))
+              .roles(new HashSet<>(Set.of(RoleName.OWNER)))
               .build();
       OrganisationInvitationRequest request =
           new OrganisationInvitationRequest("missing@example.com");
@@ -302,7 +290,7 @@ class OrganisationServiceTest {
           User.builder()
               .id(UUID.randomUUID())
               .organisation(organisation)
-              .roles(new HashSet<>(Set.of(ownerRole())))
+              .roles(new HashSet<>(Set.of(RoleName.OWNER)))
               .build();
       User invitedUser =
           User.builder()
@@ -360,12 +348,12 @@ class OrganisationServiceTest {
       // arrange
       UUID organisationId = UUID.randomUUID();
       Organisation organisation = Organisation.builder().id(organisationId).build();
-      Role ownerRole = ownerRole();
+      RoleName role = RoleName.OWNER;
       User owner =
           User.builder()
               .id(UUID.randomUUID())
               .organisation(organisation)
-              .roles(new java.util.HashSet<>(Set.of(ownerRole)))
+              .roles(new java.util.HashSet<>(Set.of(role)))
               .build();
       User invitedUser =
           User.builder()
@@ -386,11 +374,5 @@ class OrganisationServiceTest {
       assertNull(invitedUser.getOrganisation());
       verify(userRepository).save(invitedUser);
     }
-  }
-
-  private static Role ownerRole() {
-    Role role = new Role();
-    role.setName(RoleName.OWNER.name());
-    return role;
   }
 }

@@ -38,6 +38,7 @@ class AuthenticationControllerTest {
       """
             {
               "firstname": "Jan",
+              "lastname": "Kowalski",
               "email": "jan.kowalski@example.com",
               "password": "Superextrasecurepassword1!"
             }
@@ -137,7 +138,7 @@ class AuthenticationControllerTest {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
                       """
-                                    {"firstname": "Jan", "email": "", "password": "Secret123!"}
+                                    {"firstname": "Jan", "lastname": "Kowalski", "email": "", "password": "Secret123!"}
                                     """))
           .andExpect(status().isBadRequest());
 

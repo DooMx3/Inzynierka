@@ -11,6 +11,7 @@ import com.github.DooMx3.inzynierka.entities.Organisation;
 import com.github.DooMx3.inzynierka.entities.PasswordResetToken;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.enums.MembershipStatus;
+import com.github.DooMx3.inzynierka.enums.RoleName;
 import com.github.DooMx3.inzynierka.exceptions.InvalidCredentialsException;
 import com.github.DooMx3.inzynierka.exceptions.ResourceConflictException;
 import com.github.DooMx3.inzynierka.exceptions.ResourceNotFoundException;
@@ -18,7 +19,9 @@ import com.github.DooMx3.inzynierka.exceptions.UnauthorizedException;
 import com.github.DooMx3.inzynierka.repositories.PasswordResetTokenRepository;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -337,6 +340,119 @@ class UserServiceTest {
       // assert
       assertNull(user.getOrganisation());
       assertEquals(MembershipStatus.NONE, user.getMembershipStatus());
+      verify(userRepository).save(user);
+    }
+  }
+
+  @Nested
+  class AddRoleToUser {
+
+    @Test
+    void shouldThrowExceptionWhenUserIsNull() {
+      // arrange
+      RoleName role = RoleName.OWNER;
+
+      // act & assert
+      assertThrows(IllegalArgumentException.class, () -> service.addRoleToUser(null, role));
+      verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenRoleIsNull() {
+      // arrange
+      User user = new User();
+      user.setRoles(new HashSet<>());
+
+      // act & assert
+      assertThrows(IllegalArgumentException.class, () -> service.addRoleToUser(user, null));
+      assertTrue(user.getRoles().isEmpty());
+      verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldAddRoleToUserWhenArgumentsAreValid() {
+      // arrange
+      RoleName role = RoleName.OWNER;
+      User user = new User();
+      user.setRoles(new HashSet<>());
+
+      // act
+      service.addRoleToUser(user, role);
+
+      // assert
+      assertTrue(user.getRoles().contains(role));
+      verify(userRepository).save(user);
+    }
+
+    @Test
+    void shouldNotDuplicateRoleWhenUserAlreadyHasIt() {
+      // arrange
+      RoleName role = RoleName.OWNER;
+      User user = new User();
+      user.setRoles(new HashSet<>(Set.of(role)));
+
+      // act
+      service.addRoleToUser(user, role);
+
+      // assert
+      assertEquals(1, user.getRoles().size());
+      verify(userRepository).save(user);
+    }
+  }
+
+  @Nested
+  class RemoveRoleFromUser {
+
+    @Test
+    void shouldThrowExceptionWhenUserIsNull() {
+      // arrange
+      RoleName role = RoleName.OENOLOGIST;
+
+      // act & assert
+      assertThrows(IllegalArgumentException.class, () -> service.removeRoleFromUser(null, role));
+      verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenRoleIsNull() {
+      // arrange
+      RoleName role = RoleName.OWNER;
+      User user = new User();
+      user.setRoles(new HashSet<>(Set.of(role)));
+
+      // act & assert
+      assertThrows(IllegalArgumentException.class, () -> service.removeRoleFromUser(user, null));
+      assertEquals(1, user.getRoles().size());
+      verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldRemoveRoleFromUserWhenUserHasIt() {
+      // arrange
+      RoleName role = RoleName.OWNER;
+      User user = new User();
+      user.setRoles(new HashSet<>(Set.of(role)));
+
+      // act
+      service.removeRoleFromUser(user, role);
+
+      // assert
+      assertFalse(user.getRoles().contains(role));
+      verify(userRepository).save(user);
+    }
+
+    @Test
+    void shouldSaveUserEvenWhenUserDoesNotHaveRole() {
+      // arrange
+      RoleName role = RoleName.WORKER;
+      User user = new User();
+      user.setRoles(new HashSet<>());
+
+      // act
+      service.removeRoleFromUser(user, role);
+
+      // assert
+      assertTrue(user.getRoles().isEmpty());
       verify(userRepository).save(user);
     }
   }

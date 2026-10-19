@@ -2,6 +2,7 @@ package com.github.DooMx3.inzynierka.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.DooMx3.inzynierka.enums.MembershipStatus;
+import com.github.DooMx3.inzynierka.enums.RoleName;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.util.*;
@@ -49,22 +50,21 @@ public class User implements UserDetails {
 
   private boolean active;
 
-  @ManyToMany(fetch = FetchType.EAGER)
-  @JoinTable(
-      name = "users_roles",
-      joinColumns = @JoinColumn(name = "user_id"),
-      inverseJoinColumns = @JoinColumn(name = "role_id"))
-  @Builder.Default
-  private Set<Role> roles = new HashSet<>();
-
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "organisation_id")
   private Organisation organisation;
 
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id"))
+  @Enumerated(EnumType.STRING)
+  @Column(name = "role", nullable = false)
+  @Builder.Default
+  private Set<RoleName> roles = EnumSet.noneOf(RoleName.class);
+
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return roles.stream()
-        .map(role -> new SimpleGrantedAuthority(role.getName()))
+        .map(role -> new SimpleGrantedAuthority(role.name()))
         .collect(Collectors.toList());
   }
 

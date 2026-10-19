@@ -30,6 +30,7 @@ public class AuthenticationService {
     User user =
         User.builder()
             .firstname(request.firstname())
+            .lastname(request.lastname())
             .email(request.email())
             .password(passwordEncoder.encode(request.password()))
             .membershipStatus(MembershipStatus.NONE)
