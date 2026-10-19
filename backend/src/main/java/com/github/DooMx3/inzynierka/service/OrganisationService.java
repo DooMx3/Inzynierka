@@ -5,13 +5,11 @@ import com.github.DooMx3.inzynierka.dto.organisation.OrganisationPatchRequest;
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationRequest;
 import com.github.DooMx3.inzynierka.dto.organisation.PendingInvitationResponse;
 import com.github.DooMx3.inzynierka.entities.Organisation;
-import com.github.DooMx3.inzynierka.entities.Role;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.enums.MembershipStatus;
 import com.github.DooMx3.inzynierka.enums.RoleName;
 import com.github.DooMx3.inzynierka.exceptions.*;
 import com.github.DooMx3.inzynierka.repositories.OrganisationRepository;
-import com.github.DooMx3.inzynierka.repositories.RoleRepository;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -26,8 +24,8 @@ import org.springframework.stereotype.Service;
 public class OrganisationService {
 
   private final OrganisationRepository organisationRepository;
-  private final RoleRepository roleRepository;
   private final UserRepository userRepository;
+  private final UserService userService;
 
   @Transactional
   public Organisation createOrganisation(OrganisationRequest request, User user) {
@@ -54,11 +52,7 @@ public class OrganisationService {
     Organisation savedOrganisation = organisationRepository.save(organisation);
     user.setOrganisation(savedOrganisation);
     user.setMembershipStatus(MembershipStatus.MEMBER);
-    Role ownerRole =
-        roleRepository
-            .findByName(RoleName.OWNER.name())
-            .orElseThrow(() -> new IllegalStateException("OWNER role is not configured"));
-    user.getRoles().add(ownerRole);
+    user.getRoles().add(RoleName.OWNER);
     userRepository.save(user);
 
     return savedOrganisation;
@@ -107,7 +101,7 @@ public class OrganisationService {
     organisation.setActive(false);
     user.setOrganisation(null);
     user.setMembershipStatus(MembershipStatus.NONE);
-    user.getRoles().removeIf(role -> RoleName.OWNER.name().equals(role.getName()));
+    user.getRoles().removeIf(RoleName.OWNER::equals);
     userRepository.save(user);
   }
 
@@ -215,12 +209,51 @@ public class OrganisationService {
     boolean ownsOrganisation =
         user.getOrganisation() != null
             && organisation.getId().equals(user.getOrganisation().getId())
-            && user.getRoles().stream()
-                .anyMatch(role -> RoleName.OWNER.name().equals(role.getName()));
+            && user.getRoles().stream().anyMatch(RoleName.OWNER::equals);
 
     if (!ownsOrganisation) {
       throw new InsufficientPermissionException(
           "Only the organisation owner can access the organisation");
     }
+  }
+
+  public User getUserFromOrganisationById(UUID organisationId, UUID userId) {
+    User user =
+        userRepository
+            .findById(userId)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+    if (user.getOrganisation() == null || !organisationId.equals(user.getOrganisation().getId())) {
+      throw new ResourceNotFoundException("User does not belong to this organisation");
+    }
+    return user;
+  }
+
+  @Transactional
+  public void addRoleToUser(UUID organisationId, UUID userId, RoleName role, User owner) {
+    User target = prepareRoleChange(organisationId, userId, role, owner);
+    userService.addRoleToUser(target, role);
+  }
+
+  @Transactional
+  public void removeRoleFromUser(UUID organisationId, UUID userId, RoleName role, User owner) {
+    User target = prepareRoleChange(organisationId, userId, role, owner);
+    userService.removeRoleFromUser(target, role);
+  }
+
+  private User prepareRoleChange(UUID organisationId, UUID userId, RoleName role, User owner) {
+    Organisation organisation = getOrganisation(organisationId, owner);
+    if (!organisation.isActive()) {
+      throw new InactiveResourceException("Cannot change roles in an inactive organisation");
+    }
+    if (role == RoleName.OWNER) {
+      throw new ResourceConflictException("The OWNER role cannot be added or removed this way");
+    }
+
+    User target = getUserFromOrganisationById(organisationId, userId);
+    if (target.getMembershipStatus() != MembershipStatus.MEMBER) {
+      throw new ResourceConflictException("User has not accepted the invitation yet");
+    }
+    return target;
   }
 }

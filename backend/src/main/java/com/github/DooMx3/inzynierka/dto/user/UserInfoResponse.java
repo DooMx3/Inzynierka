@@ -1,6 +1,5 @@
 package com.github.DooMx3.inzynierka.dto.user;
 
-import com.github.DooMx3.inzynierka.entities.Role;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.enums.MembershipStatus;
 import java.util.Set;
@@ -25,6 +24,6 @@ public record UserInfoResponse(
         user.getPhoneNumber(),
         user.getEmail(),
         user.isActive(),
-        user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()));
+        user.getRoles().stream().map(Enum::name).collect(Collectors.toSet()));
   }
 }

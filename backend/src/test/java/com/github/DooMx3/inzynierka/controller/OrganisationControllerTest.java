@@ -22,6 +22,9 @@ import com.github.DooMx3.inzynierka.dto.organisation.OrganisationPatchRequest;
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationRequest;
 import com.github.DooMx3.inzynierka.entities.Organisation;
 import com.github.DooMx3.inzynierka.entities.User;
+import com.github.DooMx3.inzynierka.enums.RoleName;
+import com.github.DooMx3.inzynierka.exceptions.InactiveResourceException;
+import com.github.DooMx3.inzynierka.exceptions.ResourceConflictException;
 import com.github.DooMx3.inzynierka.exceptions.ResourceNotFoundException;
 import com.github.DooMx3.inzynierka.service.JwtService;
 import com.github.DooMx3.inzynierka.service.OrganisationService;
@@ -594,6 +597,298 @@ class OrganisationControllerTest {
           .andExpect(status().isBadRequest());
 
       verifyNoInteractions(organisationService);
+    }
+  }
+
+  @Nested
+  class AddRoleToUser {
+      private final String ROLES_URL = BASE_URL + "/{organisationId}/users/{userId}/roles";
+      private final UUID targetUserId = UUID.randomUUID();
+
+    @Test
+    void shouldReturn204ForOwnerWhenAddingWorkerRole() throws Exception {
+      mockMvc
+          .perform(
+              post(ROLES_URL, organisationId, targetUserId)
+                  .param("role", RoleName.WORKER.name())
+                  .with(authentication(owner())))
+          .andExpect(status().isNoContent());
+
+      verify(organisationService)
+          .addRoleToUser(organisationId, targetUserId, RoleName.WORKER, user);
+    }
+
+    @Test
+    void shouldReturn204ForOwnerWhenAddingOenologistRole() throws Exception {
+      mockMvc
+          .perform(
+              post(ROLES_URL, organisationId, targetUserId)
+                  .param("role", RoleName.OENOLOGIST.name())
+                  .with(authentication(owner())))
+          .andExpect(status().isNoContent());
+
+      verify(organisationService)
+          .addRoleToUser(organisationId, targetUserId, RoleName.OENOLOGIST, user);
+    }
+
+    @Test
+    void shouldReturn400WhenRoleIsUnknown() throws Exception {
+      mockMvc
+          .perform(
+              post(ROLES_URL, organisationId, targetUserId)
+                  .param("role", "NOT_A_ROLE")
+                  .with(authentication(owner())))
+          .andExpect(status().isBadRequest());
+
+      verifyNoInteractions(organisationService);
+    }
+
+    @Test
+    void shouldReturn400WhenOrganisationIdIsNotValidUuid() throws Exception {
+      mockMvc
+          .perform(
+              post(ROLES_URL, "not-a-uuid", targetUserId)
+                  .param("role", RoleName.WORKER.name())
+                  .with(authentication(owner())))
+          .andExpect(status().isBadRequest());
+
+      verifyNoInteractions(organisationService);
+    }
+
+    @Test
+    void shouldReturn400WhenUserIdIsNotValidUuid() throws Exception {
+      mockMvc
+          .perform(
+              post(ROLES_URL, organisationId, "not-a-uuid")
+                  .param("role", RoleName.WORKER.name())
+                  .with(authentication(owner())))
+          .andExpect(status().isBadRequest());
+
+      verifyNoInteractions(organisationService);
+    }
+
+    @Test
+    void shouldReturn401WhenNotAuthenticated() throws Exception {
+      mockMvc
+          .perform(
+              post(ROLES_URL, organisationId, targetUserId).param("role", RoleName.WORKER.name()))
+          .andExpect(status().isUnauthorized());
+
+      verifyNoInteractions(organisationService);
+    }
+
+    @Test
+    void shouldReturn403WhenUserIsNotOwner() throws Exception {
+      mockMvc
+          .perform(
+              post(ROLES_URL, organisationId, targetUserId)
+                  .param("role", RoleName.WORKER.name())
+                  .with(authentication(notOwner())))
+          .andExpect(status().isForbidden());
+
+      verifyNoInteractions(organisationService);
+    }
+
+    @Test
+    void shouldReturn404WhenOrganisationOrUserNotFound() throws Exception {
+      doThrow(new ResourceNotFoundException("User not found"))
+          .when(organisationService)
+          .addRoleToUser(organisationId, targetUserId, RoleName.WORKER, user);
+
+      mockMvc
+          .perform(
+              post(ROLES_URL, organisationId, targetUserId)
+                  .param("role", RoleName.WORKER.name())
+                  .with(authentication(owner())))
+          .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldReturn409WhenOwnerRoleRequested() throws Exception {
+      doThrow(new ResourceConflictException("The OWNER role cannot be added or removed this way"))
+          .when(organisationService)
+          .addRoleToUser(organisationId, targetUserId, RoleName.OWNER, user);
+
+      mockMvc
+          .perform(
+              post(ROLES_URL, organisationId, targetUserId)
+                  .param("role", RoleName.OWNER.name())
+                  .with(authentication(owner())))
+          .andExpect(status().isConflict());
+    }
+
+    @Test
+    void shouldReturn409WhenUserHasPendingInvitation() throws Exception {
+      doThrow(new ResourceConflictException("User has not accepted the invitation yet"))
+          .when(organisationService)
+          .addRoleToUser(organisationId, targetUserId, RoleName.WORKER, user);
+
+      mockMvc
+          .perform(
+              post(ROLES_URL, organisationId, targetUserId)
+                  .param("role", RoleName.WORKER.name())
+                  .with(authentication(owner())))
+          .andExpect(status().isConflict());
+    }
+
+    @Test
+    void shouldReturn409WhenOrganisationIsInactive() throws Exception {
+      doThrow(new InactiveResourceException("Cannot change roles in an inactive organisation"))
+          .when(organisationService)
+          .addRoleToUser(organisationId, targetUserId, RoleName.WORKER, user);
+
+      mockMvc
+          .perform(
+              post(ROLES_URL, organisationId, targetUserId)
+                  .param("role", RoleName.WORKER.name())
+                  .with(authentication(owner())))
+          .andExpect(status().isConflict());
+    }
+  }
+
+  @Nested
+  class RemoveRoleFromUser {
+    private final String ROLES_URL = BASE_URL + "/{organisationId}/users/{userId}/roles";
+    private final UUID targetUserId = UUID.randomUUID();
+
+    @Test
+    void shouldReturn204ForOwnerWhenRemovingWorkerRole() throws Exception {
+      mockMvc
+          .perform(
+              delete(ROLES_URL, organisationId, targetUserId)
+                  .param("role", RoleName.WORKER.name())
+                  .with(authentication(owner())))
+          .andExpect(status().isNoContent());
+
+      verify(organisationService)
+          .removeRoleFromUser(organisationId, targetUserId, RoleName.WORKER, user);
+    }
+
+    @Test
+    void shouldReturn204ForOwnerWhenRemovingOenologistRole() throws Exception {
+      mockMvc
+          .perform(
+              delete(ROLES_URL, organisationId, targetUserId)
+                  .param("role", RoleName.OENOLOGIST.name())
+                  .with(authentication(owner())))
+          .andExpect(status().isNoContent());
+
+      verify(organisationService)
+          .removeRoleFromUser(organisationId, targetUserId, RoleName.OENOLOGIST, user);
+    }
+
+    @Test
+    void shouldReturn400WhenRoleIsUnknown() throws Exception {
+      mockMvc
+          .perform(
+              delete(ROLES_URL, organisationId, targetUserId)
+                  .param("role", "NOT_A_ROLE")
+                  .with(authentication(owner())))
+          .andExpect(status().isBadRequest());
+
+      verifyNoInteractions(organisationService);
+    }
+
+    @Test
+    void shouldReturn400WhenOrganisationIdIsNotValidUuid() throws Exception {
+      mockMvc
+          .perform(
+              delete(ROLES_URL, "not-a-uuid", targetUserId)
+                  .param("role", RoleName.WORKER.name())
+                  .with(authentication(owner())))
+          .andExpect(status().isBadRequest());
+
+      verifyNoInteractions(organisationService);
+    }
+
+    @Test
+    void shouldReturn400WhenUserIdIsNotValidUuid() throws Exception {
+      mockMvc
+          .perform(
+              delete(ROLES_URL, organisationId, "not-a-uuid")
+                  .param("role", RoleName.WORKER.name())
+                  .with(authentication(owner())))
+          .andExpect(status().isBadRequest());
+
+      verifyNoInteractions(organisationService);
+    }
+
+    @Test
+    void shouldReturn401WhenNotAuthenticated() throws Exception {
+      mockMvc
+          .perform(
+              delete(ROLES_URL, organisationId, targetUserId).param("role", RoleName.WORKER.name()))
+          .andExpect(status().isUnauthorized());
+
+      verifyNoInteractions(organisationService);
+    }
+
+    @Test
+    void shouldReturn403WhenUserIsNotOwner() throws Exception {
+      mockMvc
+          .perform(
+              delete(ROLES_URL, organisationId, targetUserId)
+                  .param("role", RoleName.WORKER.name())
+                  .with(authentication(notOwner())))
+          .andExpect(status().isForbidden());
+
+      verifyNoInteractions(organisationService);
+    }
+
+    @Test
+    void shouldReturn404WhenOrganisationOrUserNotFound() throws Exception {
+      doThrow(new ResourceNotFoundException("User does not belong to this organisation"))
+          .when(organisationService)
+          .removeRoleFromUser(organisationId, targetUserId, RoleName.WORKER, user);
+
+      mockMvc
+          .perform(
+              delete(ROLES_URL, organisationId, targetUserId)
+                  .param("role", RoleName.WORKER.name())
+                  .with(authentication(owner())))
+          .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldReturn409WhenOwnerRoleRequested() throws Exception {
+      doThrow(new ResourceConflictException("The OWNER role cannot be added or removed this way"))
+          .when(organisationService)
+          .removeRoleFromUser(organisationId, targetUserId, RoleName.OWNER, user);
+
+      mockMvc
+          .perform(
+              delete(ROLES_URL, organisationId, targetUserId)
+                  .param("role", RoleName.OWNER.name())
+                  .with(authentication(owner())))
+          .andExpect(status().isConflict());
+    }
+
+    @Test
+    void shouldReturn409WhenUserHasPendingInvitation() throws Exception {
+      doThrow(new ResourceConflictException("User has not accepted the invitation yet"))
+          .when(organisationService)
+          .removeRoleFromUser(organisationId, targetUserId, RoleName.WORKER, user);
+
+      mockMvc
+          .perform(
+              delete(ROLES_URL, organisationId, targetUserId)
+                  .param("role", RoleName.WORKER.name())
+                  .with(authentication(owner())))
+          .andExpect(status().isConflict());
+    }
+
+    @Test
+    void shouldReturn409WhenOrganisationIsInactive() throws Exception {
+      doThrow(new InactiveResourceException("Cannot change roles in an inactive organisation"))
+          .when(organisationService)
+          .removeRoleFromUser(organisationId, targetUserId, RoleName.WORKER, user);
+
+      mockMvc
+          .perform(
+              delete(ROLES_URL, organisationId, targetUserId)
+                  .param("role", RoleName.WORKER.name())
+                  .with(authentication(owner())))
+          .andExpect(status().isConflict());
     }
   }
 }
