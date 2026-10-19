@@ -223,4 +223,21 @@ public class OrganisationService {
           "Only the organisation owner can access the organisation");
     }
   }
+
+  public List<User> getOrganisationMembers(UUID organisationId) {
+    return userRepository.findByOrganisationIdAndMembershipStatus(
+        organisationId, MembershipStatus.MEMBER);
+  }
+
+  public void removeUserFromOrganisation(Organisation organisation, User user) {
+    if (user.getOrganisation() == null
+        || !organisation.getId().equals(user.getOrganisation().getId())) {
+      throw new ResourceNotFoundException("User does not belong to the specified organisation");
+    }
+
+    user.setOrganisation(null);
+    user.setMembershipStatus(MembershipStatus.NONE);
+    userRepository.save(user);
+    // TODO: Remove roles associated with the organisation;
+  }
 }
