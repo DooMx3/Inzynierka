@@ -275,4 +275,13 @@ public class OrganisationController {
     organisationService.removeRoleFromUser(id, userId, role, user);
     return ResponseEntity.noContent().build();
   }
+
+  @GetMapping("/{id}/members")
+  @PreAuthorize("hasAuthority('OWNER')")
+  public ResponseEntity<List<User>> getOrganisationMembers(
+      @Parameter(description = "Organisation ID") @PathVariable UUID id,
+      @Parameter(hidden = true) @AuthenticationPrincipal User user) {
+    List<User> members = organisationService.getOrganisationMembers(id);
+    return ResponseEntity.ok(members);
+  }
 }
