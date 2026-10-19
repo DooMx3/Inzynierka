@@ -157,4 +157,22 @@ describe('Input field', () => {
             'false',
         );
     });
+
+    it('forwards autocomplete and keydown to the input', async () => {
+        let key = '';
+        render(InputField, {
+            label: 'Current password',
+            type: 'password',
+            autocomplete: 'current-password',
+            onkeydown: (event: KeyboardEvent) => {
+                key = event.key;
+            },
+        });
+
+        const input = screen.getByLabelText('Current password');
+        expect(input).toHaveAttribute('autocomplete', 'current-password');
+
+        await fireEvent.keyDown(input, { key: 'Enter' });
+        expect(key).toBe('Enter');
+    });
 });

@@ -42,11 +42,22 @@ describe('Login form', () => {
         expect(screen.getByLabelText('Email')).toBeInTheDocument();
         expect(screen.getByLabelText('Password')).toHaveAttribute('type', 'password');
         expect(screen.getByRole('button', { name: 'Login' })).toHaveAttribute('type', 'submit');
-        expect(screen.getByRole('link', { name: 'Forgot password?' })).toHaveAttribute(
-            'href',
-            '/forgot-password',
-        );
+        expect(screen.getByRole('button', { name: 'Forgot password?' })).toHaveAttribute('type', 'button');
         expect(screen.getByRole('button', { name: 'create an account' })).toHaveAttribute('type', 'button');
+    });
+
+    it('turns the card over when a flip handler is provided', async () => {
+        let flipped = false;
+        render(LoginForm, {
+            onForgotPassword: () => {
+                flipped = true;
+            },
+        });
+
+        await fireEvent.click(screen.getByRole('button', { name: 'Forgot password?' }));
+
+        expect(flipped).toBe(true);
+        expect(window.location.href).toBe('http://localhost/auth');
     });
 
     it('switches to registration from the button under the form', async () => {

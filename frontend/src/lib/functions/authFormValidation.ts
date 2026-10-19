@@ -120,3 +120,39 @@ export const resetPasswordErrorMessages = (input: {
 
     return messages;
 };
+
+export type ChangePasswordInvalidFields = {
+    oldPassword: boolean;
+    password: boolean;
+    confirmPassword: boolean;
+};
+
+export const changePasswordInvalidFields = (input: {
+    oldPassword: string;
+    password: string;
+    confirmPassword: string;
+}): ChangePasswordInvalidFields => ({
+    oldPassword: input.oldPassword.length === 0,
+    ...resetPasswordInvalidFields(input),
+});
+
+export const changePasswordErrorMessages = (input: {
+    oldPassword: string;
+    password: string;
+    confirmPassword: string;
+}) => {
+    const fields = changePasswordInvalidFields(input);
+    const messages: string[] = [];
+
+    if (fields.oldPassword) {
+        messages.push('Enter your current password.');
+    }
+    if (fields.password) {
+        messages.push('Password does not meet the requirements.');
+    }
+    if (fields.confirmPassword) {
+        messages.push('Passwords do not match.');
+    }
+
+    return messages;
+};

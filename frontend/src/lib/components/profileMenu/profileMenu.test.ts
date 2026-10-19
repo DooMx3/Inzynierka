@@ -48,7 +48,8 @@ describe('Profile menu', () => {
         flushSync();
 
         expect(button).toHaveAttribute('aria-expanded', 'true');
-        expect(screen.getByRole('menuitem', { name: 'Logout' })).toBeInTheDocument();
+        const logoutItem = screen.getByRole('menuitem', { name: 'Logout' });
+        expect(logoutItem.querySelector('svg')).not.toBeNull();
     });
 
     it('logs out and clears the session', async () => {
@@ -66,6 +67,6 @@ describe('Profile menu', () => {
             expect(session.user).toBeNull();
         });
         expect(logoutCalled).toBe(true);
-        expect(window.location.href).toBe('/');
+        expect(window.location.href).toBe('/auth');
     });
 });

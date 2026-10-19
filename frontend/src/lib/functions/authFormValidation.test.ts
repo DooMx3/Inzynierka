@@ -9,6 +9,8 @@ import {
     registerInvalidFields,
     resetPasswordErrorMessages,
     resetPasswordInvalidFields,
+    changePasswordErrorMessages,
+    changePasswordInvalidFields,
 } from './authFormValidation';
 
 const readyPassword = 'Superextrasecurepassword1!';
@@ -116,5 +118,60 @@ describe('Auth form validation', () => {
             password: false,
             confirmPassword: false,
         });
+    });
+
+    it('requires the current password before a change', () => {
+        expect(changePasswordInvalidFields({
+            oldPassword: '',
+            password: readyPassword,
+            confirmPassword: readyPassword,
+        })).toEqual({
+            oldPassword: true,
+            password: false,
+            confirmPassword: false,
+        });
+        expect(changePasswordErrorMessages({
+            oldPassword: '',
+            password: readyPassword,
+            confirmPassword: readyPassword,
+        })).toEqual(['Enter your current password.']);
+    });
+
+    it('rejects a new password that misses the rules or the confirmation', () => {
+        expect(changePasswordErrorMessages({
+            oldPassword: 'current-password',
+            password: 'Abcdef1!',
+            confirmPassword: 'Abcdef1!',
+        })).toEqual(['Password does not meet the requirements.']);
+
+        expect(changePasswordInvalidFields({
+            oldPassword: 'current-password',
+            password: readyPassword,
+            confirmPassword: `${readyPassword}x`,
+        })).toEqual({
+            oldPassword: false,
+            password: false,
+            confirmPassword: true,
+        });
+        expect(changePasswordErrorMessages({
+            oldPassword: 'current-password',
+            password: readyPassword,
+            confirmPassword: `${readyPassword}x`,
+        })).toEqual(['Passwords do not match.']);
+    });
+
+    it('accepts a complete password change', () => {
+        const input = {
+            oldPassword: 'current-password',
+            password: readyPassword,
+            confirmPassword: readyPassword,
+        };
+
+        expect(changePasswordInvalidFields(input)).toEqual({
+            oldPassword: false,
+            password: false,
+            confirmPassword: false,
+        });
+        expect(changePasswordErrorMessages(input)).toEqual([]);
     });
 });

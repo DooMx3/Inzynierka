@@ -30,4 +30,23 @@ describe('Auth panel', () => {
         expect(screen.queryByLabelText('Username')).not.toBeInTheDocument();
         expect(screen.getByRole('heading', { name: 'Welcome back.' })).toBeInTheDocument();
     });
+
+    it('turns the login card over to password recovery and back', async () => {
+        const { container } = render(AuthPanel, { animate: false });
+
+        await fireEvent.click(screen.getByRole('button', { name: 'Forgot password?' }));
+        flushSync();
+
+        const card = container.querySelector('.flip-card');
+        expect(card).toHaveClass('is-flipped');
+        expect(card).toHaveAttribute('data-flipped', 'true');
+        expect(screen.getByRole('heading', { name: 'Forgot your password?' })).toBeInTheDocument();
+
+        await fireEvent.click(screen.getByRole('button', { name: 'sign in' }));
+        flushSync();
+
+        expect(card).not.toHaveClass('is-flipped');
+        expect(card).toHaveAttribute('data-flipped', 'false');
+        expect(screen.getByRole('heading', { name: 'Welcome back.' })).toBeInTheDocument();
+    });
 });

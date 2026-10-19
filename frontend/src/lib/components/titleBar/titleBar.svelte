@@ -9,10 +9,10 @@
 </script>
 
 <span class="relative z-30 flex items-center justify-center h-24 w-full bg-[#eae0d5]">
-    <span class="flex items-center justify-start w-1/3">
+    <button class="flex items-center justify-start w-1/3 cursor-pointer" onclick={() => (window.location.href = "/")}>
         <img alt="Logo" src={logo} class="h-24 w-24 mr-2" />
         <p class="text-zinc-800 font-semibold text-2xl">Name goes here</p>
-    </span>
+    </button>
     <span class="flex items-center justify-center w-1/3">
         <SearchField
             bind:value={search}

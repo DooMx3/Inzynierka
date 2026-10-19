@@ -9,16 +9,18 @@
     import SendResetLinkButton from "../buttons/sendResetLinkButton.svelte";
     import AuthSwitch from "../authSwitch/authSwitch.svelte";
 
+    let {
+        onBackToSignIn = () => {},
+    }: {
+        onBackToSignIn?: () => void;
+    } = $props();
+
     let email = $state("");
     let showErrors = $state(false);
     let pending = $state(false);
     let sentMessage = $state("");
 
     let fieldErrors = $derived(forgotPasswordInvalidFields(email));
-
-    const backToSignIn = () => {
-        window.location.href = "/auth";
-    };
 
     const submit = async (event: SubmitEvent) => {
         event.preventDefault();
@@ -45,28 +47,32 @@
 </script>
 
 <form
-    class="flex w-full flex-col gap-4 rounded-3xl border border-[#d9cbbd] bg-[#f7f1ea] p-6 text-zinc-800 shadow-sm"
+    class="flex w-full flex-col rounded-3xl border border-[#d9cbbd] bg-[#f7f1ea] p-6 text-zinc-800 shadow-sm"
     novalidate
     onsubmit={submit}
 >
-    <h2 class="text-xl font-semibold">Forgot your password?</h2>
-    <p class="text-sm text-zinc-600">
-        Enter the email on the account. If it exists, a reset link will be sent.
-    </p>
-    <hr class="border-[#d9cbbd]" />
-    {#if sentMessage}
-        <p class="text-sm text-zinc-700">{sentMessage}</p>
-    {:else}
-        <InputField
-            label="Email"
-            type="email"
-            placeholder="Please enter your email"
-            bind:value={email}
-            svg={mailIcon}
-            invalid={showErrors && fieldErrors.email}
-        />
+    <div class="flex flex-col gap-4">
+        <h2 class="text-xl font-semibold">Forgot your password?</h2>
+        <p class="text-sm text-zinc-600">
+            Enter the email on the account. If it exists, a reset link will be sent.
+        </p>
         <hr class="border-[#d9cbbd]" />
-        <SendResetLinkButton type="submit" />
-    {/if}
-    <AuthSwitch prefix="You want to" keyword="sign in" onClick={backToSignIn} />
+    </div>
+    <div class="mt-8 flex flex-col gap-8">
+        {#if sentMessage}
+            <p class="text-sm text-zinc-700">{sentMessage}</p>
+        {:else}
+            <InputField
+                label="Email"
+                type="email"
+                placeholder="Please enter your email"
+                bind:value={email}
+                svg={mailIcon}
+                invalid={showErrors && fieldErrors.email}
+            />
+            <hr class="border-[#d9cbbd]" />
+            <SendResetLinkButton type="submit" />
+        {/if}
+        <AuthSwitch prefix="You want to" keyword="sign in" onClick={onBackToSignIn} />
+    </div>
 </form>

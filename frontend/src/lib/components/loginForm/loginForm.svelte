@@ -10,8 +10,10 @@
 
     let {
         onSwitchToRegister = () => {},
+        onForgotPassword = () => {},
     }: {
         onSwitchToRegister?: () => void;
+        onForgotPassword?: () => void;
     } = $props();
 
     let email = $state("");
@@ -77,12 +79,13 @@
         invalid={passwordInvalid}
         oninput={clearAuthFailed}
     />
-    <a
-        href="/forgot-password"
-        class="self-end text-sm font-semibold text-[#6b4f3a] transition-colors duration-200 hover:text-[#3d2a1c]"
+    <button
+        type="button"
+        class="cursor-pointer self-end border-0 bg-transparent p-0 text-sm font-semibold text-[#6b4f3a] transition-colors duration-200 hover:text-[#3d2a1c]"
+        onclick={onForgotPassword}
     >
         Forgot password?
-    </a>
+    </button>
     <hr class="border-[#d9cbbd]" />
     <LoginButton type="submit" />
     <AuthSwitch prefix="You want to" keyword="create an account" onClick={onSwitchToRegister} />

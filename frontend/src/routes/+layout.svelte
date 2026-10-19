@@ -3,7 +3,9 @@
     import "../app.css"
     import { onMount } from 'svelte';
     
+    import Breadcrumbs from '$lib/components/breadcrumbs/breadcrumbs.svelte';
     import MenuBar from '$lib/components/menuBar/menuBar.svelte';
+    import SubpageTitle from '$lib/components/subpageTitle/subpageTitle.svelte';
     import TitleBar from '$lib/components/titleBar/titleBar.svelte';
 
     import { menu, toggleMenu } from '$lib/stores/menu.svelte';
@@ -38,8 +40,14 @@
                         onclick={toggleMenu}
                     ></button>
                 {/if}
-                <main class="min-h-0 min-w-0 flex-1 overflow-auto p-4">
-                    {@render children()}
+                <main class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+                    <header class="flex shrink-0 flex-col items-start gap-1 px-4 pt-4">
+                        <Breadcrumbs />
+                        <SubpageTitle />
+                    </header>
+                    <div class="min-h-0 flex-1 overflow-auto px-4 pb-4">
+                        {@render children()}
+                    </div>
                 </main>
             </div>
         </div>
