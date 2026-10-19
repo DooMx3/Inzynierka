@@ -12,7 +12,9 @@
         label = "",
         labelPosition = "top",
         invalid = false,
+        autocomplete,
         oninput,
+        onkeydown,
     }: {
         value?: string;
         type?: "text" | "password" | "email" | "search";
@@ -22,7 +24,9 @@
         label?: string;
         labelPosition?: "top" | "left";
         invalid?: boolean;
+        autocomplete?: HTMLInputElement["autocomplete"];
         oninput?: () => void;
+        onkeydown?: (event: KeyboardEvent) => void;
     } = $props();
 
     const inputId = `${uid}-field`;
@@ -59,8 +63,10 @@
             id={inputId}
             type={inputType}
             {placeholder}
+            {autocomplete}
             bind:value
             oninput={() => oninput?.()}
+            onkeydown={(event) => onkeydown?.(event)}
             class={[
                 "flex-1 min-w-0 bg-transparent border-none outline-none",
                 invalid

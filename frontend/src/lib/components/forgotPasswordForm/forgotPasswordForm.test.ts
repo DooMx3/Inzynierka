@@ -6,7 +6,6 @@ import ForgotPasswordForm from './forgotPasswordForm.svelte';
 describe('Forgot password form', () => {
     const originalFetch = globalThis.fetch;
     const originalAlert = globalThis.alert;
-    const originalLocation = window.location;
     let alerts: string[];
 
     beforeEach(() => {
@@ -14,21 +13,11 @@ describe('Forgot password form', () => {
         globalThis.alert = ((message?: string) => {
             alerts.push(String(message ?? ''));
         }) as typeof alert;
-        Object.defineProperty(window, 'location', {
-            configurable: true,
-            writable: true,
-            value: { href: 'http://localhost/forgot-password' },
-        });
     });
 
     afterEach(() => {
         globalThis.fetch = originalFetch;
         globalThis.alert = originalAlert;
-        Object.defineProperty(window, 'location', {
-            configurable: true,
-            writable: true,
-            value: originalLocation,
-        });
     });
 
     it('asks for an email and a way back to sign in', () => {
@@ -39,12 +28,17 @@ describe('Forgot password form', () => {
         expect(screen.getByRole('button', { name: 'sign in' })).toHaveAttribute('type', 'button');
     });
 
-    it('returns to the auth page from the sign in switch', async () => {
-        render(ForgotPasswordForm);
+    it('flips back to sign in when the card provides a handler', async () => {
+        let flippedBack = false;
+        render(ForgotPasswordForm, {
+            onBackToSignIn: () => {
+                flippedBack = true;
+            },
+        });
 
         await fireEvent.click(screen.getByRole('button', { name: 'sign in' }));
 
-        expect(window.location.href).toBe('/auth');
+        expect(flippedBack).toBe(true);
     });
 
     it('refuses an invalid email without calling the server', async () => {

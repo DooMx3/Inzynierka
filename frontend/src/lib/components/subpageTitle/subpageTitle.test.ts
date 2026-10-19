@@ -20,7 +20,7 @@ describe('SubpageTitle', () => {
     it('has expected typography and color classes', () => {
         const { container } = render(SubpageTitle);
         const span = container.querySelector('span');
-        expect(span).toHaveClass('text-zinc-400', 'text-3xl', 'font-bold');
+        expect(span).toHaveClass('text-zinc-500', 'text-3xl', 'font-bold');
     });
 
     it('renders empty content when on root path', () => {

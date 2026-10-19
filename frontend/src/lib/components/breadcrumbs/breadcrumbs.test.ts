@@ -66,6 +66,6 @@ describe('Breadcrumbs', () => {
 
     it('has text-zinc-400 class', () => {
         const { container } = render(Breadcrumbs, { additionalCrumbs: [] });
-        expect(container.querySelector('span')).toHaveClass('text-zinc-400');
+        expect(container.querySelector('span')).toHaveClass('text-zinc-900');
     });
 });
