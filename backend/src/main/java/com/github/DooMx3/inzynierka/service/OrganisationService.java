@@ -15,9 +15,13 @@ import com.github.DooMx3.inzynierka.repositories.RoleRepository;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,202 +29,218 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class OrganisationService {
 
-  private final OrganisationRepository organisationRepository;
-  private final RoleRepository roleRepository;
-  private final UserRepository userRepository;
+    private final OrganisationRepository organisationRepository;
+    private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
 
-  @Transactional
-  public Organisation createOrganisation(OrganisationRequest request, User user) {
-    if (user == null) {
-      throw new UnauthorizedException("Authenticated user is required to create an organisation");
+    @Transactional
+    public Organisation createOrganisation(OrganisationRequest request, User user) {
+        if (user == null) {
+            throw new UnauthorizedException("Authenticated user is required to create an organisation");
+        }
+
+        if (user.getOrganisation() != null) {
+            throw new OrganisationAlreadyAssignedException(
+                    "You cannot create another organisation because you already belong to one");
+        }
+
+        Organisation organisation =
+                Organisation.builder()
+                        .name(request.name())
+                        .taxId(request.taxId())
+                        .street(request.street())
+                        .postalCode(request.postalCode())
+                        .city(request.city())
+                        .logoPath(request.logoPath())
+                        .motto(request.motto())
+                        .build();
+
+        Organisation savedOrganisation = organisationRepository.save(organisation);
+        user.setOrganisation(savedOrganisation);
+        user.setMembershipStatus(MembershipStatus.MEMBER);
+        Role ownerRole =
+                roleRepository
+                        .findByName(RoleName.OWNER.name())
+                        .orElseThrow(() -> new IllegalStateException("OWNER role is not configured"));
+        user.getRoles().add(ownerRole);
+        userRepository.save(user);
+
+        return savedOrganisation;
     }
 
-    if (user.getOrganisation() != null) {
-      throw new OrganisationAlreadyAssignedException(
-          "You cannot create another organisation because you already belong to one");
+    @Transactional
+    public Organisation getOrganisation(UUID id, User user) {
+        Organisation organisation = findOrganisation(id);
+        requireOwner(organisation, user);
+        return organisation;
     }
 
-    Organisation organisation =
-        Organisation.builder()
-            .name(request.name())
-            .taxId(request.taxId())
-            .street(request.street())
-            .postalCode(request.postalCode())
-            .city(request.city())
-            .logoPath(request.logoPath())
-            .motto(request.motto())
-            .build();
+    @Transactional
+    public Organisation updateOrganisation(UUID id, OrganisationRequest request, User user) {
+        Organisation organisation = getOrganisation(id, user);
 
-    Organisation savedOrganisation = organisationRepository.save(organisation);
-    user.setOrganisation(savedOrganisation);
-    user.setMembershipStatus(MembershipStatus.MEMBER);
-    Role ownerRole =
-        roleRepository
-            .findByName(RoleName.OWNER.name())
-            .orElseThrow(() -> new IllegalStateException("OWNER role is not configured"));
-    user.getRoles().add(ownerRole);
-    userRepository.save(user);
+        if (!organisation.isActive()) {
+            throw new InactiveResourceException("Cannot update an inactive organisation");
+        }
 
-    return savedOrganisation;
-  }
+        organisation.setName(request.name());
+        organisation.setTaxId(request.taxId());
+        organisation.setStreet(request.street());
+        organisation.setPostalCode(request.postalCode());
+        organisation.setCity(request.city());
+        organisation.setLogoPath(request.logoPath());
+        organisation.setMotto(request.motto());
 
-  @Transactional
-  public Organisation getOrganisation(UUID id, User user) {
-    Organisation organisation = findOrganisation(id);
-    requireOwner(organisation, user);
-    return organisation;
-  }
-
-  @Transactional
-  public Organisation updateOrganisation(UUID id, OrganisationRequest request, User user) {
-    Organisation organisation = getOrganisation(id, user);
-
-    if (!organisation.isActive()) {
-      throw new InactiveResourceException("Cannot update an inactive organisation");
+        return organisationRepository.save(organisation);
     }
 
-    organisation.setName(request.name());
-    organisation.setTaxId(request.taxId());
-    organisation.setStreet(request.street());
-    organisation.setPostalCode(request.postalCode());
-    organisation.setCity(request.city());
-    organisation.setLogoPath(request.logoPath());
-    organisation.setMotto(request.motto());
+    @Transactional
+    public void deleteOrganisation(UUID id, User user) {
+        Organisation organisation = getOrganisation(id, user);
 
-    return organisationRepository.save(organisation);
-  }
+        List<User> pendingInvitations =
+                userRepository.findByOrganisationAndMembershipStatus(
+                        organisation, MembershipStatus.PENDING);
+        pendingInvitations.forEach(
+                invitedUser -> {
+                    invitedUser.setOrganisation(null);
+                    invitedUser.setMembershipStatus(MembershipStatus.NONE);
+                });
+        userRepository.saveAll(pendingInvitations);
 
-  @Transactional
-  public void deleteOrganisation(UUID id, User user) {
-    Organisation organisation = getOrganisation(id, user);
-
-    List<User> pendingInvitations =
-        userRepository.findByOrganisationAndMembershipStatus(
-            organisation, MembershipStatus.PENDING);
-    pendingInvitations.forEach(
-        invitedUser -> {
-          invitedUser.setOrganisation(null);
-          invitedUser.setMembershipStatus(MembershipStatus.NONE);
-        });
-    userRepository.saveAll(pendingInvitations);
-
-    organisation.setActive(false);
-    user.setOrganisation(null);
-    user.setMembershipStatus(MembershipStatus.NONE);
-    user.getRoles().removeIf(role -> RoleName.OWNER.name().equals(role.getName()));
-    userRepository.save(user);
-  }
-
-  @Transactional
-  public Organisation patchOrganisation(
-      UUID id, @Valid OrganisationPatchRequest request, User user) {
-    Organisation organisation = getOrganisation(id, user);
-
-    if (!organisation.isActive()) {
-      throw new InactiveResourceException("Cannot update an inactive organisation");
+        organisation.setActive(false);
+        user.setOrganisation(null);
+        user.setMembershipStatus(MembershipStatus.NONE);
+        user.getRoles().removeIf(role -> RoleName.OWNER.name().equals(role.getName()));
+        userRepository.save(user);
     }
 
-    if (request.name() != null) {
-      organisation.setName(request.name());
-    }
-    if (request.taxId() != null) {
-      organisation.setTaxId(request.taxId());
-    }
-    if (request.street() != null) {
-      organisation.setStreet(request.street());
-    }
-    if (request.postalCode() != null) {
-      organisation.setPostalCode(request.postalCode());
-    }
-    if (request.city() != null) {
-      organisation.setCity(request.city());
-    }
-    if (request.logoPath() != null) {
-      organisation.setLogoPath(request.logoPath());
-    }
-    if (request.motto() != null) {
-      organisation.setMotto(request.motto());
-    }
+    @Transactional
+    public Organisation patchOrganisation(
+            UUID id, @Valid OrganisationPatchRequest request, User user) {
+        Organisation organisation = getOrganisation(id, user);
 
-    return organisationRepository.save(organisation);
-  }
+        if (!organisation.isActive()) {
+            throw new InactiveResourceException("Cannot update an inactive organisation");
+        }
 
-  @Transactional
-  public void inviteUser(UUID organisationId, OrganisationInvitationRequest request, User owner) {
-    Organisation organisation = getOrganisation(organisationId, owner);
-    if (!organisation.isActive()) {
-      throw new InactiveResourceException("Cannot invite a user to an inactive organisation");
-    }
+        if (request.name() != null) {
+            organisation.setName(request.name());
+        }
+        if (request.taxId() != null) {
+            organisation.setTaxId(request.taxId());
+        }
+        if (request.street() != null) {
+            organisation.setStreet(request.street());
+        }
+        if (request.postalCode() != null) {
+            organisation.setPostalCode(request.postalCode());
+        }
+        if (request.city() != null) {
+            organisation.setCity(request.city());
+        }
+        if (request.logoPath() != null) {
+            organisation.setLogoPath(request.logoPath());
+        }
+        if (request.motto() != null) {
+            organisation.setMotto(request.motto());
+        }
 
-    User invitedUser =
-        userRepository
-            .findByEmail(request.email())
-            .orElseThrow(
-                () -> new ResourceNotFoundException("No user exists with the provided email"));
-
-    if (invitedUser.getId() != null && invitedUser.getId().equals(owner.getId())) {
-      throw new SelfInvitationException("You cannot invite yourself");
-    }
-    if (invitedUser.getOrganisation() != null
-        || invitedUser.getMembershipStatus() != MembershipStatus.NONE) {
-      throw new ResourceConflictException(
-          "User already belongs to an organisation or has a pending invitation");
+        return organisationRepository.save(organisation);
     }
 
-    invitedUser.setOrganisation(organisation);
-    invitedUser.setMembershipStatus(MembershipStatus.PENDING);
-    userRepository.save(invitedUser);
-  }
+    @Transactional
+    public void inviteUser(UUID organisationId, OrganisationInvitationRequest request, User owner) {
+        Organisation organisation = getOrganisation(organisationId, owner);
+        if (!organisation.isActive()) {
+            throw new InactiveResourceException("Cannot invite a user to an inactive organisation");
+        }
 
-  @Transactional
-  public void cancelInvitation(UUID organisationId, UUID userId, User owner) {
-    Organisation organisation = getOrganisation(organisationId, owner);
-    User invitedUser =
-        userRepository
-            .findById(userId)
-            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        User invitedUser =
+                userRepository
+                        .findByEmail(request.email())
+                        .orElseThrow(
+                                () -> new ResourceNotFoundException("No user exists with the provided email"));
 
-    if (invitedUser.getOrganisation() == null
-        || !organisationId.equals(invitedUser.getOrganisation().getId())
-        || invitedUser.getMembershipStatus() != MembershipStatus.PENDING) {
-      throw new ResourceNotFoundException("Pending invitation not found");
+        if (invitedUser.getId() != null && invitedUser.getId().equals(owner.getId())) {
+            throw new SelfInvitationException("You cannot invite yourself");
+        }
+        if (invitedUser.getOrganisation() != null
+                || invitedUser.getMembershipStatus() != MembershipStatus.NONE) {
+            throw new ResourceConflictException(
+                    "User already belongs to an organisation or has a pending invitation");
+        }
+
+        invitedUser.setOrganisation(organisation);
+        invitedUser.setMembershipStatus(MembershipStatus.PENDING);
+        userRepository.save(invitedUser);
     }
 
-    invitedUser.setOrganisation(null);
-    invitedUser.setMembershipStatus(MembershipStatus.NONE);
-    userRepository.save(invitedUser);
-  }
+    @Transactional
+    public void cancelInvitation(UUID organisationId, UUID userId, User owner) {
+        Organisation organisation = getOrganisation(organisationId, owner);
+        User invitedUser =
+                userRepository
+                        .findById(userId)
+                        .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-  @Transactional
-  public List<PendingInvitationResponse> getPendingInvitations(UUID organisationId, User owner) {
-    Organisation organisation = getOrganisation(organisationId, owner);
-    return userRepository
-        .findByOrganisationAndMembershipStatus(organisation, MembershipStatus.PENDING)
-        .stream()
-        .map(PendingInvitationResponse::from)
-        .collect(Collectors.toList());
-  }
+        if (invitedUser.getOrganisation() == null
+                || !organisationId.equals(invitedUser.getOrganisation().getId())
+                || invitedUser.getMembershipStatus() != MembershipStatus.PENDING) {
+            throw new ResourceNotFoundException("Pending invitation not found");
+        }
 
-  private Organisation findOrganisation(UUID id) {
-    return organisationRepository
-        .findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Organisation not found: " + id));
-  }
-
-  private void requireOwner(Organisation organisation, User user) {
-    if (user == null) {
-      throw new UnauthorizedException("Authenticated user is required");
+        invitedUser.setOrganisation(null);
+        invitedUser.setMembershipStatus(MembershipStatus.NONE);
+        userRepository.save(invitedUser);
     }
 
-    boolean ownsOrganisation =
-        user.getOrganisation() != null
-            && organisation.getId().equals(user.getOrganisation().getId())
-            && user.getRoles().stream()
-                .anyMatch(role -> RoleName.OWNER.name().equals(role.getName()));
-
-    if (!ownsOrganisation) {
-      throw new InsufficientPermissionException(
-          "Only the organisation owner can access the organisation");
+    @Transactional
+    public List<PendingInvitationResponse> getPendingInvitations(UUID organisationId, User owner) {
+        Organisation organisation = getOrganisation(organisationId, owner);
+        return userRepository
+                .findByOrganisationAndMembershipStatus(organisation, MembershipStatus.PENDING)
+                .stream()
+                .map(PendingInvitationResponse::from)
+                .collect(Collectors.toList());
     }
-  }
+
+    private Organisation findOrganisation(UUID id) {
+        return organisationRepository
+                .findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Organisation not found: " + id));
+    }
+
+    private void requireOwner(Organisation organisation, User user) {
+        if (user == null) {
+            throw new UnauthorizedException("Authenticated user is required");
+        }
+
+        boolean ownsOrganisation =
+                user.getOrganisation() != null
+                        && organisation.getId().equals(user.getOrganisation().getId())
+                        && user.getRoles().stream()
+                        .anyMatch(role -> RoleName.OWNER.name().equals(role.getName()));
+
+        if (!ownsOrganisation) {
+            throw new InsufficientPermissionException(
+                    "Only the organisation owner can access the organisation");
+        }
+    }
+
+    public List<User> getOrganisationMembers(UUID organisationId) {
+
+        return userRepository.findByOrganisationIdAndMembershipStatus(organisationId, MembershipStatus.MEMBER);
+    }
+
+    public void removeMember(UUID id, UUID userId) {
+        User memberToRemove =
+                userRepository
+                        .findById(userId)
+                        .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        memberToRemove.setOrganisation(null);
+        memberToRemove.setMembershipStatus(MembershipStatus.NONE);
+        memberToRemove.setRoles(Set.of());
+        userRepository.save(memberToRemove);
+    }
 }

@@ -206,4 +206,24 @@ public class OrganisationController {
     organisationService.cancelInvitation(id, userId, user);
     return ResponseEntity.noContent().build();
   }
+
+  @GetMapping("/{id}/members")
+  @PreAuthorize("hasAuthority('OWNER')")
+  public ResponseEntity<List<User>> getOrganisationMembers(
+      @Parameter(description = "Organisation ID") @PathVariable UUID id,
+      @Parameter(hidden = true) @AuthenticationPrincipal User user) {
+      UUID orgId = organisationService.getOrganisation(id, user).getId();
+    List<User> members = organisationService.getOrganisationMembers(orgId);
+    return ResponseEntity.ok(members);
+  }
+
+  @DeleteMapping("/{id}/members/{userId}")
+  @PreAuthorize("hasAuthority('OWNER')")
+  public ResponseEntity<Void> removeMember(
+      @Parameter(description = "Organisation ID") @PathVariable UUID id,
+      @Parameter(description = "ID of the member to remove") @PathVariable UUID userId,
+      @Parameter(hidden = true) @AuthenticationPrincipal User user) {
+      organisationService.removeMember(id, userId);
+      return ResponseEntity.noContent().build();
+  }
 }
