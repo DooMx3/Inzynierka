@@ -11,6 +11,7 @@ export type LoginInvalidFields = {
 
 export type RegisterInvalidFields = {
     username: boolean;
+    lastname: boolean;
     email: boolean;
     password: boolean;
     confirmPassword: boolean;
@@ -37,11 +38,13 @@ export const loginErrorMessages = (email: string, password: string) => {
 
 export const registerInvalidFields = (input: {
     username: string;
+    lastname: string;
     email: string;
     password: string;
     confirmPassword: string;
 }): RegisterInvalidFields => ({
     username: input.username.trim().length === 0,
+    lastname: input.lastname.trim().length === 0,
     email: !isValidEmail(input.email),
     password: !isPasswordReadyForRegistration(input.password),
     confirmPassword: input.password !== input.confirmPassword,
@@ -49,6 +52,7 @@ export const registerInvalidFields = (input: {
 
 export const registerErrorMessages = (input: {
     username: string;
+    lastname: string;
     email: string;
     password: string;
     confirmPassword: string;
@@ -58,6 +62,9 @@ export const registerErrorMessages = (input: {
 
     if (fields.username) {
         messages.push('Enter your username.');
+    }
+    if(fields.lastname) {
+        messages.push('Enter your lastname.');
     }
     if (fields.email) {
         messages.push('Enter a valid email.');
