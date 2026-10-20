@@ -4,13 +4,13 @@
 
   <p>Vinary and vineyard management software.</p>
 
-  <p>
-    <a href="https://github.com/DooMx3/Inzynierka/actions/workflows/backend-tests.yml">
-      <img src="https://github.com/DooMx3/Inzynierka/actions/workflows/backend-tests.yml/badge.svg" alt="Backend Tests" />
-    </a>
-  </p>
-
 </div>
+
+| Workflow | Status | What it checks |
+| --- | --- | --- |
+| [Backend tests](https://github.com/DooMx3/Inzynierka/actions/workflows/backend-tests.yml) | [![Backend tests](https://github.com/DooMx3/Inzynierka/actions/workflows/backend-tests.yml/badge.svg)](https://github.com/DooMx3/Inzynierka/actions/workflows/backend-tests.yml) | `mvn test` against PostgreSQL 16 |
+| [Frontend tests](https://github.com/DooMx3/Inzynierka/actions/workflows/frontend.yml) | [![Frontend tests](https://github.com/DooMx3/Inzynierka/actions/workflows/frontend.yml/badge.svg)](https://github.com/DooMx3/Inzynierka/actions/workflows/frontend.yml) | `bun run test` |
+| [Container images](https://github.com/DooMx3/Inzynierka/actions/workflows/containers.yml) | [![Container images](https://github.com/DooMx3/Inzynierka/actions/workflows/containers.yml/badge.svg)](https://github.com/DooMx3/Inzynierka/actions/workflows/containers.yml) | Build of both images and push to GHCR (`latest` on push to `main`) |
 
 ---
 # About
@@ -18,55 +18,98 @@ Simple yet powerfull app made to help everyone involved in making wine. It allow
 
 # Screenshots
 
-## Run Locally
-Firstly, setup postgres database and some kind of mail server and configure connection in [application.properties](backend/src/main/resources/application.properties)
-Clone the project
+# Run Locally
+
+## Clone the project
 
 ```bash
-  git clone https://github.com/DooMx3/Inzynierka/
+git clone git@github.com:DooMx3/Inzynierka.git
 ```
 
-Go to the project directory
+## Logging into GitHub Container Registry
+
+Images come from GitHub Container Registry, so log in before the first start. 
 
 ```bash
-  cd Inzynierka
+docker login ghcr.io
 ```
 
-Run backend
+or for podman
 
 ```bash
-  cd backend
-  mvn spring-boot:run
+podman login ghcr.io
 ```
 
-Run frontnend
+## Running the containers
+
+With Docker or Podman installed, start the stack:
 
 ```bash
-  cd frontend
-  bun dev
+docker compose up
 ```
 
-After that app should be available at localhost:3000
-
-
-## Running Tests
-
-To run backend tests, run the following commands:
+or for podman
 
 ```bash
-  cd backend
-  mvn test
+podman compose up
 ```
 
-To run frontend tests, run the following commands:
+## Stopping the containers
+
+To stop the containers you can run:
 
 ```bash
-  cd frontend
-  bun test
+docker compose down
+```
+
+or for podman
+
+```bash
+podman compose down
+```
+
+# Running Tests
+
+Backend tests need Maven. Frontend tests need Bun. Install frontend dependencies with Bun, npm, or pnpm.
+
+## Frontend
+
+```bash
+cd frontend
+```
+
+Install dependencies:
+
+```bash
+bun install
+```
+
+or with npm:
+
+```bash
+npm install
+```
+
+or with pnpm:
+
+```bash
+pnpm install
+```
+
+Then run the tests:
+
+```bash
+bun test
+```
+
+## Backend
+
+```bash
+cd backend && mvn test
 ```
 
 # Why
 We made this app as a engineering thesis project, but maybe you can use it to make some lovely wine, who knows.
 
-## License
+# License
 All right reserved for now
