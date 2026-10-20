@@ -602,8 +602,8 @@ class OrganisationControllerTest {
 
   @Nested
   class AddRoleToUser {
-      private final String ROLES_URL = BASE_URL + "/{organisationId}/users/{userId}/roles";
-      private final UUID targetUserId = UUID.randomUUID();
+    private final String ROLES_URL = BASE_URL + "/{organisationId}/users/{userId}/roles";
+    private final UUID targetUserId = UUID.randomUUID();
 
     @Test
     void shouldReturn204ForOwnerWhenAddingWorkerRole() throws Exception {
