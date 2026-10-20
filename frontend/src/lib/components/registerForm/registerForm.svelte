@@ -68,6 +68,7 @@
         try {
             const user = await register(
                 username.trim(),
+                lastname.trim(),
                 email.trim(),
                 password,
             );

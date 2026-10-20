@@ -41,6 +41,7 @@ describe('Session store', () => {
                 JSON.stringify({
                     id: '1',
                     firstname: 'Anna',
+                    lastname: 'Nowak',
                     email: 'anna@example.com',
                 }),
                 { status: 200 },
@@ -51,6 +52,7 @@ describe('Session store', () => {
         expect(session.user).toEqual({
             id: '1',
             firstname: 'Anna',
+            lastname: 'Nowak',
             email: 'anna@example.com',
         });
     });
