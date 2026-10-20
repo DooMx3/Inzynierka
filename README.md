@@ -23,7 +23,7 @@ Simple yet powerfull app made to help everyone involved in making wine. It allow
 ## Clone the project
 
 ```bash
-git clone git@github.com:DooMx3/Inzynierka.git
+git clone git@github.com:DooMx3/Inzynierka.git && cd Inzynierka
 ```
 
 ## Logging into GitHub Container Registry
