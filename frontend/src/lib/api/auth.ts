@@ -11,6 +11,7 @@ export class ApiError extends Error {
 export type SessionUser = {
     id: string;
     firstname: string;
+    lastname: string;
     email: string;
 };
 
@@ -59,6 +60,7 @@ async function readUser(response: Response): Promise<SessionUser> {
     return {
         id: String(body.id ?? ''),
         firstname: typeof body.firstname === 'string' ? body.firstname : '',
+        lastname: typeof body.lastname === 'string' ? body.lastname : '',
         email: body.email,
     };
 }
@@ -102,6 +104,7 @@ export async function login(email: string, password: string): Promise<SessionUse
 
 export async function register(
     firstname: string,
+    lastname: string,
     email: string,
     password: string,
 ): Promise<SessionUser> {
@@ -109,7 +112,7 @@ export async function register(
         method: 'POST',
         credentials: 'include',
         headers: jsonHeaders,
-        body: JSON.stringify({ firstname, email, password }),
+        body: JSON.stringify({ firstname, lastname, email, password }),
     });
 
     if (!response.ok) {

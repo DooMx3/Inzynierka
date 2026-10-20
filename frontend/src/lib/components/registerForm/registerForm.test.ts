@@ -110,6 +110,7 @@ describe('Register form', () => {
                 expect(init?.body).toBe(
                     JSON.stringify({
                         firstname: 'Jan',
+                        lastname: 'Kowalski',
                         email: 'jan.kowalski@example.com',
                         password: readyPassword,
                     }),
@@ -120,6 +121,7 @@ describe('Register form', () => {
                 JSON.stringify({
                     id: '1',
                     firstname: 'Jan',
+                    lastname: 'Kowalski',
                     email: 'jan.kowalski@example.com',
                 }),
                 { status: 200 },

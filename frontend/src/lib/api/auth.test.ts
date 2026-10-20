@@ -12,6 +12,7 @@ import {
 const userPayload = {
     id: 'user-1',
     firstname: 'Jan',
+    lastname: 'Kowalski',
     email: 'jan.kowalski@example.com',
 };
 
@@ -61,7 +62,7 @@ describe('Auth API', () => {
         expect(calls[1]?.url).toBe('/api/user/info');
     });
 
-    it('registers with firstname, email and password', async () => {
+    it('registers with firstname, lastname, email and password', async () => {
         globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
             const url = String(input);
             calls.push({ url, init });
@@ -71,13 +72,20 @@ describe('Auth API', () => {
             return jsonResponse(userPayload);
         }) as typeof fetch;
 
-        const user = await register('Jan', 'jan.kowalski@example.com', 'Superextrasecurepassword1!');
+        const user = await register(
+            'Jan',
+            'Kowalski',
+            'jan.kowalski@example.com',
+            'Superextrasecurepassword1!',
+        );
 
         expect(user.firstname).toBe('Jan');
+        expect(user.lastname).toBe('Kowalski');
         expect(calls[0]?.url).toBe('/api/auth/register');
         expect(calls[0]?.init?.body).toBe(
             JSON.stringify({
                 firstname: 'Jan',
+                lastname: 'Kowalski',
                 email: 'jan.kowalski@example.com',
                 password: 'Superextrasecurepassword1!',
             }),
@@ -105,7 +113,7 @@ describe('Auth API', () => {
         globalThis.fetch = (async () =>
             jsonResponse({ password: 'Password must have at least 16 characters' }, 400)) as typeof fetch;
 
-        const error = await register('Jan', 'jan.kowalski@example.com', 'short').catch(
+        const error = await register('Jan', 'Kowalski', 'jan.kowalski@example.com', 'short').catch(
             (caught: unknown) => caught,
         );
 
