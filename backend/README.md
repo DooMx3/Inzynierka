@@ -29,25 +29,17 @@
 # Additional information
 
 ## Creating SQL migrations with Liquibase
-
-Create a new SQL file under `src/main/resources/db/migration`, for example `V6__add_organisation_website.sql`:
-
-```sql
-ALTER TABLE organisation
-    ADD COLUMN website VARCHAR(255);
+Update db state(spring runs this automatically on app start) 
+```bash
+mvn clean compile liquibase:update
+```
+Generate new migration file
+```bash
+mvn clean compile liquibase:diff -Dliquibase.diffChangeLogFile=src/main/resources/db/changelog/changes/<new_migration_file>.xml
 ```
 
-Then add a new changeset to `src/main/resources/db/changelog/db.changelog-master.xml`:
-
-```xml
-<changeSet id="V6" author="inzynierka">
-    <sqlFile path="../migration/V6__add_organisation_website.sql"
-             relativeToChangelogFile="true"/>
-</changeSet>
-```
-
-Give every changeset a unique ID and add a new migration instead of editing one that may already have been applied. Liquibase records executed changesets and does not run them again.
-
+Namin convention for migration files: `YYYY-MM-DD-{XXX}-<description>.xml`
+XXX - zero padded number of migration file for given day, e.g. 001, 002, 003 etc.
 ## Other
 - In dev environment, the application uses a local mail server (Mailpit) to send emails. You can access the Mailpit web interface at http://localhost:8025 to view sent emails.
 - Api documentation is available at http://localhost:8080/swagger-ui.html

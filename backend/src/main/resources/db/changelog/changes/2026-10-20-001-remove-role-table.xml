@@ -1,0 +1,93 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="karolsol (generated)" id="1792479511923-1">
+        <createTable tableName="_user">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="_userPK"/>
+            </column>
+            <column name="active" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="firstname" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="lastname" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="membership_status" type="VARCHAR(255)"/>
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone_number" type="VARCHAR(255)"/>
+            <column name="organisation_id" type="UUID"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1792479511923-2">
+        <createTable tableName="organisation">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="organisationPK"/>
+            </column>
+            <column name="active" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="city" type="VARCHAR(255)"/>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
+            <column name="logo_path" type="VARCHAR(255)"/>
+            <column name="motto" type="VARCHAR(255)"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="postal_code" type="VARCHAR(255)"/>
+            <column name="street" type="VARCHAR(255)"/>
+            <column name="tax_id" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1792479511923-3">
+        <createTable tableName="password_reset_token">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="password_reset_tokenPK"/>
+            </column>
+            <column name="expiry_date" type="TIMESTAMP(6) WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="token_hash" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="used" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1792479511923-4">
+        <createTable tableName="users_roles">
+            <column name="user_id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="users_rolesPK"/>
+            </column>
+            <column name="role" type="VARCHAR(255)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="users_rolesPK"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1792479511923-5">
+        <addUniqueConstraint columnNames="token_hash" constraintName="UC_PASSWORD_RESET_TOKENTOKEN_HASH_COL" tableName="password_reset_token"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1792479511923-6">
+        <addUniqueConstraint columnNames="user_id" constraintName="UC_PASSWORD_RESET_TOKENUSER_ID_COL" tableName="password_reset_token"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1792479511923-7">
+        <addUniqueConstraint columnNames="email" constraintName="UC__USEREMAIL_COL" tableName="_user"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1792479511923-8">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="users_roles" constraintName="FK5qwjdmx05r5lk8b7knro2kr2v" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="_user" validate="true"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1792479511923-9">
+        <addForeignKeyConstraint baseColumnNames="organisation_id" baseTableName="_user" constraintName="FKk006godd96prsck213ws6bd34" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organisation" validate="true"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1792479511923-10">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="password_reset_token" constraintName="FKoeh3a80fkstspnug2889nlopb" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="_user" validate="true"/>
+    </changeSet>
+</databaseChangeLog>
