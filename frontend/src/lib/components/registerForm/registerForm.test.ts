@@ -7,7 +7,8 @@ import { session, setUser } from '$lib/stores/session.svelte';
 const readyPassword = 'Superextrasecurepassword1!';
 
 const fillReadyAccount = async (confirmPassword = readyPassword) => {
-    await fireEvent.input(screen.getByLabelText('Username'), { target: { value: 'Jan' } });
+    await fireEvent.input(screen.getByLabelText('Firstname'), { target: { value: 'Jan' } });
+    await fireEvent.input(screen.getByLabelText('Lastname'), { target: { value: 'Kowalski' } });
     await fireEvent.input(screen.getByLabelText('Email'), {
         target: { value: 'jan.kowalski@example.com' },
     });
@@ -51,7 +52,8 @@ describe('Register form', () => {
     it('keeps the registration fields and a login switch', () => {
         render(RegisterForm);
 
-        expect(screen.getByLabelText('Username')).toBeInTheDocument();
+        expect(screen.getByLabelText('Firstname')).toBeInTheDocument();
+        expect(screen.getByLabelText('Lastname')).toBeInTheDocument();
         expect(screen.getByLabelText('Email')).toBeInTheDocument();
         expect(screen.getByLabelText('Password')).toHaveAttribute('type', 'password');
         expect(screen.getByLabelText('Confirm Password')).toHaveAttribute('type', 'password');

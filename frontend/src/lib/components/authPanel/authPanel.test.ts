@@ -12,7 +12,7 @@ describe('Auth panel', () => {
         expect(panel).toHaveClass('h-full', 'w-full');
         expect(panel).not.toHaveClass('max-w-md');
         expect(screen.getByRole('heading', { name: 'Welcome back.' })).toBeInTheDocument();
-        expect(screen.queryByLabelText('Username')).not.toBeInTheDocument();
+        expect(screen.queryByLabelText('Firstname')).not.toBeInTheDocument();
     });
 
     it('slides to registration and back to login', async () => {
@@ -21,13 +21,14 @@ describe('Auth panel', () => {
         await fireEvent.click(screen.getByRole('button', { name: 'create an account' }));
         flushSync();
 
-        expect(screen.getByLabelText('Username')).toBeInTheDocument();
+        expect(screen.getByLabelText('Firstname')).toBeInTheDocument();
+        expect(screen.getByLabelText('Lastname')).toBeInTheDocument();
         expect(screen.getByRole('heading', { name: /create an account/i })).toBeInTheDocument();
 
         await fireEvent.click(screen.getByRole('button', { name: 'sign in' }));
         flushSync();
 
-        expect(screen.queryByLabelText('Username')).not.toBeInTheDocument();
+        expect(screen.queryByLabelText('Firstname')).not.toBeInTheDocument();
         expect(screen.getByRole('heading', { name: 'Welcome back.' })).toBeInTheDocument();
     });
 });

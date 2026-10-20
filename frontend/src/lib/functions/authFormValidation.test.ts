@@ -39,26 +39,24 @@ describe('Auth form validation', () => {
     });
 
     it('marks a registration password that cannot be sent to the backend', () => {
-        const fields = registerInvalidFields({
+        const input = {
             username: 'Jan',
+            lastname: 'Kowalski',
             email: 'jan.kowalski@example.com',
             password: 'Abcdef1!',
             confirmPassword: 'Abcdef1!',
-        });
+        };
+        const fields = registerInvalidFields(input);
 
         expect(fields.password).toBe(true);
         expect(fields.confirmPassword).toBe(false);
-        expect(registerErrorMessages({
-            username: 'Jan',
-            email: 'jan.kowalski@example.com',
-            password: 'Abcdef1!',
-            confirmPassword: 'Abcdef1!',
-        })).toContain('Password does not meet the requirements.');
+        expect(registerErrorMessages(input)).toContain('Password does not meet the requirements.');
     });
 
     it('marks mismatched passwords', () => {
         const fields = registerInvalidFields({
             username: 'Jan',
+            lastname: 'Kowalski',
             email: 'jan.kowalski@example.com',
             password: readyPassword,
             confirmPassword: `${readyPassword}x`,
@@ -71,6 +69,7 @@ describe('Auth form validation', () => {
     it('accepts a registration payload the backend can store', () => {
         const input = {
             username: 'Jan',
+            lastname: 'Kowalski',
             email: 'jan.kowalski@example.com',
             password: readyPassword,
             confirmPassword: readyPassword,
@@ -78,6 +77,7 @@ describe('Auth form validation', () => {
 
         expect(registerInvalidFields(input)).toEqual({
             username: false,
+            lastname: false,
             email: false,
             password: false,
             confirmPassword: false,
