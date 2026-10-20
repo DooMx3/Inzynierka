@@ -1,0 +1,61 @@
+# Development without the frontend container. Run the UI locally (bun dev).
+# Backend image comes from GHCR (latest = last push to main):
+#   docker compose -f docker-compose.dev.yml up -d
+name: inzynierka
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: inzynierka-psql
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: backend
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d backend"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: inzynierka-mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    restart: unless-stopped
+
+  backend:
+    image: ghcr.io/doomx3/inzynierka-backend:${IMAGE_TAG:-latest}
+    pull_policy: always
+    container_name: inzynierka-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/backend
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_MAIL_HOST: mailpit
+      SPRING_MAIL_PORT: "1025"
+      APP_RESET_PASSWORD_URL: http://localhost:3000/reset-password
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mailpit:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
