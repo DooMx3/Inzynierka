@@ -26,20 +26,6 @@ Simple yet powerfull app made to help everyone involved in making wine. It allow
 git clone git@github.com:DooMx3/Inzynierka.git && cd Inzynierka
 ```
 
-## Logging into GitHub Container Registry
-
-Images come from GitHub Container Registry, so log in before the first start. 
-
-```bash
-docker login ghcr.io
-```
-
-or for podman
-
-```bash
-podman login ghcr.io
-```
-
 ## Running the containers
 
 With Docker or Podman installed, start the stack:
