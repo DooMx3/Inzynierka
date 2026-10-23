@@ -3,6 +3,9 @@ name: Backend tests
 on:
   pull_request:
     branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-tests.yml'
 
 jobs:
   test:

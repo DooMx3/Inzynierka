@@ -8,9 +8,10 @@
 
 | Workflow | Status | What it checks |
 | --- | --- | --- |
-| [Backend tests](https://github.com/DooMx3/Inzynierka/actions/workflows/backend-tests.yml) | [![Backend tests](https://github.com/DooMx3/Inzynierka/actions/workflows/backend-tests.yml/badge.svg)](https://github.com/DooMx3/Inzynierka/actions/workflows/backend-tests.yml) | `mvn test` against PostgreSQL 16 |
-| [Frontend tests](https://github.com/DooMx3/Inzynierka/actions/workflows/frontend.yml) | [![Frontend tests](https://github.com/DooMx3/Inzynierka/actions/workflows/frontend.yml/badge.svg)](https://github.com/DooMx3/Inzynierka/actions/workflows/frontend.yml) | `bun run test` |
-| [Container images](https://github.com/DooMx3/Inzynierka/actions/workflows/containers.yml) | [![Container images](https://github.com/DooMx3/Inzynierka/actions/workflows/containers.yml/badge.svg)](https://github.com/DooMx3/Inzynierka/actions/workflows/containers.yml) | Build of both images and push to GHCR (`latest` on push to `main`) |
+| [Backend tests](https://github.com/DooMx3/Inzynierka/actions/workflows/backend-tests.yml) | [![Backend tests](https://github.com/DooMx3/Inzynierka/actions/workflows/backend-tests.yml/badge.svg)](https://github.com/DooMx3/Inzynierka/actions/workflows/backend-tests.yml) | `mvn test` against PostgreSQL 16, on pull requests that change `backend/` |
+| [Frontend tests](https://github.com/DooMx3/Inzynierka/actions/workflows/frontend.yml) | [![Frontend tests](https://github.com/DooMx3/Inzynierka/actions/workflows/frontend.yml/badge.svg)](https://github.com/DooMx3/Inzynierka/actions/workflows/frontend.yml) | `bun run test`, on pull requests that change `frontend/` |
+| [Backend image](https://github.com/DooMx3/Inzynierka/actions/workflows/backend-image.yml) | [![Backend image](https://github.com/DooMx3/Inzynierka/actions/workflows/backend-image.yml/badge.svg)](https://github.com/DooMx3/Inzynierka/actions/workflows/backend-image.yml) | Build and push to GHCR on push to `main` when `backend/` changes |
+| [Frontend image](https://github.com/DooMx3/Inzynierka/actions/workflows/frontend-image.yml) | [![Frontend image](https://github.com/DooMx3/Inzynierka/actions/workflows/frontend-image.yml/badge.svg)](https://github.com/DooMx3/Inzynierka/actions/workflows/frontend-image.yml) | Build and push to GHCR on push to `main` when `frontend/` changes |
 
 ---
 # About
