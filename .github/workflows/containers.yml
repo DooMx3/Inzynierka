@@ -1,8 +1,6 @@
 name: Container images
 
 on:
-  pull_request:
-    branches: [main]
   push:
     branches: [main]
 
@@ -50,13 +48,8 @@ jobs:
         if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
         run: |
           docker push "${IMAGE}:${GITHUB_SHA}"
-          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
-            docker tag "${IMAGE}:${GITHUB_SHA}" "${IMAGE}:latest"
-            docker push "${IMAGE}:latest"
-          else
-            docker tag "${IMAGE}:${GITHUB_SHA}" "${IMAGE}:pr-${{ github.event.pull_request.number }}"
-            docker push "${IMAGE}:pr-${{ github.event.pull_request.number }}"
-          fi
+          docker tag "${IMAGE}:${GITHUB_SHA}" "${IMAGE}:latest"
+          docker push "${IMAGE}:latest"
 
   frontend-image:
     name: Frontend image
@@ -85,10 +78,5 @@ jobs:
         if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
         run: |
           docker push "${IMAGE}:${GITHUB_SHA}"
-          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
-            docker tag "${IMAGE}:${GITHUB_SHA}" "${IMAGE}:latest"
-            docker push "${IMAGE}:latest"
-          else
-            docker tag "${IMAGE}:${GITHUB_SHA}" "${IMAGE}:pr-${{ github.event.pull_request.number }}"
-            docker push "${IMAGE}:pr-${{ github.event.pull_request.number }}"
-          fi
+          docker tag "${IMAGE}:${GITHUB_SHA}" "${IMAGE}:latest"
+          docker push "${IMAGE}:latest"
