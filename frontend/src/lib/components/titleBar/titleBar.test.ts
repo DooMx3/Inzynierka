@@ -114,9 +114,32 @@ describe('Title bar', () => {
         render(TitleBar);
 
         expect(screen.queryByRole('button', { name: 'Profile Dropdown' })).not.toBeInTheDocument();
+        expect(screen.queryByRole('searchbox', { name: 'Search' })).not.toBeInTheDocument();
         const signIn = screen.getByRole('link', { name: 'Sign in' });
         expect(signIn).toHaveAttribute('href', '/auth');
         expect(signIn.querySelector('svg')).toBeInTheDocument();
         expect(signIn).toHaveClass('bg-[#e4d3c0]', 'text-[#4a3428]', 'transition-colors', 'duration-200');
+    });
+
+    it('hides search on a phone even after signing in', () => {
+        const original = window.matchMedia;
+        window.matchMedia = ((query: string) => ({
+            matches: query.includes('max-width'),
+            media: query,
+            addEventListener: () => {},
+            removeEventListener: () => {},
+            dispatchEvent: () => false,
+            onchange: null,
+        })) as typeof window.matchMedia;
+
+        try {
+            render(TitleBar);
+
+            expect(screen.queryByRole('searchbox', { name: 'Search' })).not.toBeInTheDocument();
+            expect(screen.getByText('Name goes here')).toHaveClass('whitespace-nowrap');
+            expect(screen.getByRole('button', { name: 'Profile Dropdown' })).toBeInTheDocument();
+        } finally {
+            window.matchMedia = original;
+        }
     });
 });
