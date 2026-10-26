@@ -221,8 +221,8 @@
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         grid-template-areas:
             "first last"
-            "password confirm"
-            "email email";
+            "email email"
+            "password confirm";
         align-items: start;
         column-gap: 1.25rem;
         row-gap: 1rem;
