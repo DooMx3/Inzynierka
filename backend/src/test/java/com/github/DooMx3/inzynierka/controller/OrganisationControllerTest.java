@@ -24,6 +24,7 @@ import com.github.DooMx3.inzynierka.entities.Organisation;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.enums.RoleName;
 import com.github.DooMx3.inzynierka.exceptions.InactiveResourceException;
+import com.github.DooMx3.inzynierka.exceptions.InsufficientPermissionException;
 import com.github.DooMx3.inzynierka.exceptions.ResourceConflictException;
 import com.github.DooMx3.inzynierka.exceptions.ResourceNotFoundException;
 import com.github.DooMx3.inzynierka.service.JwtService;
@@ -552,13 +553,22 @@ class OrganisationControllerTest {
   @Nested
   class DeleteOrganisation {
 
+    private static final String DELETE_REQUEST =
+        """
+        {"password":"correct-password"}
+        """;
+
     @Test
     void shouldReturn204ForOwner() throws Exception {
       mockMvc
-          .perform(delete(BASE_URL + "/{id}", organisationId).with(authentication(owner())))
+          .perform(
+              delete(BASE_URL + "/{id}", organisationId)
+                  .with(authentication(owner()))
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(DELETE_REQUEST))
           .andExpect(status().isNoContent());
 
-      verify(organisationService).deleteOrganisation(organisationId, user);
+      verify(organisationService).deleteOrganisation(organisationId, "correct-password", user);
     }
 
     @Test
@@ -573,7 +583,11 @@ class OrganisationControllerTest {
     @Test
     void shouldReturn403WhenUserIsNotOwner() throws Exception {
       mockMvc
-          .perform(delete(BASE_URL + "/{id}", organisationId).with(authentication(notOwner())))
+          .perform(
+              delete(BASE_URL + "/{id}", organisationId)
+                  .with(authentication(notOwner()))
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(DELETE_REQUEST))
           .andExpect(status().isForbidden());
 
       verifyNoInteractions(organisationService);
@@ -583,17 +597,40 @@ class OrganisationControllerTest {
     void shouldReturn404WhenOrganisationNotFound() throws Exception {
       doThrow(new ResourceNotFoundException("Organisation not found: " + organisationId))
           .when(organisationService)
-          .deleteOrganisation(organisationId, user);
+          .deleteOrganisation(organisationId, "correct-password", user);
 
       mockMvc
-          .perform(delete(BASE_URL + "/{id}", organisationId).with(authentication(owner())))
+          .perform(
+              delete(BASE_URL + "/{id}", organisationId)
+                  .with(authentication(owner()))
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(DELETE_REQUEST))
           .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldReturn403WhenOwnerDoesNotOwnRequestedOrganisation() throws Exception {
+      doThrow(new InsufficientPermissionException("Only the organisation owner can access it"))
+          .when(organisationService)
+          .deleteOrganisation(organisationId, "correct-password", user);
+
+      mockMvc
+          .perform(
+              delete(BASE_URL + "/{id}", organisationId)
+                  .with(authentication(owner()))
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(DELETE_REQUEST))
+          .andExpect(status().isForbidden());
     }
 
     @Test
     void shouldReturn400WhenIdIsNotValidUuid() throws Exception {
       mockMvc
-          .perform(delete(BASE_URL + "/{id}", "not-a-uuid").with(authentication(owner())))
+          .perform(
+              delete(BASE_URL + "/{id}", "not-a-uuid")
+                  .with(authentication(owner()))
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(DELETE_REQUEST))
           .andExpect(status().isBadRequest());
 
       verifyNoInteractions(organisationService);

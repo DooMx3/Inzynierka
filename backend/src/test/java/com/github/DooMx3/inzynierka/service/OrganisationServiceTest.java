@@ -28,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 class OrganisationServiceTest {
@@ -35,6 +36,8 @@ class OrganisationServiceTest {
   @Mock private OrganisationRepository repository;
 
   @Mock private UserRepository userRepository;
+
+  @Mock private PasswordEncoder passwordEncoder;
 
   @InjectMocks private OrganisationService service;
 
@@ -148,6 +151,7 @@ class OrganisationServiceTest {
           User.builder()
               .organisation(organisation)
               .membershipStatus(MembershipStatus.MEMBER)
+              .password("stored-hash")
               .roles(new HashSet<>(Set.of(RoleName.OWNER)))
               .build();
       User invitedUser =
@@ -160,9 +164,10 @@ class OrganisationServiceTest {
       when(userRepository.findByOrganisationAndMembershipStatus(
               organisation, MembershipStatus.PENDING))
           .thenReturn(List.of(invitedUser));
+      when(passwordEncoder.matches("correct-password", "stored-hash")).thenReturn(true);
 
       // act
-      service.deleteOrganisation(id, user);
+      service.deleteOrganisation(id, "correct-password", user);
 
       // assert
       assertFalse(organisation.isActive());
@@ -176,10 +181,59 @@ class OrganisationServiceTest {
       assertEquals(MembershipStatus.NONE, invitedUser.getMembershipStatus());
 
       verify(repository).findById(id);
+      verify(passwordEncoder).matches("correct-password", "stored-hash");
       verify(userRepository)
           .findByOrganisationAndMembershipStatus(organisation, MembershipStatus.PENDING);
       verify(userRepository).saveAll(List.of(invitedUser));
       verify(userRepository).save(user);
+    }
+
+    @Test
+    void shouldNotDeleteOrganisationWhenPasswordIsIncorrect() {
+      UUID id = UUID.randomUUID();
+      Organisation organisation = Organisation.builder().id(id).active(true).build();
+      User user =
+          User.builder()
+              .organisation(organisation)
+              .membershipStatus(MembershipStatus.MEMBER)
+              .password("stored-hash")
+              .roles(new HashSet<>(Set.of(RoleName.OWNER)))
+              .build();
+      when(repository.findById(id)).thenReturn(Optional.of(organisation));
+      when(passwordEncoder.matches("wrong-password", "stored-hash")).thenReturn(false);
+
+      assertThrows(
+          InvalidCredentialsException.class,
+          () -> service.deleteOrganisation(id, "wrong-password", user));
+
+      assertTrue(organisation.isActive());
+      assertSame(organisation, user.getOrganisation());
+      verify(passwordEncoder).matches("wrong-password", "stored-hash");
+      verify(userRepository, never()).findByOrganisationAndMembershipStatus(any(), any());
+      verify(userRepository, never()).save(any());
+      verify(userRepository, never()).saveAll(any());
+    }
+
+    @Test
+    void shouldNotDeleteOrganisationWhenUserDoesNotOwnIt() {
+      UUID id = UUID.randomUUID();
+      Organisation organisation = Organisation.builder().id(id).active(true).build();
+      Organisation otherOrganisation = Organisation.builder().id(UUID.randomUUID()).build();
+      User user =
+          User.builder()
+              .organisation(otherOrganisation)
+              .password("stored-hash")
+              .roles(new HashSet<>(Set.of(RoleName.OWNER)))
+              .build();
+      when(repository.findById(id)).thenReturn(Optional.of(organisation));
+
+      assertThrows(
+          InsufficientPermissionException.class,
+          () -> service.deleteOrganisation(id, "correct-password", user));
+
+      assertTrue(organisation.isActive());
+      verify(repository).findById(id);
+      verifyNoInteractions(passwordEncoder, userRepository);
     }
   }
 
