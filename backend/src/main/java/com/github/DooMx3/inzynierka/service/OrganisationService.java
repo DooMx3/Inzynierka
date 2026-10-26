@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,6 +27,7 @@ public class OrganisationService {
   private final OrganisationRepository organisationRepository;
   private final UserRepository userRepository;
   private final UserService userService;
+  private final PasswordEncoder passwordEncoder;
 
   @Transactional
   public Organisation createOrganisation(OrganisationRequest request, User user) {
@@ -85,8 +87,11 @@ public class OrganisationService {
   }
 
   @Transactional
-  public void deleteOrganisation(UUID id, User user) {
+  public void deleteOrganisation(UUID id, String password, User user) {
     Organisation organisation = getOrganisation(id, user);
+    if (!passwordEncoder.matches(password, user.getPassword())) {
+      throw new InvalidCredentialsException("Password is incorrect");
+    }
 
     List<User> pendingInvitations =
         userRepository.findByOrganisationAndMembershipStatus(

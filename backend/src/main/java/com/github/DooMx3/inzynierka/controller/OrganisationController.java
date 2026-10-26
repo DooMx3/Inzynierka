@@ -1,5 +1,6 @@
 package com.github.DooMx3.inzynierka.controller;
 
+import com.github.DooMx3.inzynierka.dto.organisation.OrganisationDeleteRequest;
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationInvitationRequest;
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationPatchRequest;
 import com.github.DooMx3.inzynierka.dto.organisation.OrganisationRequest;
@@ -115,10 +116,15 @@ public class OrganisationController {
 
   @Operation(
       summary = "Delete organisation",
-      description = "Deletes the organisation with the given ID. Requires the OWNER authority.")
+      description =
+          "Deletes the organisation with the given ID after verifying the authenticated owner's password.")
   @ApiResponses({
     @ApiResponse(responseCode = "204", description = "Organisation deleted"),
-    @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content),
+    @ApiResponse(responseCode = "400", description = "Validation error", content = @Content),
+    @ApiResponse(
+        responseCode = "401",
+        description = "Not authenticated or password is incorrect",
+        content = @Content),
     @ApiResponse(
         responseCode = "403",
         description = "Access denied (OWNER authority required)",
@@ -129,8 +135,9 @@ public class OrganisationController {
   @PreAuthorize("hasAuthority('OWNER')")
   public ResponseEntity<Void> delete(
       @Parameter(description = "Organisation ID") @PathVariable UUID id,
+      @RequestBody @Valid OrganisationDeleteRequest request,
       @Parameter(hidden = true) @AuthenticationPrincipal User user) {
-    organisationService.deleteOrganisation(id, user);
+    organisationService.deleteOrganisation(id, request.password(), user);
     return ResponseEntity.noContent().build();
   }
 
