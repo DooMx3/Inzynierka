@@ -276,6 +276,20 @@ public class OrganisationController {
     return ResponseEntity.noContent().build();
   }
 
+  @Operation(
+      summary = "Get organisation members",
+      description =
+          "Retrieves a list of all members belonging to the specified organisation. Requires the OWNER authority for this organisation.")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "Organisation members retrieved successfully"),
+    @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content),
+    @ApiResponse(
+        responseCode = "403",
+        description = "Access denied; organisation OWNER authority required",
+        content = @Content),
+    @ApiResponse(responseCode = "404", description = "Organisation not found", content = @Content),
+    @ApiResponse(responseCode = "409", description = "Inactive organisation", content = @Content)
+  })
   @GetMapping("/{id}/members")
   @PreAuthorize("hasAuthority('OWNER')")
   public ResponseEntity<List<User>> getOrganisationMembers(
