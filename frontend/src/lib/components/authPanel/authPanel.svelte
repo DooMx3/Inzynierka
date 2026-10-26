@@ -109,12 +109,14 @@
         </div>
     {:else}
         <div
-            class="absolute inset-0 flex items-center justify-center overflow-y-auto p-8"
+            class="absolute inset-0 overflow-y-auto px-4 py-3 sm:px-6 sm:py-2"
             in:authSlide={{ panel: "register", phase: "in", animate: animate && motion }}
             out:authSlide={{ panel: "register", phase: "out", animate: animate && motion }}
         >
-            <div class="w-full max-w-md">
-                <RegisterForm onSwitchToLogin={showLogin} />
+            <div class="flex min-h-full items-center justify-center">
+                <div class="w-full max-w-6xl">
+                    <RegisterForm onSwitchToLogin={showLogin} />
+                </div>
             </div>
         </div>
     {/if}
