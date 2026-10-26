@@ -41,6 +41,10 @@ class OrganisationServiceTest {
 
   @InjectMocks private OrganisationService service;
 
+  private void mockAuthenticatedUser(User user) {
+    when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+  }
+
   @Nested
   class CreateOrganisation {
 
@@ -149,25 +153,26 @@ class OrganisationServiceTest {
               .build();
       User user =
           User.builder()
+              .id(UUID.randomUUID())
               .organisation(organisation)
               .membershipStatus(MembershipStatus.MEMBER)
               .password("stored-hash")
               .roles(new HashSet<>(Set.of(RoleName.OWNER)))
               .build();
+      mockAuthenticatedUser(user);
       User invitedUser =
           User.builder()
               .organisation(organisation)
               .membershipStatus(MembershipStatus.PENDING)
               .build();
 
-      when(repository.findById(id)).thenReturn(Optional.of(organisation));
       when(userRepository.findByOrganisationAndMembershipStatus(
               organisation, MembershipStatus.PENDING))
           .thenReturn(List.of(invitedUser));
       when(passwordEncoder.matches("correct-password", "stored-hash")).thenReturn(true);
 
       // act
-      service.deleteOrganisation(id, "correct-password", user);
+      service.deleteOrganisation("correct-password", user);
 
       // assert
       assertFalse(organisation.isActive());
@@ -180,7 +185,6 @@ class OrganisationServiceTest {
       assertNull(invitedUser.getOrganisation());
       assertEquals(MembershipStatus.NONE, invitedUser.getMembershipStatus());
 
-      verify(repository).findById(id);
       verify(passwordEncoder).matches("correct-password", "stored-hash");
       verify(userRepository)
           .findByOrganisationAndMembershipStatus(organisation, MembershipStatus.PENDING);
@@ -194,17 +198,18 @@ class OrganisationServiceTest {
       Organisation organisation = Organisation.builder().id(id).active(true).build();
       User user =
           User.builder()
+              .id(UUID.randomUUID())
               .organisation(organisation)
               .membershipStatus(MembershipStatus.MEMBER)
               .password("stored-hash")
               .roles(new HashSet<>(Set.of(RoleName.OWNER)))
               .build();
-      when(repository.findById(id)).thenReturn(Optional.of(organisation));
+      mockAuthenticatedUser(user);
       when(passwordEncoder.matches("wrong-password", "stored-hash")).thenReturn(false);
 
       assertThrows(
           InvalidCredentialsException.class,
-          () -> service.deleteOrganisation(id, "wrong-password", user));
+          () -> service.deleteOrganisation("wrong-password", user));
 
       assertTrue(organisation.isActive());
       assertSame(organisation, user.getOrganisation());
@@ -218,22 +223,21 @@ class OrganisationServiceTest {
     void shouldNotDeleteOrganisationWhenUserDoesNotOwnIt() {
       UUID id = UUID.randomUUID();
       Organisation organisation = Organisation.builder().id(id).active(true).build();
-      Organisation otherOrganisation = Organisation.builder().id(UUID.randomUUID()).build();
       User user =
           User.builder()
-              .organisation(otherOrganisation)
+              .id(UUID.randomUUID())
+              .organisation(organisation)
               .password("stored-hash")
-              .roles(new HashSet<>(Set.of(RoleName.OWNER)))
               .build();
-      when(repository.findById(id)).thenReturn(Optional.of(organisation));
+      mockAuthenticatedUser(user);
 
       assertThrows(
           InsufficientPermissionException.class,
-          () -> service.deleteOrganisation(id, "correct-password", user));
+          () -> service.deleteOrganisation("correct-password", user));
 
       assertTrue(organisation.isActive());
-      verify(repository).findById(id);
-      verifyNoInteractions(passwordEncoder, userRepository);
+      verify(userRepository).findById(user.getId());
+      verifyNoInteractions(passwordEncoder);
     }
   }
 
@@ -255,18 +259,19 @@ class OrganisationServiceTest {
               .build();
       User user =
           User.builder()
+              .id(UUID.randomUUID())
               .organisation(organisation)
               .roles(new java.util.HashSet<>(Set.of(RoleName.OWNER)))
               .build();
+      mockAuthenticatedUser(user);
 
       OrganisationPatchRequest request =
           new OrganisationPatchRequest(null, null, null, null, null, null, "Nowe motto");
 
-      when(repository.findById(id)).thenReturn(Optional.of(organisation));
       when(repository.save(organisation)).thenReturn(organisation);
 
       // act
-      Organisation result = service.patchOrganisation(id, request, user);
+      Organisation result = service.patchOrganisation(request, user);
 
       // assert
       assertEquals("Stara nazwa", result.getName());
@@ -288,6 +293,7 @@ class OrganisationServiceTest {
               .organisation(organisation)
               .roles(new java.util.HashSet<>(Set.of(RoleName.OWNER)))
               .build();
+      mockAuthenticatedUser(owner);
       User invitedUser =
           User.builder()
               .id(UUID.randomUUID())
@@ -295,12 +301,10 @@ class OrganisationServiceTest {
               .membershipStatus(MembershipStatus.NONE)
               .build();
 
-      when(repository.findById(organisationId)).thenReturn(Optional.of(organisation));
       when(userRepository.findByEmail(invitedUser.getEmail())).thenReturn(Optional.of(invitedUser));
 
       // act
-      service.inviteUser(
-          organisationId, new OrganisationInvitationRequest(invitedUser.getEmail()), owner);
+      service.inviteUser(new OrganisationInvitationRequest(invitedUser.getEmail()), owner);
 
       // assert
       assertSame(organisation, invitedUser.getOrganisation());
@@ -319,17 +323,15 @@ class OrganisationServiceTest {
               .organisation(organisation)
               .roles(new HashSet<>(Set.of(RoleName.OWNER)))
               .build();
+      mockAuthenticatedUser(owner);
       OrganisationInvitationRequest request =
           new OrganisationInvitationRequest("missing@example.com");
 
-      when(repository.findById(organisationId)).thenReturn(Optional.of(organisation));
       when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
 
       // act & assert
       ResourceNotFoundException exception =
-          assertThrows(
-              ResourceNotFoundException.class,
-              () -> service.inviteUser(organisationId, request, owner));
+          assertThrows(ResourceNotFoundException.class, () -> service.inviteUser(request, owner));
 
       assertEquals("No user exists with the provided email", exception.getMessage());
       verify(userRepository, never()).save(any(User.class));
@@ -346,6 +348,7 @@ class OrganisationServiceTest {
               .organisation(organisation)
               .roles(new HashSet<>(Set.of(RoleName.OWNER)))
               .build();
+      mockAuthenticatedUser(owner);
       User invitedUser =
           User.builder()
               .id(UUID.randomUUID())
@@ -356,14 +359,11 @@ class OrganisationServiceTest {
       OrganisationInvitationRequest request =
           new OrganisationInvitationRequest(invitedUser.getEmail());
 
-      when(repository.findById(organisationId)).thenReturn(Optional.of(organisation));
       when(userRepository.findByEmail(request.email())).thenReturn(Optional.of(invitedUser));
 
       // act & assert
       ResourceConflictException exception =
-          assertThrows(
-              ResourceConflictException.class,
-              () -> service.inviteUser(organisationId, request, owner));
+          assertThrows(ResourceConflictException.class, () -> service.inviteUser(request, owner));
 
       assertEquals(
           "User already belongs to an organisation or has a pending invitation",
@@ -384,17 +384,16 @@ class OrganisationServiceTest {
               .organisation(organisation)
               .membershipStatus(MembershipStatus.MEMBER)
               .build();
+      mockAuthenticatedUser(requester);
       OrganisationInvitationRequest request =
           new OrganisationInvitationRequest("worker@example.com");
 
-      when(repository.findById(organisationId)).thenReturn(Optional.of(organisation));
-
       // act & assert
       assertThrows(
-          InsufficientPermissionException.class,
-          () -> service.inviteUser(organisationId, request, requester));
+          InsufficientPermissionException.class, () -> service.inviteUser(request, requester));
 
-      verifyNoInteractions(userRepository);
+      verify(userRepository).findById(requester.getId());
+      verify(userRepository, never()).findByEmail(any());
     }
 
     @Test
@@ -409,6 +408,7 @@ class OrganisationServiceTest {
               .organisation(organisation)
               .roles(new java.util.HashSet<>(Set.of(role)))
               .build();
+      mockAuthenticatedUser(owner);
       User invitedUser =
           User.builder()
               .id(UUID.randomUUID())
@@ -417,16 +417,56 @@ class OrganisationServiceTest {
               .membershipStatus(MembershipStatus.PENDING)
               .build();
 
-      when(repository.findById(organisationId)).thenReturn(Optional.of(organisation));
       when(userRepository.findById(invitedUser.getId())).thenReturn(Optional.of(invitedUser));
 
       // act
-      service.cancelInvitation(organisationId, invitedUser.getId(), owner);
+      service.cancelInvitation(invitedUser.getId(), owner);
 
       // assert
       assertEquals(MembershipStatus.NONE, invitedUser.getMembershipStatus());
       assertNull(invitedUser.getOrganisation());
       verify(userRepository).save(invitedUser);
+    }
+  }
+
+  @Nested
+  class GetOrganisationMembers {
+
+    @Test
+    void shouldReturnMembersOfAuthenticatedOwnersOrganisation() {
+      Organisation organisation = Organisation.builder().id(UUID.randomUUID()).active(true).build();
+      User owner =
+          User.builder()
+              .id(UUID.randomUUID())
+              .organisation(organisation)
+              .roles(new HashSet<>(Set.of(RoleName.OWNER)))
+              .build();
+      mockAuthenticatedUser(owner);
+      List<User> members =
+          List.of(User.builder().membershipStatus(MembershipStatus.MEMBER).build());
+      when(userRepository.findByOrganisationIdAndMembershipStatus(
+              organisation.getId(), MembershipStatus.MEMBER))
+          .thenReturn(members);
+
+      assertSame(members, service.getOrganisationMembers(owner));
+      verify(userRepository)
+          .findByOrganisationIdAndMembershipStatus(organisation.getId(), MembershipStatus.MEMBER);
+    }
+
+    @Test
+    void shouldRejectMemberListingWhenUserIsNotAnOwner() {
+      User user =
+          User.builder()
+              .id(UUID.randomUUID())
+              .organisation(Organisation.builder().id(UUID.randomUUID()).active(true).build())
+              .roles(new HashSet<>())
+              .build();
+      mockAuthenticatedUser(user);
+
+      assertThrows(
+          InsufficientPermissionException.class, () -> service.getOrganisationMembers(user));
+
+      verify(userRepository).findById(user.getId());
     }
   }
 }

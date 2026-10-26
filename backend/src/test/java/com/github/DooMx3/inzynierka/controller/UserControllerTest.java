@@ -21,7 +21,6 @@ import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.service.JwtService;
 import com.github.DooMx3.inzynierka.service.UserService;
 import java.util.List;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -422,36 +421,19 @@ class UserControllerTest {
   @Nested
   class AcceptInvitation {
 
-    private final UUID organisationId = UUID.randomUUID();
-
     @Test
     void shouldReturn204AndPassDataToService() throws Exception {
       mockMvc
-          .perform(
-              post(BASE_URL + "/invitations/{organisationId}/accept", organisationId)
-                  .with(authenticated()))
+          .perform(post(BASE_URL + "/invitations/accept").with(authenticated()))
           .andExpect(status().isNoContent())
           .andExpect(content().string(""));
 
-      verify(userService).acceptInvitation(organisationId, user);
-    }
-
-    @Test
-    void shouldReturn400WhenOrganisationIdIsNotValidUuid() throws Exception {
-      mockMvc
-          .perform(
-              post(BASE_URL + "/invitations/{organisationId}/accept", "not-a-uuid")
-                  .with(authenticated()))
-          .andExpect(status().isBadRequest());
-
-      verifyNoInteractions(userService);
+      verify(userService).acceptInvitation(user);
     }
 
     @Test
     void shouldReturn401WhenNotAuthenticated() throws Exception {
-      mockMvc
-          .perform(post(BASE_URL + "/invitations/{organisationId}/accept", organisationId))
-          .andExpect(status().isUnauthorized());
+      mockMvc.perform(post(BASE_URL + "/invitations/accept")).andExpect(status().isUnauthorized());
 
       verifyNoInteractions(userService);
     }
@@ -460,36 +442,19 @@ class UserControllerTest {
   @Nested
   class RejectInvitation {
 
-    private final UUID organisationId = UUID.randomUUID();
-
     @Test
     void shouldReturn204AndPassDataToService() throws Exception {
       mockMvc
-          .perform(
-              delete(BASE_URL + "/invitations/{organisationId}", organisationId)
-                  .with(authenticated()))
+          .perform(delete(BASE_URL + "/invitations").with(authenticated()))
           .andExpect(status().isNoContent())
           .andExpect(content().string(""));
 
-      verify(userService).rejectInvitation(organisationId, user);
-    }
-
-    @Test
-    void shouldReturn400WhenOrganisationIdIsNotValidUuid() throws Exception {
-      mockMvc
-          .perform(
-              delete(BASE_URL + "/invitations/{organisationId}", "not-a-uuid")
-                  .with(authenticated()))
-          .andExpect(status().isBadRequest());
-
-      verifyNoInteractions(userService);
+      verify(userService).rejectInvitation(user);
     }
 
     @Test
     void shouldReturn401WhenNotAuthenticated() throws Exception {
-      mockMvc
-          .perform(delete(BASE_URL + "/invitations/{organisationId}", organisationId))
-          .andExpect(status().isUnauthorized());
+      mockMvc.perform(delete(BASE_URL + "/invitations")).andExpect(status().isUnauthorized());
 
       verifyNoInteractions(userService);
     }

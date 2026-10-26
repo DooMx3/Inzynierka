@@ -251,24 +251,24 @@ class OrganisationControllerTest {
   }
 
   @Nested
-  class GetOrganisationById {
+  class GetOrganisation {
 
     @Test
     void shouldReturn200AndOrganisationForOwner() throws Exception {
-      when(organisationService.getOrganisation(organisationId, user)).thenReturn(organisation);
+      when(organisationService.getOrganisation(user)).thenReturn(organisation);
 
       mockMvc
-          .perform(get(BASE_URL + "/{id}", organisationId).with(authentication(owner())))
+          .perform(get(BASE_URL).with(authentication(owner())))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.id").value(organisationId.toString()))
           .andExpect(jsonPath("$.name").value("Acme"));
 
-      verify(organisationService).getOrganisation(organisationId, user);
+      verify(organisationService).getOrganisation(user);
     }
 
     @Test
     void shouldReturn401WhenNotAuthenticated() throws Exception {
-      mockMvc.perform(get(BASE_URL + "/{id}", organisationId)).andExpect(status().isUnauthorized());
+      mockMvc.perform(get(BASE_URL)).andExpect(status().isUnauthorized());
 
       verifyNoInteractions(organisationService);
     }
@@ -276,29 +276,68 @@ class OrganisationControllerTest {
     @Test
     void shouldReturn403WhenUserIsNotOwner() throws Exception {
       mockMvc
-          .perform(get(BASE_URL + "/{id}", organisationId).with(authentication(notOwner())))
+          .perform(get(BASE_URL).with(authentication(notOwner())))
           .andExpect(status().isForbidden());
 
       verifyNoInteractions(organisationService);
     }
 
     @Test
-    void shouldReturn404WhenOrganisationNotFound() throws Exception {
-      when(organisationService.getOrganisation(organisationId, user))
-          .thenThrow(new ResourceNotFoundException("Organisation not found: " + organisationId));
+    void shouldReturn403WhenOwnerHasNoOrganisation() throws Exception {
+      when(organisationService.getOrganisation(user))
+          .thenThrow(new InsufficientPermissionException("Owner has no organisation"));
 
       mockMvc
-          .perform(get(BASE_URL + "/{id}", organisationId).with(authentication(owner())))
-          .andExpect(status().isNotFound());
+          .perform(get(BASE_URL).with(authentication(owner())))
+          .andExpect(status().isForbidden());
+    }
+  }
+
+  @Nested
+  class OrganisationScopedEndpoints {
+
+    private final UUID targetUserId = UUID.randomUUID();
+
+    @Test
+    void shouldInviteUserToAuthenticatedOwnersOrganisation() throws Exception {
+      mockMvc
+          .perform(
+              post(BASE_URL + "/invitations")
+                  .with(authentication(owner()))
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content("{\"email\":\"worker@example.com\"}"))
+          .andExpect(status().isNoContent());
+
+      verify(organisationService).inviteUser(any(), eq(user));
     }
 
     @Test
-    void shouldReturn400WhenIdIsNotValidUuid() throws Exception {
+    void shouldListPendingInvitationsForAuthenticatedOwnersOrganisation() throws Exception {
       mockMvc
-          .perform(get(BASE_URL + "/{id}", "not-a-uuid").with(authentication(owner())))
-          .andExpect(status().isBadRequest());
+          .perform(get(BASE_URL + "/invitations").with(authentication(owner())))
+          .andExpect(status().isOk());
 
-      verifyNoInteractions(organisationService);
+      verify(organisationService).getPendingInvitations(user);
+    }
+
+    @Test
+    void shouldCancelInvitationForUserInAuthenticatedOwnersOrganisation() throws Exception {
+      mockMvc
+          .perform(
+              delete(BASE_URL + "/invitations/{userId}", targetUserId)
+                  .with(authentication(owner())))
+          .andExpect(status().isNoContent());
+
+      verify(organisationService).cancelInvitation(targetUserId, user);
+    }
+
+    @Test
+    void shouldListMembersOfAuthenticatedOwnersOrganisation() throws Exception {
+      mockMvc
+          .perform(get(BASE_URL + "/members").with(authentication(owner())))
+          .andExpect(status().isOk());
+
+      verify(organisationService).getOrganisationMembers(user);
     }
   }
 
@@ -307,13 +346,12 @@ class OrganisationControllerTest {
 
     @Test
     void shouldReturn200AndUpdatedOrganisationForOwner() throws Exception {
-      when(organisationService.updateOrganisation(
-              eq(organisationId), any(OrganisationRequest.class), eq(user)))
+      when(organisationService.updateOrganisation(any(OrganisationRequest.class), eq(user)))
           .thenReturn(organisation);
 
       mockMvc
           .perform(
-              put(BASE_URL + "/{id}", organisationId)
+              put(BASE_URL)
                   .with(authentication(owner()))
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(VALID_REQUEST))
@@ -323,13 +361,12 @@ class OrganisationControllerTest {
 
     @Test
     void shouldPassRequestBodyToService() throws Exception {
-      when(organisationService.updateOrganisation(
-              eq(organisationId), any(OrganisationRequest.class), eq(user)))
+      when(organisationService.updateOrganisation(any(OrganisationRequest.class), eq(user)))
           .thenReturn(organisation);
 
       mockMvc
           .perform(
-              put(BASE_URL + "/{id}", organisationId)
+              put(BASE_URL)
                   .with(authentication(owner()))
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(VALID_REQUEST))
@@ -337,8 +374,7 @@ class OrganisationControllerTest {
 
       ArgumentCaptor<OrganisationRequest> captor =
           ArgumentCaptor.forClass(OrganisationRequest.class);
-      verify(organisationService)
-          .updateOrganisation(eq(organisationId), captor.capture(), eq(user));
+      verify(organisationService).updateOrganisation(captor.capture(), eq(user));
 
       assertThat(captor.getValue().name()).isEqualTo("Acme");
       assertThat(captor.getValue().city()).isEqualTo("Warszawa");
@@ -348,7 +384,7 @@ class OrganisationControllerTest {
     void shouldReturn400WhenNameIsBlank() throws Exception {
       mockMvc
           .perform(
-              put(BASE_URL + "/{id}", organisationId)
+              put(BASE_URL)
                   .with(authentication(owner()))
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
@@ -364,7 +400,7 @@ class OrganisationControllerTest {
     void shouldReturn400WhenCityIsBlank() throws Exception {
       mockMvc
           .perform(
-              put(BASE_URL + "/{id}", organisationId)
+              put(BASE_URL)
                   .with(authentication(owner()))
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
@@ -380,9 +416,7 @@ class OrganisationControllerTest {
     void shouldReturn400WhenBodyIsMissing() throws Exception {
       mockMvc
           .perform(
-              put(BASE_URL + "/{id}", organisationId)
-                  .with(authentication(owner()))
-                  .contentType(MediaType.APPLICATION_JSON))
+              put(BASE_URL).with(authentication(owner())).contentType(MediaType.APPLICATION_JSON))
           .andExpect(status().isBadRequest());
 
       verifyNoInteractions(organisationService);
@@ -391,10 +425,7 @@ class OrganisationControllerTest {
     @Test
     void shouldReturn401WhenNotAuthenticated() throws Exception {
       mockMvc
-          .perform(
-              put(BASE_URL + "/{id}", organisationId)
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(VALID_REQUEST))
+          .perform(put(BASE_URL).contentType(MediaType.APPLICATION_JSON).content(VALID_REQUEST))
           .andExpect(status().isUnauthorized());
 
       verifyNoInteractions(organisationService);
@@ -404,7 +435,7 @@ class OrganisationControllerTest {
     void shouldReturn403WhenUserIsNotOwner() throws Exception {
       mockMvc
           .perform(
-              put(BASE_URL + "/{id}", organisationId)
+              put(BASE_URL)
                   .with(authentication(notOwner()))
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(VALID_REQUEST))
@@ -414,18 +445,17 @@ class OrganisationControllerTest {
     }
 
     @Test
-    void shouldReturn404WhenOrganisationNotFound() throws Exception {
-      when(organisationService.updateOrganisation(
-              eq(organisationId), any(OrganisationRequest.class), eq(user)))
-          .thenThrow(new ResourceNotFoundException("Organisation not found: " + organisationId));
+    void shouldReturn403WhenOwnerHasNoOrganisation() throws Exception {
+      when(organisationService.updateOrganisation(any(OrganisationRequest.class), eq(user)))
+          .thenThrow(new InsufficientPermissionException("Owner has no organisation"));
 
       mockMvc
           .perform(
-              put(BASE_URL + "/{id}", organisationId)
+              put(BASE_URL)
                   .with(authentication(owner()))
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(VALID_REQUEST))
-          .andExpect(status().isNotFound());
+          .andExpect(status().isForbidden());
     }
   }
 
@@ -434,13 +464,12 @@ class OrganisationControllerTest {
 
     @Test
     void shouldReturn200AndPatchedOrganisationForOwner() throws Exception {
-      when(organisationService.patchOrganisation(
-              eq(organisationId), any(OrganisationPatchRequest.class), eq(user)))
+      when(organisationService.patchOrganisation(any(OrganisationPatchRequest.class), eq(user)))
           .thenReturn(organisation);
 
       mockMvc
           .perform(
-              patch(BASE_URL + "/{id}", organisationId)
+              patch(BASE_URL)
                   .with(authentication(owner()))
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
@@ -453,13 +482,12 @@ class OrganisationControllerTest {
 
     @Test
     void shouldPassOnlyProvidedFieldsToService() throws Exception {
-      when(organisationService.patchOrganisation(
-              eq(organisationId), any(OrganisationPatchRequest.class), eq(user)))
+      when(organisationService.patchOrganisation(any(OrganisationPatchRequest.class), eq(user)))
           .thenReturn(organisation);
 
       mockMvc
           .perform(
-              patch(BASE_URL + "/{id}", organisationId)
+              patch(BASE_URL)
                   .with(authentication(owner()))
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(
@@ -470,7 +498,7 @@ class OrganisationControllerTest {
 
       ArgumentCaptor<OrganisationPatchRequest> captor =
           ArgumentCaptor.forClass(OrganisationPatchRequest.class);
-      verify(organisationService).patchOrganisation(eq(organisationId), captor.capture(), eq(user));
+      verify(organisationService).patchOrganisation(captor.capture(), eq(user));
 
       OrganisationPatchRequest captured = captor.getValue();
       assertThat(captured.motto()).isEqualTo("New motto");
@@ -484,13 +512,12 @@ class OrganisationControllerTest {
 
     @Test
     void shouldReturn200WhenBodyIsEmptyObject() throws Exception {
-      when(organisationService.patchOrganisation(
-              eq(organisationId), any(OrganisationPatchRequest.class), eq(user)))
+      when(organisationService.patchOrganisation(any(OrganisationPatchRequest.class), eq(user)))
           .thenReturn(organisation);
 
       mockMvc
           .perform(
-              patch(BASE_URL + "/{id}", organisationId)
+              patch(BASE_URL)
                   .with(authentication(owner()))
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{}"))
@@ -501,9 +528,7 @@ class OrganisationControllerTest {
     void shouldReturn400WhenBodyIsMissing() throws Exception {
       mockMvc
           .perform(
-              patch(BASE_URL + "/{id}", organisationId)
-                  .with(authentication(owner()))
-                  .contentType(MediaType.APPLICATION_JSON))
+              patch(BASE_URL).with(authentication(owner())).contentType(MediaType.APPLICATION_JSON))
           .andExpect(status().isBadRequest());
 
       verifyNoInteractions(organisationService);
@@ -512,10 +537,7 @@ class OrganisationControllerTest {
     @Test
     void shouldReturn401WhenNotAuthenticated() throws Exception {
       mockMvc
-          .perform(
-              patch(BASE_URL + "/{id}", organisationId)
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content("{}"))
+          .perform(patch(BASE_URL).contentType(MediaType.APPLICATION_JSON).content("{}"))
           .andExpect(status().isUnauthorized());
 
       verifyNoInteractions(organisationService);
@@ -525,7 +547,7 @@ class OrganisationControllerTest {
     void shouldReturn403WhenUserIsNotOwner() throws Exception {
       mockMvc
           .perform(
-              patch(BASE_URL + "/{id}", organisationId)
+              patch(BASE_URL)
                   .with(authentication(notOwner()))
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{}"))
@@ -535,18 +557,17 @@ class OrganisationControllerTest {
     }
 
     @Test
-    void shouldReturn404WhenOrganisationNotFound() throws Exception {
-      when(organisationService.patchOrganisation(
-              eq(organisationId), any(OrganisationPatchRequest.class), eq(user)))
-          .thenThrow(new ResourceNotFoundException("Organisation not found: " + organisationId));
+    void shouldReturn403WhenOwnerHasNoOrganisation() throws Exception {
+      when(organisationService.patchOrganisation(any(OrganisationPatchRequest.class), eq(user)))
+          .thenThrow(new InsufficientPermissionException("Owner has no organisation"));
 
       mockMvc
           .perform(
-              patch(BASE_URL + "/{id}", organisationId)
+              patch(BASE_URL)
                   .with(authentication(owner()))
                   .contentType(MediaType.APPLICATION_JSON)
                   .content("{}"))
-          .andExpect(status().isNotFound());
+          .andExpect(status().isForbidden());
     }
   }
 
@@ -562,20 +583,18 @@ class OrganisationControllerTest {
     void shouldReturn204ForOwner() throws Exception {
       mockMvc
           .perform(
-              delete(BASE_URL + "/{id}", organisationId)
+              delete(BASE_URL)
                   .with(authentication(owner()))
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(DELETE_REQUEST))
           .andExpect(status().isNoContent());
 
-      verify(organisationService).deleteOrganisation(organisationId, "correct-password", user);
+      verify(organisationService).deleteOrganisation("correct-password", user);
     }
 
     @Test
     void shouldReturn401WhenNotAuthenticated() throws Exception {
-      mockMvc
-          .perform(delete(BASE_URL + "/{id}", organisationId))
-          .andExpect(status().isUnauthorized());
+      mockMvc.perform(delete(BASE_URL)).andExpect(status().isUnauthorized());
 
       verifyNoInteractions(organisationService);
     }
@@ -584,7 +603,7 @@ class OrganisationControllerTest {
     void shouldReturn403WhenUserIsNotOwner() throws Exception {
       mockMvc
           .perform(
-              delete(BASE_URL + "/{id}", organisationId)
+              delete(BASE_URL)
                   .with(authentication(notOwner()))
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(DELETE_REQUEST))
@@ -594,85 +613,55 @@ class OrganisationControllerTest {
     }
 
     @Test
-    void shouldReturn404WhenOrganisationNotFound() throws Exception {
-      doThrow(new ResourceNotFoundException("Organisation not found: " + organisationId))
+    void shouldReturn403WhenOwnerHasNoOrganisation() throws Exception {
+      doThrow(new InsufficientPermissionException("Owner has no organisation"))
           .when(organisationService)
-          .deleteOrganisation(organisationId, "correct-password", user);
+          .deleteOrganisation("correct-password", user);
 
       mockMvc
           .perform(
-              delete(BASE_URL + "/{id}", organisationId)
-                  .with(authentication(owner()))
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(DELETE_REQUEST))
-          .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void shouldReturn403WhenOwnerDoesNotOwnRequestedOrganisation() throws Exception {
-      doThrow(new InsufficientPermissionException("Only the organisation owner can access it"))
-          .when(organisationService)
-          .deleteOrganisation(organisationId, "correct-password", user);
-
-      mockMvc
-          .perform(
-              delete(BASE_URL + "/{id}", organisationId)
+              delete(BASE_URL)
                   .with(authentication(owner()))
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(DELETE_REQUEST))
           .andExpect(status().isForbidden());
     }
-
-    @Test
-    void shouldReturn400WhenIdIsNotValidUuid() throws Exception {
-      mockMvc
-          .perform(
-              delete(BASE_URL + "/{id}", "not-a-uuid")
-                  .with(authentication(owner()))
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(DELETE_REQUEST))
-          .andExpect(status().isBadRequest());
-
-      verifyNoInteractions(organisationService);
-    }
   }
 
   @Nested
   class AddRoleToUser {
-    private final String ROLES_URL = BASE_URL + "/{organisationId}/users/{userId}/roles";
+    private final String ROLES_URL = BASE_URL + "/users/{userId}/roles";
     private final UUID targetUserId = UUID.randomUUID();
 
     @Test
     void shouldReturn204ForOwnerWhenAddingWorkerRole() throws Exception {
       mockMvc
           .perform(
-              post(ROLES_URL, organisationId, targetUserId)
+              post(ROLES_URL, targetUserId)
                   .param("role", RoleName.WORKER.name())
                   .with(authentication(owner())))
           .andExpect(status().isNoContent());
 
-      verify(organisationService)
-          .addRoleToUser(organisationId, targetUserId, RoleName.WORKER, user);
+      verify(organisationService).addRoleToUser(targetUserId, RoleName.WORKER, user);
     }
 
     @Test
     void shouldReturn204ForOwnerWhenAddingOenologistRole() throws Exception {
       mockMvc
           .perform(
-              post(ROLES_URL, organisationId, targetUserId)
+              post(ROLES_URL, targetUserId)
                   .param("role", RoleName.OENOLOGIST.name())
                   .with(authentication(owner())))
           .andExpect(status().isNoContent());
 
-      verify(organisationService)
-          .addRoleToUser(organisationId, targetUserId, RoleName.OENOLOGIST, user);
+      verify(organisationService).addRoleToUser(targetUserId, RoleName.OENOLOGIST, user);
     }
 
     @Test
     void shouldReturn400WhenRoleIsUnknown() throws Exception {
       mockMvc
           .perform(
-              post(ROLES_URL, organisationId, targetUserId)
+              post(ROLES_URL, targetUserId)
                   .param("role", "NOT_A_ROLE")
                   .with(authentication(owner())))
           .andExpect(status().isBadRequest());
@@ -681,10 +670,10 @@ class OrganisationControllerTest {
     }
 
     @Test
-    void shouldReturn400WhenOrganisationIdIsNotValidUuid() throws Exception {
+    void shouldReturn400WhenMemberIdIsNotValidUuid() throws Exception {
       mockMvc
           .perform(
-              post(ROLES_URL, "not-a-uuid", targetUserId)
+              post(ROLES_URL, "not-a-uuid")
                   .param("role", RoleName.WORKER.name())
                   .with(authentication(owner())))
           .andExpect(status().isBadRequest());
@@ -696,7 +685,7 @@ class OrganisationControllerTest {
     void shouldReturn400WhenUserIdIsNotValidUuid() throws Exception {
       mockMvc
           .perform(
-              post(ROLES_URL, organisationId, "not-a-uuid")
+              post(ROLES_URL, "not-a-uuid")
                   .param("role", RoleName.WORKER.name())
                   .with(authentication(owner())))
           .andExpect(status().isBadRequest());
@@ -707,8 +696,7 @@ class OrganisationControllerTest {
     @Test
     void shouldReturn401WhenNotAuthenticated() throws Exception {
       mockMvc
-          .perform(
-              post(ROLES_URL, organisationId, targetUserId).param("role", RoleName.WORKER.name()))
+          .perform(post(ROLES_URL, targetUserId).param("role", RoleName.WORKER.name()))
           .andExpect(status().isUnauthorized());
 
       verifyNoInteractions(organisationService);
@@ -718,7 +706,7 @@ class OrganisationControllerTest {
     void shouldReturn403WhenUserIsNotOwner() throws Exception {
       mockMvc
           .perform(
-              post(ROLES_URL, organisationId, targetUserId)
+              post(ROLES_URL, targetUserId)
                   .param("role", RoleName.WORKER.name())
                   .with(authentication(notOwner())))
           .andExpect(status().isForbidden());
@@ -730,11 +718,11 @@ class OrganisationControllerTest {
     void shouldReturn404WhenOrganisationOrUserNotFound() throws Exception {
       doThrow(new ResourceNotFoundException("User not found"))
           .when(organisationService)
-          .addRoleToUser(organisationId, targetUserId, RoleName.WORKER, user);
+          .addRoleToUser(targetUserId, RoleName.WORKER, user);
 
       mockMvc
           .perform(
-              post(ROLES_URL, organisationId, targetUserId)
+              post(ROLES_URL, targetUserId)
                   .param("role", RoleName.WORKER.name())
                   .with(authentication(owner())))
           .andExpect(status().isNotFound());
@@ -744,11 +732,11 @@ class OrganisationControllerTest {
     void shouldReturn409WhenOwnerRoleRequested() throws Exception {
       doThrow(new ResourceConflictException("The OWNER role cannot be added or removed this way"))
           .when(organisationService)
-          .addRoleToUser(organisationId, targetUserId, RoleName.OWNER, user);
+          .addRoleToUser(targetUserId, RoleName.OWNER, user);
 
       mockMvc
           .perform(
-              post(ROLES_URL, organisationId, targetUserId)
+              post(ROLES_URL, targetUserId)
                   .param("role", RoleName.OWNER.name())
                   .with(authentication(owner())))
           .andExpect(status().isConflict());
@@ -758,11 +746,11 @@ class OrganisationControllerTest {
     void shouldReturn409WhenUserHasPendingInvitation() throws Exception {
       doThrow(new ResourceConflictException("User has not accepted the invitation yet"))
           .when(organisationService)
-          .addRoleToUser(organisationId, targetUserId, RoleName.WORKER, user);
+          .addRoleToUser(targetUserId, RoleName.WORKER, user);
 
       mockMvc
           .perform(
-              post(ROLES_URL, organisationId, targetUserId)
+              post(ROLES_URL, targetUserId)
                   .param("role", RoleName.WORKER.name())
                   .with(authentication(owner())))
           .andExpect(status().isConflict());
@@ -772,11 +760,11 @@ class OrganisationControllerTest {
     void shouldReturn409WhenOrganisationIsInactive() throws Exception {
       doThrow(new InactiveResourceException("Cannot change roles in an inactive organisation"))
           .when(organisationService)
-          .addRoleToUser(organisationId, targetUserId, RoleName.WORKER, user);
+          .addRoleToUser(targetUserId, RoleName.WORKER, user);
 
       mockMvc
           .perform(
-              post(ROLES_URL, organisationId, targetUserId)
+              post(ROLES_URL, targetUserId)
                   .param("role", RoleName.WORKER.name())
                   .with(authentication(owner())))
           .andExpect(status().isConflict());
@@ -785,40 +773,38 @@ class OrganisationControllerTest {
 
   @Nested
   class RemoveRoleFromUser {
-    private final String ROLES_URL = BASE_URL + "/{organisationId}/users/{userId}/roles";
+    private final String ROLES_URL = BASE_URL + "/users/{userId}/roles";
     private final UUID targetUserId = UUID.randomUUID();
 
     @Test
     void shouldReturn204ForOwnerWhenRemovingWorkerRole() throws Exception {
       mockMvc
           .perform(
-              delete(ROLES_URL, organisationId, targetUserId)
+              delete(ROLES_URL, targetUserId)
                   .param("role", RoleName.WORKER.name())
                   .with(authentication(owner())))
           .andExpect(status().isNoContent());
 
-      verify(organisationService)
-          .removeRoleFromUser(organisationId, targetUserId, RoleName.WORKER, user);
+      verify(organisationService).removeRoleFromUser(targetUserId, RoleName.WORKER, user);
     }
 
     @Test
     void shouldReturn204ForOwnerWhenRemovingOenologistRole() throws Exception {
       mockMvc
           .perform(
-              delete(ROLES_URL, organisationId, targetUserId)
+              delete(ROLES_URL, targetUserId)
                   .param("role", RoleName.OENOLOGIST.name())
                   .with(authentication(owner())))
           .andExpect(status().isNoContent());
 
-      verify(organisationService)
-          .removeRoleFromUser(organisationId, targetUserId, RoleName.OENOLOGIST, user);
+      verify(organisationService).removeRoleFromUser(targetUserId, RoleName.OENOLOGIST, user);
     }
 
     @Test
     void shouldReturn400WhenRoleIsUnknown() throws Exception {
       mockMvc
           .perform(
-              delete(ROLES_URL, organisationId, targetUserId)
+              delete(ROLES_URL, targetUserId)
                   .param("role", "NOT_A_ROLE")
                   .with(authentication(owner())))
           .andExpect(status().isBadRequest());
@@ -827,10 +813,10 @@ class OrganisationControllerTest {
     }
 
     @Test
-    void shouldReturn400WhenOrganisationIdIsNotValidUuid() throws Exception {
+    void shouldReturn400WhenMemberIdIsNotValidUuid() throws Exception {
       mockMvc
           .perform(
-              delete(ROLES_URL, "not-a-uuid", targetUserId)
+              delete(ROLES_URL, "not-a-uuid")
                   .param("role", RoleName.WORKER.name())
                   .with(authentication(owner())))
           .andExpect(status().isBadRequest());
@@ -842,7 +828,7 @@ class OrganisationControllerTest {
     void shouldReturn400WhenUserIdIsNotValidUuid() throws Exception {
       mockMvc
           .perform(
-              delete(ROLES_URL, organisationId, "not-a-uuid")
+              delete(ROLES_URL, "not-a-uuid")
                   .param("role", RoleName.WORKER.name())
                   .with(authentication(owner())))
           .andExpect(status().isBadRequest());
@@ -853,8 +839,7 @@ class OrganisationControllerTest {
     @Test
     void shouldReturn401WhenNotAuthenticated() throws Exception {
       mockMvc
-          .perform(
-              delete(ROLES_URL, organisationId, targetUserId).param("role", RoleName.WORKER.name()))
+          .perform(delete(ROLES_URL, targetUserId).param("role", RoleName.WORKER.name()))
           .andExpect(status().isUnauthorized());
 
       verifyNoInteractions(organisationService);
@@ -864,7 +849,7 @@ class OrganisationControllerTest {
     void shouldReturn403WhenUserIsNotOwner() throws Exception {
       mockMvc
           .perform(
-              delete(ROLES_URL, organisationId, targetUserId)
+              delete(ROLES_URL, targetUserId)
                   .param("role", RoleName.WORKER.name())
                   .with(authentication(notOwner())))
           .andExpect(status().isForbidden());
@@ -876,11 +861,11 @@ class OrganisationControllerTest {
     void shouldReturn404WhenOrganisationOrUserNotFound() throws Exception {
       doThrow(new ResourceNotFoundException("User does not belong to this organisation"))
           .when(organisationService)
-          .removeRoleFromUser(organisationId, targetUserId, RoleName.WORKER, user);
+          .removeRoleFromUser(targetUserId, RoleName.WORKER, user);
 
       mockMvc
           .perform(
-              delete(ROLES_URL, organisationId, targetUserId)
+              delete(ROLES_URL, targetUserId)
                   .param("role", RoleName.WORKER.name())
                   .with(authentication(owner())))
           .andExpect(status().isNotFound());
@@ -890,11 +875,11 @@ class OrganisationControllerTest {
     void shouldReturn409WhenOwnerRoleRequested() throws Exception {
       doThrow(new ResourceConflictException("The OWNER role cannot be added or removed this way"))
           .when(organisationService)
-          .removeRoleFromUser(organisationId, targetUserId, RoleName.OWNER, user);
+          .removeRoleFromUser(targetUserId, RoleName.OWNER, user);
 
       mockMvc
           .perform(
-              delete(ROLES_URL, organisationId, targetUserId)
+              delete(ROLES_URL, targetUserId)
                   .param("role", RoleName.OWNER.name())
                   .with(authentication(owner())))
           .andExpect(status().isConflict());
@@ -904,11 +889,11 @@ class OrganisationControllerTest {
     void shouldReturn409WhenUserHasPendingInvitation() throws Exception {
       doThrow(new ResourceConflictException("User has not accepted the invitation yet"))
           .when(organisationService)
-          .removeRoleFromUser(organisationId, targetUserId, RoleName.WORKER, user);
+          .removeRoleFromUser(targetUserId, RoleName.WORKER, user);
 
       mockMvc
           .perform(
-              delete(ROLES_URL, organisationId, targetUserId)
+              delete(ROLES_URL, targetUserId)
                   .param("role", RoleName.WORKER.name())
                   .with(authentication(owner())))
           .andExpect(status().isConflict());
@@ -918,11 +903,11 @@ class OrganisationControllerTest {
     void shouldReturn409WhenOrganisationIsInactive() throws Exception {
       doThrow(new InactiveResourceException("Cannot change roles in an inactive organisation"))
           .when(organisationService)
-          .removeRoleFromUser(organisationId, targetUserId, RoleName.WORKER, user);
+          .removeRoleFromUser(targetUserId, RoleName.WORKER, user);
 
       mockMvc
           .perform(
-              delete(ROLES_URL, organisationId, targetUserId)
+              delete(ROLES_URL, targetUserId)
                   .param("role", RoleName.WORKER.name())
                   .with(authentication(owner())))
           .andExpect(status().isConflict());
