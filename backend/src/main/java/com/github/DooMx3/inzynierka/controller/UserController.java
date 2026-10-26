@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -134,46 +133,37 @@ public class UserController {
 
   @Operation(
       summary = "Accept organisation invitation",
-      description =
-          "Accepts the authenticated user's pending invitation to the specified organisation.")
+      description = "Accepts the authenticated user's pending organisation invitation.")
   @ApiResponses({
     @ApiResponse(responseCode = "204", description = "Invitation accepted", content = @Content),
     @ApiResponse(
         responseCode = "400",
-        description =
-            "No pending invitation for this organisation, or the organisation is inactive",
+        description = "No pending organisation invitation, or the organisation is inactive",
         content = @Content),
     @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content)
   })
-  @PostMapping("/invitations/{organisationId}/accept")
+  @PostMapping("/invitations/accept")
   public ResponseEntity<Void> acceptInvitation(
-      @Parameter(description = "ID of the organisation whose invitation should be accepted")
-          @PathVariable
-          UUID organisationId,
       @Parameter(hidden = true) @AuthenticationPrincipal User user) {
-    service.acceptInvitation(organisationId, user);
+    service.acceptInvitation(user);
     return ResponseEntity.noContent().build();
   }
 
   @Operation(
       summary = "Reject organisation invitation",
-      description =
-          "Rejects the authenticated user's pending invitation to the specified organisation.")
+      description = "Rejects the authenticated user's pending organisation invitation.")
   @ApiResponses({
     @ApiResponse(responseCode = "204", description = "Invitation rejected", content = @Content),
     @ApiResponse(
         responseCode = "400",
-        description = "No pending invitation for this organisation",
+        description = "No pending organisation invitation",
         content = @Content),
     @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content)
   })
-  @DeleteMapping("/invitations/{organisationId}")
+  @DeleteMapping("/invitations")
   public ResponseEntity<Void> rejectInvitation(
-      @Parameter(description = "ID of the organisation whose invitation should be rejected")
-          @PathVariable
-          UUID organisationId,
       @Parameter(hidden = true) @AuthenticationPrincipal User user) {
-    service.rejectInvitation(organisationId, user);
+    service.rejectInvitation(user);
     return ResponseEntity.noContent().build();
   }
 }

@@ -313,7 +313,7 @@ class UserServiceTest {
       when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
       // act
-      service.acceptInvitation(organisationId, user);
+      service.acceptInvitation(user);
 
       // assert
       assertEquals(MembershipStatus.MEMBER, user.getMembershipStatus());
@@ -335,7 +335,7 @@ class UserServiceTest {
       when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
       // act
-      service.rejectInvitation(organisationId, user);
+      service.rejectInvitation(user);
 
       // assert
       assertNull(user.getOrganisation());

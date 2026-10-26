@@ -61,15 +61,13 @@ public class OrganisationService {
   }
 
   @Transactional
-  public Organisation getOrganisation(UUID id, User user) {
-    Organisation organisation = findOrganisation(id);
-    requireOwner(organisation, user);
-    return organisation;
+  public Organisation getOrganisation(User user) {
+    return getOwnedOrganisation(user);
   }
 
   @Transactional
-  public Organisation updateOrganisation(UUID id, OrganisationRequest request, User user) {
-    Organisation organisation = getOrganisation(id, user);
+  public Organisation updateOrganisation(OrganisationRequest request, User user) {
+    Organisation organisation = getOwnedOrganisation(user);
 
     if (!organisation.isActive()) {
       throw new InactiveResourceException("Cannot update an inactive organisation");
@@ -87,8 +85,8 @@ public class OrganisationService {
   }
 
   @Transactional
-  public void deleteOrganisation(UUID id, String password, User user) {
-    Organisation organisation = getOrganisation(id, user);
+  public void deleteOrganisation(String password, User user) {
+    Organisation organisation = getOwnedOrganisation(user);
     if (!passwordEncoder.matches(password, user.getPassword())) {
       throw new InvalidCredentialsException("Password is incorrect");
     }
@@ -111,9 +109,8 @@ public class OrganisationService {
   }
 
   @Transactional
-  public Organisation patchOrganisation(
-      UUID id, @Valid OrganisationPatchRequest request, User user) {
-    Organisation organisation = getOrganisation(id, user);
+  public Organisation patchOrganisation(@Valid OrganisationPatchRequest request, User user) {
+    Organisation organisation = getOwnedOrganisation(user);
 
     if (!organisation.isActive()) {
       throw new InactiveResourceException("Cannot update an inactive organisation");
@@ -145,8 +142,8 @@ public class OrganisationService {
   }
 
   @Transactional
-  public void inviteUser(UUID organisationId, OrganisationInvitationRequest request, User owner) {
-    Organisation organisation = getOrganisation(organisationId, owner);
+  public void inviteUser(OrganisationInvitationRequest request, User owner) {
+    Organisation organisation = getOwnedOrganisation(owner);
     if (!organisation.isActive()) {
       throw new InactiveResourceException("Cannot invite a user to an inactive organisation");
     }
@@ -172,15 +169,15 @@ public class OrganisationService {
   }
 
   @Transactional
-  public void cancelInvitation(UUID organisationId, UUID userId, User owner) {
-    Organisation organisation = getOrganisation(organisationId, owner);
+  public void cancelInvitation(UUID userId, User owner) {
+    Organisation organisation = getOwnedOrganisation(owner);
     User invitedUser =
         userRepository
             .findById(userId)
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
     if (invitedUser.getOrganisation() == null
-        || !organisationId.equals(invitedUser.getOrganisation().getId())
+        || !organisation.getId().equals(invitedUser.getOrganisation().getId())
         || invitedUser.getMembershipStatus() != MembershipStatus.PENDING) {
       throw new ResourceNotFoundException("Pending invitation not found");
     }
@@ -191,8 +188,8 @@ public class OrganisationService {
   }
 
   @Transactional
-  public List<PendingInvitationResponse> getPendingInvitations(UUID organisationId, User owner) {
-    Organisation organisation = getOrganisation(organisationId, owner);
+  public List<PendingInvitationResponse> getPendingInvitations(User owner) {
+    Organisation organisation = getOwnedOrganisation(owner);
     return userRepository
         .findByOrganisationAndMembershipStatus(organisation, MembershipStatus.PENDING)
         .stream()
@@ -200,54 +197,51 @@ public class OrganisationService {
         .collect(Collectors.toList());
   }
 
-  private Organisation findOrganisation(UUID id) {
-    return organisationRepository
-        .findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Organisation not found: " + id));
-  }
-
-  private void requireOwner(Organisation organisation, User user) {
-    if (user == null) {
+  private Organisation getOwnedOrganisation(User user) {
+    if (user == null || user.getId() == null) {
       throw new UnauthorizedException("Authenticated user is required");
     }
 
-    boolean ownsOrganisation =
-        user.getOrganisation() != null
-            && organisation.getId().equals(user.getOrganisation().getId())
-            && user.getRoles().stream().anyMatch(RoleName.OWNER::equals);
+    User authenticatedUser =
+        userRepository
+            .findById(user.getId())
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-    if (!ownsOrganisation) {
+    if (authenticatedUser.getOrganisation() == null
+        || authenticatedUser.getRoles().stream().noneMatch(RoleName.OWNER::equals)) {
       throw new InsufficientPermissionException(
           "Only the organisation owner can access the organisation");
     }
+    return authenticatedUser.getOrganisation();
   }
 
-  public User getUserFromOrganisationById(UUID organisationId, UUID userId) {
+  public User getUserFromOrganisationById(Organisation organisation, UUID userId) {
     User user =
         userRepository
             .findById(userId)
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-    if (user.getOrganisation() == null || !organisationId.equals(user.getOrganisation().getId())) {
+    if (user.getOrganisation() == null
+        || !organisation.getId().equals(user.getOrganisation().getId())) {
       throw new ResourceNotFoundException("User does not belong to this organisation");
     }
     return user;
   }
 
   @Transactional
-  public void addRoleToUser(UUID organisationId, UUID userId, RoleName role, User owner) {
-    User target = prepareRoleChange(organisationId, userId, role, owner);
+  public void addRoleToUser(UUID userId, RoleName role, User owner) {
+    User target = prepareRoleChange(userId, role, owner);
     userService.addRoleToUser(target, role);
   }
 
   @Transactional
-  public void removeRoleFromUser(UUID organisationId, UUID userId, RoleName role, User owner) {
-    User target = prepareRoleChange(organisationId, userId, role, owner);
+  public void removeRoleFromUser(UUID userId, RoleName role, User owner) {
+    User target = prepareRoleChange(userId, role, owner);
     userService.removeRoleFromUser(target, role);
   }
 
-  private User prepareRoleChange(UUID organisationId, UUID userId, RoleName role, User owner) {
-    Organisation organisation = getOrganisation(organisationId, owner);
+  private User prepareRoleChange(UUID userId, RoleName role, User owner) {
+    Organisation organisation = getOwnedOrganisation(owner);
     if (!organisation.isActive()) {
       throw new InactiveResourceException("Cannot change roles in an inactive organisation");
     }
@@ -255,16 +249,20 @@ public class OrganisationService {
       throw new ResourceConflictException("The OWNER role cannot be added or removed this way");
     }
 
-    User target = getUserFromOrganisationById(organisationId, userId);
+    User target = getUserFromOrganisationById(organisation, userId);
     if (target.getMembershipStatus() != MembershipStatus.MEMBER) {
       throw new ResourceConflictException("User has not accepted the invitation yet");
     }
     return target;
   }
 
-  public List<User> getOrganisationMembers(UUID organisationId) {
+  public List<User> getOrganisationMembers(User owner) {
+    Organisation organisation = getOwnedOrganisation(owner);
+    if (!organisation.isActive()) {
+      throw new InactiveResourceException("Cannot view members of an inactive organisation");
+    }
     return userRepository.findByOrganisationIdAndMembershipStatus(
-        organisationId, MembershipStatus.MEMBER);
+        organisation.getId(), MembershipStatus.MEMBER);
   }
 
   public void removeUserFromOrganisation(Organisation organisation, User user) {

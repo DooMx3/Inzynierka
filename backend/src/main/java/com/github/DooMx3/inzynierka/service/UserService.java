@@ -128,8 +128,8 @@ public class UserService {
   }
 
   @Transactional
-  public void acceptInvitation(UUID organisationId, User authenticatedUser) {
-    User user = requirePendingInvitation(authenticatedUser, organisationId);
+  public void acceptInvitation(User authenticatedUser) {
+    User user = requirePendingInvitation(authenticatedUser);
     if (!user.getOrganisation().isActive()) {
       throw new InactiveResourceException("The organisation is inactive");
     }
@@ -139,8 +139,8 @@ public class UserService {
   }
 
   @Transactional
-  public void rejectInvitation(UUID organisationId, User authenticatedUser) {
-    User user = requirePendingInvitation(authenticatedUser, organisationId);
+  public void rejectInvitation(User authenticatedUser) {
+    User user = requirePendingInvitation(authenticatedUser);
     user.setOrganisation(null);
     user.setMembershipStatus(MembershipStatus.NONE);
     userRepository.save(user);
@@ -155,11 +155,9 @@ public class UserService {
         .orElseThrow(() -> new ResourceNotFoundException("User not found"));
   }
 
-  private User requirePendingInvitation(User authenticatedUser, UUID organisationId) {
+  private User requirePendingInvitation(User authenticatedUser) {
     User user = loadAuthenticatedUser(authenticatedUser);
-    if (user.getMembershipStatus() != MembershipStatus.PENDING
-        || user.getOrganisation() == null
-        || !organisationId.equals(user.getOrganisation().getId())) {
+    if (user.getMembershipStatus() != MembershipStatus.PENDING || user.getOrganisation() == null) {
       throw new ResourceNotFoundException("Pending invitation not found");
     }
     return user;
