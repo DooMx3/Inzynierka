@@ -1,11 +1,6 @@
 package com.github.DooMx3.inzynierka.controller;
 
-import com.github.DooMx3.inzynierka.dto.user.ChangePasswordRequest;
-import com.github.DooMx3.inzynierka.dto.user.DeactivateUserRequest;
-import com.github.DooMx3.inzynierka.dto.user.ForgotPasswordRequest;
-import com.github.DooMx3.inzynierka.dto.user.ResetPasswordRequest;
-import com.github.DooMx3.inzynierka.dto.user.UserInfoResponse;
-import com.github.DooMx3.inzynierka.dto.user.UserInvitationResponse;
+import com.github.DooMx3.inzynierka.dto.user.*;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -63,6 +58,20 @@ public class UserController {
       @Parameter(hidden = true) @AuthenticationPrincipal User user) {
     service.changePassword(request, user.getEmail());
     return ResponseEntity.ok("Password changed successfully");
+  }
+
+  @Operation(summary = "Patch user", description = "Patches the  user's information.")
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "User patched"),
+    @ApiResponse(responseCode = "400", description = "Validation error", content = @Content),
+    @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content)
+  })
+  @PatchMapping("/patch")
+  public ResponseEntity<String> patchUser(
+      @RequestBody @Valid UserPatchRequest request,
+      @Parameter(hidden = true) @AuthenticationPrincipal User user) {
+    service.patchUser(request, user.getEmail());
+    return ResponseEntity.ok("User patched successfully");
   }
 
   @Operation(

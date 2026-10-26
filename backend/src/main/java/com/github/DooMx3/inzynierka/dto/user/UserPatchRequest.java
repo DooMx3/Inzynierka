@@ -1,3 +1,5 @@
 package com.github.DooMx3.inzynierka.dto.user;
 
-public record UserPatchRequest(String email, String phoneNumber) {}
+import jakarta.validation.constraints.Email;
+
+public record UserPatchRequest(@Email String email, String phoneNumber) {}
