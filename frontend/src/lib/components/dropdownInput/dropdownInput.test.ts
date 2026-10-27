@@ -47,7 +47,7 @@ describe('DropdownInput', () => {
 
         const menu = container.querySelector('.options-menu');
         expect(menu).toBeInTheDocument();
-        expect(menu).toHaveClass('bg-zinc-700');
+        expect(menu).toHaveClass('bg-[#f7f1ea]');
 
         // Check options inside the list
         const optionBtns = screen.getAllByRole('option');

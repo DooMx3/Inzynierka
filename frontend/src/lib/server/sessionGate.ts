@@ -11,27 +11,27 @@ const normalizePath = (pathname: string) => {
 
 export const isGuestPath = (pathname: string) => guestPaths.has(normalizePath(pathname));
 
-async function currentUser(fetch: typeof globalThis.fetch): Promise<Response | null> {
+const currentUser = async (fetch: typeof globalThis.fetch): Promise<Response | null> => {
     try {
         return await fetch('/api/user/info');
     } catch {
         return null;
     }
-}
+};
 
-export async function redirectIfSignedIn(fetch: typeof globalThis.fetch): Promise<void> {
+export const redirectIfSignedIn = async (fetch: typeof globalThis.fetch): Promise<void> => {
     const response = await currentUser(fetch);
     if (response?.ok) {
         redirect(303, '/');
     }
-}
+};
 
-export async function redirectIfSignedOut(fetch: typeof globalThis.fetch): Promise<void> {
+export const redirectIfSignedOut = async (fetch: typeof globalThis.fetch): Promise<void> => {
     const response = await currentUser(fetch);
     if (!response?.ok) {
         redirect(303, '/auth');
     }
-}
+};
 
 export const guestOnly: ServerLoad = ({ fetch }) => redirectIfSignedIn(fetch);
 

@@ -1,6 +1,7 @@
 export const getUserInfo = async () => {
     const info = await fetch("/api/user/info", {
         method: "GET",
+        credentials: "include",
         headers: {
             "Content-Type": "application/json",
         },

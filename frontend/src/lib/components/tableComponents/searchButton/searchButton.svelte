@@ -9,6 +9,6 @@
     onClick={() => onClickFunction()}
     svg={searchIcon}
     text={text}
-    class="bg-blue-500 text-white fill-white"
+    class="bg-[#6b4f3a] text-white fill-white"
     isFolded={false}
 />

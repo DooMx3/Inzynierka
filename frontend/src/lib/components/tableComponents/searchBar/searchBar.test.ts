@@ -29,7 +29,7 @@ describe('SearchBar', () => {
 
     it('places search icon before the input field', () => {
         const { container } = render(SearchBar);
-        const inputWrapper = container.querySelector('.bg-zinc-800');
+        const inputWrapper = container.querySelector('.bg-white');
         expect(inputWrapper).toBeInTheDocument();
 
         const firstChild = inputWrapper?.firstElementChild;
@@ -52,10 +52,10 @@ describe('SearchBar', () => {
         const root = container.firstElementChild;
         expect(root).toHaveClass('flex', 'items-center', 'flex-col', 'gap-2');
 
-        const inputWrapper = container.querySelector('.bg-zinc-800');
-        expect(inputWrapper).toHaveClass('rounded-lg', 'bg-zinc-800', 'h-10');
+        const inputWrapper = container.querySelector('.bg-white');
+        expect(inputWrapper).toHaveClass('rounded-lg', 'bg-white', 'h-10', 'border');
 
         const input = container.querySelector('input');
-        expect(input).toHaveClass('bg-transparent', 'text-white');
+        expect(input).toHaveClass('bg-transparent', 'text-zinc-800');
     });
 });

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/svelte';
 import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
 import { flushSync } from 'svelte';
 import ProfileForm from './profileForm.svelte';
@@ -24,17 +24,11 @@ const jsonResponse = (body: unknown, status = 200) =>
 
 describe('Profile form', () => {
     const originalFetch = globalThis.fetch;
-    const originalAlert = globalThis.alert;
     const originalLocation = window.location;
     let calls: { url: string; init?: RequestInit }[];
-    let alerts: string[];
 
     beforeEach(() => {
         calls = [];
-        alerts = [];
-        globalThis.alert = ((message?: string) => {
-            alerts.push(String(message ?? ''));
-        }) as typeof alert;
         Object.defineProperty(window, 'location', {
             configurable: true,
             writable: true,
@@ -46,7 +40,7 @@ describe('Profile form', () => {
             if (url === '/api/user/info') {
                 return jsonResponse(userInfo);
             }
-            if (url === '/api/user' && init?.method === 'PUT') {
+            if (url === '/api/user/patch' && init?.method === 'PATCH') {
                 return new Response('', { status: 200 });
             }
             if (url === '/api/user/change-password') {
@@ -64,7 +58,6 @@ describe('Profile form', () => {
 
     afterEach(() => {
         globalThis.fetch = originalFetch;
-        globalThis.alert = originalAlert;
         Object.defineProperty(window, 'location', {
             configurable: true,
             writable: true,
@@ -79,126 +72,106 @@ describe('Profile form', () => {
         });
     };
 
-    it('shows the profile fields with an edit control and no page-level save bar', async () => {
+    it('shows the account fields and keeps the name read-only', async () => {
         await shown();
 
         expect(screen.getByText('Doe')).toBeInTheDocument();
         expect(screen.getByText('jane.doe@example.com')).toBeInTheDocument();
         expect(screen.getByText('987654332')).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: 'Edit First name' })).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Edit First name' })).not.toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Edit E-mail' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Edit Phone' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Change password' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Delete account' })).toBeInTheDocument();
-        expect(screen.queryByRole('button', { name: 'Save' })).not.toBeInTheDocument();
-        expect(screen.queryByRole('button', { name: 'Cancel' })).not.toBeInTheDocument();
     });
 
-    it('turns a field into an input from the label or the edit button', async () => {
+    it('patches the email from a popup and asks to sign in again', async () => {
         await shown();
-
-        await fireEvent.click(screen.getByRole('button', { name: 'First name' }));
-        expect(screen.getByRole('textbox', { name: 'First name' })).toHaveValue('Jane');
-
-        await fireEvent.click(screen.getByRole('button', { name: 'Cancel First name' }));
-        expect(screen.queryByRole('textbox', { name: 'First name' })).not.toBeInTheDocument();
-
         await fireEvent.click(screen.getByRole('button', { name: 'Edit E-mail' }));
-        expect(screen.getByRole('textbox', { name: 'E-mail' })).toHaveValue('jane.doe@example.com');
-    });
 
-    it('saves the edited field on enter and leaves the other fields unchanged', async () => {
-        await shown();
-
-        await fireEvent.click(screen.getByRole('button', { name: 'Edit First name' }));
-        const input = screen.getByRole('textbox', { name: 'First name' });
-        await fireEvent.input(input, { target: { value: 'Janet' } });
-        await fireEvent.keyDown(input, { key: 'Enter' });
+        const dialog = screen.getByRole('dialog');
+        expect(dialog.querySelector('.glass')).toBeInTheDocument();
+        await fireEvent.input(within(dialog).getByRole('textbox', { name: 'E-mail' }), {
+            target: { value: 'jane.new@example.com' },
+        });
+        await fireEvent.click(within(dialog).getByRole('button', { name: 'Confirm' }));
 
         await waitFor(() => {
-            expect(screen.getByText('Janet')).toBeInTheDocument();
+            expect(screen.getByText(/Sign in again with the new address/i)).toBeInTheDocument();
         });
 
-        const update = calls.find((call) => call.url === '/api/user' && call.init?.method === 'PUT');
-        expect(update?.init?.body).toBe(
-            JSON.stringify({
-                firstname: 'Janet',
-                lastname: 'Doe',
-                email: 'jane.doe@example.com',
-                phoneNumber: '987654332',
-            }),
-        );
-        expect(screen.queryByRole('textbox', { name: 'First name' })).not.toBeInTheDocument();
-    });
+        const update = calls.find((call) => call.url === '/api/user/patch');
+        expect(update?.init?.method).toBe('PATCH');
+        expect(update?.init?.body).toBe(JSON.stringify({ email: 'jane.new@example.com' }));
 
-    it('saves from the icon button and clears a phone number', async () => {
-        await shown();
-
-        await fireEvent.click(screen.getByRole('button', { name: 'Edit Phone' }));
-        await fireEvent.input(screen.getByRole('textbox', { name: 'Phone' }), {
-            target: { value: '   ' },
-        });
-        await fireEvent.click(screen.getByRole('button', { name: 'Save Phone' }));
-
+        await fireEvent.click(screen.getByRole('button', { name: 'Sign in again' }));
         await waitFor(() => {
-            expect(screen.getByText('Not set')).toBeInTheDocument();
+            expect(window.location.href).toBe('/auth');
         });
-
-        const update = calls.find((call) => call.url === '/api/user' && call.init?.method === 'PUT');
-        expect(update?.init?.body).toBe(
-            JSON.stringify({
-                firstname: 'Jane',
-                lastname: 'Doe',
-                email: 'jane.doe@example.com',
-                phoneNumber: null,
-            }),
-        );
+        expect(calls.some((call) => call.url === '/api/auth/logout')).toBe(true);
     });
 
-    it('cancels an edit without calling the server', async () => {
+    it('keeps an invalid email in the popup', async () => {
         await shown();
-
-        await fireEvent.click(screen.getByRole('button', { name: 'Edit Last name' }));
-        await fireEvent.input(screen.getByRole('textbox', { name: 'Last name' }), {
-            target: { value: 'Smith' },
-        });
-        await fireEvent.click(screen.getByRole('button', { name: 'Cancel Last name' }));
-
-        expect(screen.getByText('Doe')).toBeInTheDocument();
-        expect(calls.some((call) => call.init?.method === 'PUT')).toBe(false);
-    });
-
-    it('keeps an invalid email in the editor', async () => {
-        await shown();
-
         await fireEvent.click(screen.getByRole('button', { name: 'Edit E-mail' }));
-        await fireEvent.input(screen.getByRole('textbox', { name: 'E-mail' }), {
+        const dialog = screen.getByRole('dialog');
+        await fireEvent.input(within(dialog).getByRole('textbox', { name: 'E-mail' }), {
             target: { value: 'not-an-email' },
         });
-        await fireEvent.click(screen.getByRole('button', { name: 'Save E-mail' }));
+        await fireEvent.click(within(dialog).getByRole('button', { name: 'Confirm' }));
         flushSync();
 
-        expect(alerts[0]).toContain('Enter a valid email.');
-        expect(screen.getByRole('textbox', { name: 'E-mail' })).toBeInTheDocument();
-        expect(calls.some((call) => call.init?.method === 'PUT')).toBe(false);
+        expect(within(dialog).getByRole('alert')).toHaveTextContent('Enter a valid email.');
+        expect(calls.some((call) => call.init?.method === 'PATCH')).toBe(false);
     });
 
-    it('posts the current and new password', async () => {
+    it('patches the phone number and confirms without signing out', async () => {
+        await shown();
+        await fireEvent.click(screen.getByRole('button', { name: 'Edit Phone' }));
+        const dialog = screen.getByRole('dialog');
+        await fireEvent.input(within(dialog).getByRole('textbox', { name: 'Phone' }), {
+            target: { value: '123456789' },
+        });
+        await fireEvent.click(within(dialog).getByRole('button', { name: 'Confirm' }));
+
+        await waitFor(() => {
+            expect(screen.getByText('Your phone number has been updated.')).toBeInTheDocument();
+        });
+
+        const update = calls.find((call) => call.url === '/api/user/patch');
+        expect(update?.init?.body).toBe(JSON.stringify({ phoneNumber: '123456789' }));
+        expect(calls.filter((call) => call.url === '/api/user/info').length).toBeGreaterThan(1);
+        expect(calls.some((call) => call.url === '/api/auth/logout')).toBe(false);
+    });
+
+    it('closes an unchanged phone popup without calling the server', async () => {
+        await shown();
+        await fireEvent.click(screen.getByRole('button', { name: 'Edit Phone' }));
+        await fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        expect(calls.some((call) => call.init?.method === 'PATCH')).toBe(false);
+    });
+
+    it('posts the current and new password from the popup', async () => {
         await shown();
         await fireEvent.click(screen.getByRole('button', { name: 'Change password' }));
+        const dialog = screen.getByRole('dialog');
 
-        await fireEvent.input(screen.getByLabelText('Current password'), {
+        await fireEvent.input(within(dialog).getByLabelText('Current password'), {
             target: { value: 'old-password' },
         });
-        await fireEvent.input(screen.getByLabelText('New password'), {
+        await fireEvent.input(within(dialog).getByLabelText('New password'), {
             target: { value: readyPassword },
         });
-        await fireEvent.input(screen.getByLabelText('Confirm password'), {
+        await fireEvent.input(within(dialog).getByLabelText('Confirm password'), {
             target: { value: readyPassword },
         });
         flushSync();
-        await fireEvent.click(screen.getByRole('button', { name: 'Change password' }));
+        await fireEvent.click(within(dialog).getByRole('button', { name: 'Change password' }));
 
         await waitFor(() => {
-            expect(screen.getByText('Password changed successfully.')).toBeInTheDocument();
+            expect(within(dialog).getByText('Password changed successfully.')).toBeInTheDocument();
         });
 
         const update = calls.find((call) => call.url === '/api/user/change-password');
@@ -209,115 +182,24 @@ describe('Profile form', () => {
                 newPassword: readyPassword,
             }),
         );
+
+        await fireEvent.click(within(dialog).getByRole('button', { name: 'Sign in again' }));
+        await waitFor(() => {
+            expect(window.location.href).toBe('/auth');
+        });
     });
 
-    it('returns to the profile fields from the password and delete forms', async () => {
+    it('returns to the profile fields from the password and delete popups', async () => {
         await shown();
         await fireEvent.click(screen.getByRole('button', { name: 'Change password' }));
-        await fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+        await fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cancel' }));
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
         expect(screen.getByText('Jane')).toBeInTheDocument();
 
         await fireEvent.click(screen.getByRole('button', { name: 'Delete account' }));
         expect(screen.getByText('Delete your account.')).toBeInTheDocument();
-        await fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
-        expect(screen.getByText('Jane')).toBeInTheDocument();
-    });
-
-    it('returns to the profile fields after the password has changed', async () => {
-        await shown();
-        await fireEvent.click(screen.getByRole('button', { name: 'Change password' }));
-        await fireEvent.input(screen.getByLabelText('Current password'), {
-            target: { value: 'old-password' },
-        });
-        await fireEvent.input(screen.getByLabelText('New password'), {
-            target: { value: readyPassword },
-        });
-        await fireEvent.input(screen.getByLabelText('Confirm password'), {
-            target: { value: readyPassword },
-        });
-        flushSync();
-        await fireEvent.click(screen.getByRole('button', { name: 'Change password' }));
-
-        await waitFor(() => {
-            expect(screen.getByText('Password changed successfully.')).toBeInTheDocument();
-        });
-        await fireEvent.click(screen.getByRole('button', { name: 'Back to profile' }));
-        expect(screen.getByText('Jane')).toBeInTheDocument();
-    });
-
-    it('closes an unchanged field without calling the server', async () => {
-        await shown();
-        const infoCalls = () => calls.filter((call) => call.url === '/api/user/info').length;
-
-        await fireEvent.click(screen.getByRole('button', { name: 'Edit First name' }));
-        const input = screen.getByRole('textbox', { name: 'First name' });
-        await fireEvent.keyDown(input, { key: 'Enter' });
-
-        expect(screen.queryByRole('textbox', { name: 'First name' })).not.toBeInTheDocument();
-        expect(calls.some((call) => call.init?.method === 'PUT')).toBe(false);
-        expect(infoCalls()).toBe(1);
-    });
-
-    it('reloads the session after a saved change', async () => {
-        await shown();
-
-        await fireEvent.click(screen.getByRole('button', { name: 'Edit Last name' }));
-        await fireEvent.input(screen.getByRole('textbox', { name: 'Last name' }), {
-            target: { value: '   ' },
-        });
-        await fireEvent.click(screen.getByRole('button', { name: 'Save Last name' }));
-
-        await waitFor(() => {
-            expect(screen.getByText('Not set')).toBeInTheDocument();
-        });
-
-        const update = calls.find((call) => call.url === '/api/user' && call.init?.method === 'PUT');
-        expect(update?.init?.body).toBe(
-            JSON.stringify({
-                firstname: 'Jane',
-                lastname: null,
-                email: 'jane.doe@example.com',
-                phoneNumber: '987654332',
-            }),
-        );
-        expect(calls.filter((call) => call.url === '/api/user/info').length).toBeGreaterThan(1);
-    });
-
-    it('keeps a failed save in the editor', async () => {
-        globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
-            const url = String(input);
-            calls.push({ url, init });
-            if (url === '/api/user/info') {
-                return jsonResponse(userInfo);
-            }
-            return new Response('missing', { status: 404 });
-        }) as typeof fetch;
-
-        await shown();
-        await fireEvent.click(screen.getByRole('button', { name: 'Edit First name' }));
-        await fireEvent.input(screen.getByRole('textbox', { name: 'First name' }), {
-            target: { value: 'Janet' },
-        });
-        await fireEvent.click(screen.getByRole('button', { name: 'Save First name' }));
-
-        await waitFor(() => {
-            expect(alerts[0]).toBe('missing');
-        });
-        expect(screen.getByRole('textbox', { name: 'First name' })).toHaveValue('Janet');
-    });
-
-    it('refuses an empty first name', async () => {
-        await shown();
-        await fireEvent.click(screen.getByRole('button', { name: 'Edit First name' }));
-        await fireEvent.input(screen.getByRole('textbox', { name: 'First name' }), {
-            target: { value: '   ' },
-        });
-        await fireEvent.click(screen.getByRole('button', { name: 'Save First name' }));
-        flushSync();
-
-        expect(alerts[0]).toBe('Enter your first name.');
-        expect(screen.getByRole('textbox', { name: 'First name' })).toBeInTheDocument();
-        expect(calls.some((call) => call.init?.method === 'PUT')).toBe(false);
+        await fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cancel' }));
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
     it('shows an error when the profile cannot be loaded', async () => {
@@ -345,10 +227,11 @@ describe('Profile form', () => {
     it('deactivates the account and leaves for the sign-in page', async () => {
         await shown();
         await fireEvent.click(screen.getByRole('button', { name: 'Delete account' }));
-        await fireEvent.input(screen.getByLabelText('Password'), {
+        const dialog = screen.getByRole('dialog');
+        await fireEvent.input(within(dialog).getByLabelText('Password'), {
             target: { value: 'old-password' },
         });
-        await fireEvent.click(screen.getByRole('button', { name: 'Delete account' }));
+        await fireEvent.click(within(dialog).getByRole('button', { name: 'Delete account' }));
 
         await waitFor(() => {
             expect(window.location.href).toBe('/auth');

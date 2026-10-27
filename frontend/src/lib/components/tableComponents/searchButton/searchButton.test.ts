@@ -37,10 +37,10 @@ describe('SearchButton', () => {
         expect(clicked).toBe(true);
     });
 
-    it('has blue background class', () => {
+    it('has the app brown background', () => {
         const { container } = render(SearchButton);
         const btn = container.querySelector('button');
-        expect(btn).toHaveClass('bg-blue-500');
+        expect(btn).toHaveClass('bg-[#6b4f3a]');
     });
 
     it('has white text and fill classes', () => {

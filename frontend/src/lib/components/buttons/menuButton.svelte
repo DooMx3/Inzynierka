@@ -14,6 +14,6 @@
     {svg}
     {text}
     isMenuButton={true}
-    class="bg-blue-500 text-white font-semibold fill-white justify-start"
+    class="bg-[#6b4f3a] text-white font-semibold fill-white justify-start"
     {isFolded}
 />

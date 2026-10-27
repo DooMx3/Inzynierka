@@ -88,14 +88,14 @@
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         class={[
-            "flex items-center gap-2.5 h-10 px-3.5 w-36 rounded-xl bg-zinc-700 text-zinc-400 border border-zinc-600/40 hover:border-zinc-500 transition-colors duration-150 text-left",
+            "flex items-center gap-2.5 h-10 px-3.5 w-36 rounded-xl bg-white text-zinc-700 border border-[#c4b6a6] hover:border-[#8c735c] transition-colors duration-150 text-left",
             disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
-            isOpen ? "border-zinc-500 ring-1 ring-zinc-500/50" : "",
+            isOpen ? "border-[#6b4f3a] ring-1 ring-[#6b4f3a]/30" : "",
         ]}
     >
         {#if iconToRender}
             <span
-                class="additional-icon shrink-0 flex items-center justify-center text-zinc-400"
+                class="additional-icon shrink-0 flex items-center justify-center text-[#6b4f3a]"
                 role="img"
                 aria-hidden="true"
             >
@@ -106,7 +106,7 @@
         <span
             class={[
                 "dropdown-label flex-1 text-sm font-medium truncate",
-                selectedLabel ? "text-zinc-200" : "text-zinc-400",
+                selectedLabel ? "text-zinc-800" : "text-zinc-500",
             ]}
         >
             {selectedLabel || placeholder}
@@ -114,7 +114,7 @@
 
         <span
             class={[
-                "dropdown-arrow shrink-0 flex items-center justify-center text-zinc-400 transition-transform duration-200",
+                "dropdown-arrow shrink-0 flex items-center justify-center text-[#6b4f3a] transition-transform duration-200",
                 isOpen ? "rotate-180" : "",
             ]}
             role="img"
@@ -126,7 +126,7 @@
 
     {#if isOpen}
         <div
-            class="options-menu absolute left-0 top-full mt-1.5 w-full min-w-full z-50 rounded-xl bg-zinc-700 border border-zinc-600/60 shadow-2xl p-1 max-h-60 overflow-y-auto"
+            class="options-menu absolute left-0 top-full mt-1.5 w-full min-w-full z-50 rounded-xl bg-[#f7f1ea] border border-[#d9cbbd] shadow-lg p-1 max-h-60 overflow-y-auto"
             role="listbox"
             tabindex="-1"
         >
@@ -139,8 +139,8 @@
                     class={[
                         "w-full text-left px-3 py-2 text-sm rounded-lg cursor-pointer transition-colors duration-100 flex items-center justify-between",
                         opt.value === value
-                            ? "bg-zinc-600/70 text-white font-medium"
-                            : "text-zinc-300 hover:bg-zinc-600/50 hover:text-white",
+                            ? "bg-[#e4d8cb] text-zinc-900 font-medium"
+                            : "text-zinc-700 hover:bg-[#efe6dc] hover:text-zinc-900",
                     ]}
                 >
                     <span class="truncate">{opt.label}</span>

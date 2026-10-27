@@ -6,9 +6,12 @@
         text = "",
         disabled = false,
     } = $props();
+
+    const label = $derived(String(text).replace(/<[^>]*>/g, ""));
 </script>
 
 <button
+    aria-label={label || undefined}
     class={[
         className,
         "rounded-lg p-4 flex flex-col gap-3 items-center justify-center shadow-md overflow-hidden bg-[#f7f1ea]",

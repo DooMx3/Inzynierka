@@ -50,12 +50,12 @@
     };
 </script>
 
-<form class="flex w-full flex-col gap-4" novalidate onsubmit={submit}>
+<form class="flex w-full flex-col gap-4 text-zinc-800" novalidate onsubmit={submit}>
     <h2 class="text-xl font-semibold">Delete your account.</h2>
     <p class="text-sm text-zinc-700">
-        This deactivates the account. Enter your password to confirm.
+        This deactivates the account. If you own an organisation, delete that organisation first. Enter your password to confirm.
     </p>
-    <hr class="border-[#d9cbbd]" />
+    <hr class="border-[#e4d8cb]" />
     <InputField
         label="Password"
         type="password"
@@ -65,7 +65,7 @@
         svg={passwordIcon}
         invalid={showErrors && passwordMissing}
     />
-    <hr class="border-[#d9cbbd]" />
+    <hr class="border-[#e4d8cb]" />
     <Button
         type="submit"
         svg={closeIcon}
@@ -76,7 +76,7 @@
     />
     <button
         type="button"
-        class="h-12 w-full cursor-pointer rounded-lg border border-[#d9cbbd] text-zinc-700"
+        class="h-12 w-full cursor-pointer rounded-lg border border-[#c4b6a6] text-zinc-800 hover:bg-[#efe6dc]"
         onclick={onCancel}
     >
         Cancel

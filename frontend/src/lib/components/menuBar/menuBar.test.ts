@@ -2,6 +2,15 @@ import { render, screen, fireEvent } from '@testing-library/svelte';
 import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
 import MenuBar from './menuBar.svelte';
 import { menu } from '$lib/stores/menu.svelte';
+import { setUser } from '$lib/stores/session.svelte';
+
+const owner = {
+    id: '1',
+    firstname: 'Anna',
+    lastname: 'Nowak',
+    email: 'anna@example.com',
+    roles: ['OWNER'],
+};
 
 const menuItems = [
     { name: 'Field work', path: '/agriculture' },
@@ -29,6 +38,7 @@ describe('Menu bar', () => {
 
     beforeEach(() => {
         menu.folded = true;
+        setUser(owner);
     });
 
     afterEach(() => {
@@ -38,6 +48,7 @@ describe('Menu bar', () => {
             value: originalLocation,
         });
         menu.folded = true;
+        setUser(null);
     });
 
     it('Check layout', () => {
@@ -159,6 +170,38 @@ describe('Menu bar', () => {
 
         expect(btn.firstElementChild).toBe(icon);
         expect(btn.children[1]).toHaveTextContent('Field work');
+    });
+
+    it('shows field work to a vineyard worker and hides owner tools', () => {
+        setUser({ ...owner, roles: ['WORKER'] });
+        render(MenuBar);
+
+        expect(screen.getByRole('button', { name: 'Field work' })).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Vinery' })).not.toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Packed products' })).not.toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Raports' })).not.toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Workers' })).not.toBeInTheDocument();
+    });
+
+    it('shows winery tools to an oenologist and hides owner tools', () => {
+        setUser({ ...owner, roles: ['OENOLOGIST'] });
+        render(MenuBar);
+
+        expect(screen.getByRole('button', { name: 'Field work' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Vinery' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Packed products' })).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Raports' })).not.toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Workers' })).not.toBeInTheDocument();
+    });
+
+    it('hides operational items when the account has no role', () => {
+        setUser({ ...owner, roles: [] });
+        const { container } = render(MenuBar);
+
+        expect(getSidebar(container).children[1].children).toHaveLength(0);
+        for (const item of menuItems) {
+            expect(screen.queryByRole('button', { name: item.name })).not.toBeInTheDocument();
+        }
     });
 
     it.each(menuItems)('Check $name navigates to $path', async ({ name, path }) => {

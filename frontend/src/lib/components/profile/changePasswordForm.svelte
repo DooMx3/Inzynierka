@@ -12,8 +12,10 @@
 
     let {
         onCancel = () => {},
+        onFinished = () => {},
     }: {
         onCancel?: () => void;
+        onFinished?: () => void;
     } = $props();
 
     let oldPassword = $state("");
@@ -56,17 +58,17 @@
     };
 </script>
 
-<form class="flex w-full flex-col gap-4" novalidate onsubmit={submit}>
+<form class="flex w-full flex-col gap-4 text-zinc-800" novalidate onsubmit={submit}>
     <h2 class="text-xl font-semibold">Change your password.</h2>
-    <hr class="border-[#d9cbbd]" />
+    <hr class="border-[#e4d8cb]" />
     {#if doneMessage}
         <p class="text-sm text-zinc-700">{doneMessage}</p>
         <button
             type="button"
-            class="h-12 w-full cursor-pointer rounded-lg border border-[#d9cbbd] text-zinc-700"
-            onclick={onCancel}
+            class="h-12 w-full cursor-pointer rounded-lg border border-[#c4b6a6] text-zinc-800 hover:bg-[#efe6dc]"
+            onclick={onFinished}
         >
-            Back to profile
+            Sign in again
         </button>
     {:else}
         <InputField
@@ -98,7 +100,7 @@
             invalid={showErrors && fieldErrors.confirmPassword}
         />
         <PasswordConditionsIndicator {password} bind:valid={passwordValid} />
-        <hr class="border-[#d9cbbd]" />
+        <hr class="border-[#e4d8cb]" />
         <Button
             type="submit"
             svg={passwordIcon}
@@ -109,7 +111,7 @@
         />
         <button
             type="button"
-            class="h-12 w-full cursor-pointer rounded-lg border border-[#d9cbbd] text-zinc-700"
+            class="h-12 w-full cursor-pointer rounded-lg border border-[#c4b6a6] text-zinc-800 hover:bg-[#efe6dc]"
             onclick={onCancel}
         >
             Cancel

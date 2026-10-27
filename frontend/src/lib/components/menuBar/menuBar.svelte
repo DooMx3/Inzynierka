@@ -8,6 +8,7 @@
     import openIcon from "../../assets/open_menu.svg?raw";
 
     import { menu, toggleMenu } from "$lib/stores/menu.svelte";
+    import { session } from "$lib/stores/session.svelte";
 
     const goTo = (path: string) => {
         window.location.href = path;
@@ -17,6 +18,7 @@
         name: string;
         icon: string;
         goTo: string;
+        roles: string[];
     };
 
     const buttons: Button[] = [
@@ -24,33 +26,46 @@
             name: "Field work",
             icon: agriIcon,
             goTo: "/agriculture",
+            roles: ["WORKER", "OENOLOGIST", "OWNER"],
         },
         {
             name: "Vinery",
             icon: vineryIcon,
             goTo: "/vinery",
+            roles: ["OENOLOGIST", "OWNER"],
         },
         {
             name: "Packed products",
             icon: packedIcon,
             goTo: "/packed-products",
+            roles: ["OENOLOGIST", "OWNER"],
         },
         {
             name: "Raports",
             icon: raportIcon,
             goTo: "/raports",
+            roles: ["OWNER"],
         },
         {
             name: "Workers",
             icon: workersIcon,
             goTo: "/workers",
+            roles: ["OWNER"],
         },
     ];
+
+    const visibleButtons = $derived(
+        buttons.filter((button) =>
+            button.roles.some((role) => session.user?.roles.includes(role)),
+        ),
+    );
 </script>
 
 <span
-    class="absolute top-0 left-0 flex flex-col gap-2 w-72 h-full p-2 bg-[#f7f1ea] shadow-lg transition-all duration-300 ease-in-out"
-    class:!w-16={menu.folded}
+    class={[
+        "absolute top-0 left-0 flex flex-col gap-2 w-72 h-full p-2 bg-[#f7f1ea] shadow-lg transition-all duration-300 ease-in-out",
+        menu.folded && "!w-16",
+    ]}
 >
     <div class="flex w-full items-center">
         <span class="min-w-0 flex-1"></span>
@@ -66,7 +81,7 @@
         ></span>
     </div>
     <span class="flex flex-col gap-2 justify-center items-stretch flex-1">
-        {#each buttons as button (button.goTo)}
+        {#each visibleButtons as button (button.goTo)}
             <MenuButton
                 text={button.name}
                 svg={button.icon}

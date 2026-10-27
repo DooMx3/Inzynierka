@@ -32,5 +32,5 @@
     {cancelText}
     class={className}
 >
-    <span class="text-zinc-200 text-lg leading-relaxed">{text}</span>
+    <span class="text-lg leading-relaxed text-zinc-800">{text}</span>
 </FormWindow>

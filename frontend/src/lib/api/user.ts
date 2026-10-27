@@ -4,14 +4,12 @@ const jsonHeaders = {
     'Content-Type': 'application/json',
 };
 
-export type UserUpdate = {
-    firstname: string;
-    lastname: string | null;
-    email: string;
-    phoneNumber: string | null;
+export type UserPatch = {
+    email?: string;
+    phoneNumber?: string;
 };
 
-async function readMessage(response: Response, fallback: string): Promise<string> {
+const readMessage = async (response: Response, fallback: string): Promise<string> => {
     const text = (await response.text()).trim();
     if (!text) {
         return fallback;
@@ -27,11 +25,11 @@ async function readMessage(response: Response, fallback: string): Promise<string
     }
 
     return text;
-}
+};
 
-export async function updateUser(profile: UserUpdate): Promise<void> {
-    const response = await fetch('/api/user', {
-        method: 'PUT',
+export const updateUser = async (profile: UserPatch): Promise<void> => {
+    const response = await fetch('/api/user/patch', {
+        method: 'PATCH',
         credentials: 'include',
         headers: jsonHeaders,
         body: JSON.stringify(profile),
@@ -40,9 +38,9 @@ export async function updateUser(profile: UserUpdate): Promise<void> {
     if (!response.ok) {
         throw await toApiError(response);
     }
-}
+};
 
-export async function changePassword(oldPassword: string, newPassword: string): Promise<string> {
+export const changePassword = async (oldPassword: string, newPassword: string): Promise<string> => {
     const response = await fetch('/api/user/change-password', {
         method: 'POST',
         credentials: 'include',
@@ -55,9 +53,9 @@ export async function changePassword(oldPassword: string, newPassword: string): 
     }
 
     return readMessage(response, 'Password changed successfully.');
-}
+};
 
-export async function deactivateAccount(password: string): Promise<string> {
+export const deactivateAccount = async (password: string): Promise<string> => {
     const response = await fetch('/api/user/deactivate', {
         method: 'POST',
         credentials: 'include',
@@ -70,4 +68,4 @@ export async function deactivateAccount(password: string): Promise<string> {
     }
 
     return readMessage(response, 'Account deactivated.');
-}
+};

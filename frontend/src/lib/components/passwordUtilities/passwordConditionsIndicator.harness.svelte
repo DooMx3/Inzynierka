@@ -4,9 +4,7 @@
     let { password }: { password: string } = $props();
     let valid = $state(false);
 
-    export function isPasswordValid() {
-        return valid;
-    }
+    export const isPasswordValid = () => valid;
 </script>
 
 <PasswordConditionsIndicator {password} bind:valid />
