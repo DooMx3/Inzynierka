@@ -76,10 +76,9 @@ jobs:
           chmod +x .github/scripts/bump-version.sh
 
           if [[ "${{ github.ref_type }}" == "tag" ]]; then
-            # Force the pushed tag to define x.y (z = 0)
+            # Only resolve the version here — write VERSION after switching to main
             tag="${GITHUB_REF_NAME}"
             if [[ "$tag" =~ ^v?([0-9]+)\.([0-9]+)(\.([0-9]+))?$ ]]; then
-              echo "${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.0" > VERSION
               version="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.0"
             else
               echo "Tag '$tag' is not a version tag (expected vX.Y or vX.Y.Z)" >&2
@@ -114,7 +113,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           # Tag may point at an old commit; update VERSION on main tip
           git fetch origin main
-          git checkout -B main origin/main
+          git checkout -B main --force origin/main
           echo "$version" > VERSION
           git add VERSION
           if git diff --staged --quiet; then
