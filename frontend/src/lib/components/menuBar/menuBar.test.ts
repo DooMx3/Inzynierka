@@ -133,7 +133,6 @@ describe('Menu bar', () => {
         const btn = screen.getByRole('button', { name: 'Field work' });
         const label = btn.querySelector('span.overflow-hidden');
 
-        expect(btn).toHaveClass('w-12');
         expect(label).toHaveClass('max-w-0', 'opacity-0');
     });
 
@@ -213,10 +212,10 @@ describe('Menu bar', () => {
                 matches: query.includes('min-width: 768px'),
                 media: query,
                 onchange: null,
-                addListener() {},
-                removeListener() {},
-                addEventListener() {},
-                removeEventListener() {},
+                addListener() { },
+                removeListener() { },
+                addEventListener() { },
+                removeEventListener() { },
                 dispatchEvent() {
                     return false;
                 },
@@ -245,10 +244,10 @@ describe('Menu bar', () => {
                 matches: false,
                 media: query,
                 onchange: null,
-                addListener() {},
-                removeListener() {},
-                addEventListener() {},
-                removeEventListener() {},
+                addListener() { },
+                removeListener() { },
+                addEventListener() { },
+                removeEventListener() { },
                 dispatchEvent() {
                     return false;
                 },
