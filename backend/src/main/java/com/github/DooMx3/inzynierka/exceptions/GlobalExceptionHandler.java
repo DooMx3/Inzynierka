@@ -63,8 +63,9 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(NoResourceFoundException.class)
   public ResponseEntity<Map<String, String>> handlePageOrResourceNotFound(
-          NoResourceFoundException ex) {
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Resource not found: " + ex.getResourcePath()));
+      NoResourceFoundException ex) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(Map.of("error", "Resource not found: " + ex.getResourcePath()));
   }
 
   @ExceptionHandler({
