@@ -265,6 +265,24 @@ public class OrganisationService {
         organisation.getId(), MembershipStatus.MEMBER);
   }
 
+  @Transactional
+  public void removeUserFromOrganisation(UUID userId, User owner) {
+    Organisation organisation = getOwnedOrganisation(owner);
+    if (!organisation.isActive()) {
+      throw new InactiveResourceException("Cannot remove a user from an inactive organisation");
+    }
+
+    User user = getUserFromOrganisationById(organisation, userId);
+    if (user.getMembershipStatus() != MembershipStatus.MEMBER) {
+      throw new ResourceConflictException("User has not accepted the invitation yet");
+    }
+    if (user.getRoles().contains(RoleName.OWNER)) {
+      throw new ResourceConflictException("The organisation owner cannot be removed");
+    }
+
+    removeUserFromOrganisation(organisation, user);
+  }
+
   public void removeUserFromOrganisation(Organisation organisation, User user) {
     if (user.getOrganisation() == null
         || !organisation.getId().equals(user.getOrganisation().getId())) {

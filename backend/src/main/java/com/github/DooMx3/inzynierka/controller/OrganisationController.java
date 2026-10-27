@@ -208,6 +208,36 @@ public class OrganisationController {
   }
 
   @Operation(
+      summary = "Remove user from organisation",
+      description =
+          "Removes a member from the authenticated owner's organisation. Requires the OWNER authority for this organisation.")
+  @ApiResponses({
+    @ApiResponse(responseCode = "204", description = "User removed", content = @Content),
+    @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content),
+    @ApiResponse(
+        responseCode = "403",
+        description = "Access denied; organisation OWNER authority required",
+        content = @Content),
+    @ApiResponse(
+        responseCode = "404",
+        description =
+            "User not found or user does not belong to the authenticated owner's organisation",
+        content = @Content),
+    @ApiResponse(
+        responseCode = "409",
+        description = "Inactive organisation or user has not accepted the invitation",
+        content = @Content)
+  })
+  @DeleteMapping("/users/{userId}")
+  @PreAuthorize("hasAuthority('OWNER')")
+  public ResponseEntity<Void> removeUserFromOrganisation(
+      @Parameter(description = "ID of the user") @PathVariable UUID userId,
+      @Parameter(hidden = true) @AuthenticationPrincipal User user) {
+    organisationService.removeUserFromOrganisation(userId, user);
+    return ResponseEntity.noContent().build();
+  }
+
+  @Operation(
       summary = "Add role to user in organisation",
       description =
           "Adds a role to a member of the organisation. The OWNER role cannot be assigned. Requires the OWNER authority for this organisation.")
