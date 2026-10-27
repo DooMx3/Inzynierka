@@ -1,0 +1,199 @@
+name: Release containers
+
+# On every push to main (successful PR merge):
+# 1. bump VERSION — z++ normally; if the push includes a vX.Y / vX.Y.Z tag → X.Y.0
+# 2. build & push only the containers whose sources changed
+#
+# Also runs when a version tag is pushed (e.g. tagged on main after merge).
+on:
+  push:
+    branches: [main]
+    tags:
+      - 'v*.*.*'
+      - 'v*.*'
+
+concurrency:
+  group: release-containers-main
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  version:
+    name: Bump version
+    if: ${{ !contains(github.event.head_commit.message || '', '[skip ci]') }}
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+      frontend: ${{ steps.changes.outputs.frontend }}
+      backend: ${{ steps.changes.outputs.backend }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed paths
+        id: changes
+        run: |
+          frontend=false
+          backend=false
+
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            # Tag-only bump: no image rebuild unless you also pushed code on main.
+            # Rebuild both so the new x.y.0 tag exists on registries when tagging a release.
+            frontend=true
+            backend=true
+          else
+            before="${{ github.event.before }}"
+            if [[ -z "$before" || "$before" == "0000000000000000000000000000000000000000" ]]; then
+              frontend=true
+              backend=true
+            else
+              mapfile -t changed < <(git diff --name-only "$before" "$GITHUB_SHA")
+              printf 'Changed files:\n%s\n' "${changed[*]-}"
+              for f in "${changed[@]-}"; do
+                case "$f" in
+                  frontend/*|.github/workflows/release.yml|.github/scripts/*)
+                    frontend=true
+                    ;;
+                  backend/*|.github/workflows/release.yml|.github/scripts/*)
+                    backend=true
+                    ;;
+                esac
+              done
+            fi
+          fi
+
+          echo "frontend=${frontend}" >> "$GITHUB_OUTPUT"
+          echo "backend=${backend}" >> "$GITHUB_OUTPUT"
+
+      - name: Bump VERSION
+        id: bump
+        run: |
+          chmod +x .github/scripts/bump-version.sh
+
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            # Force the pushed tag to define x.y (z = 0)
+            tag="${GITHUB_REF_NAME}"
+            if [[ "$tag" =~ ^v?([0-9]+)\.([0-9]+)(\.([0-9]+))?$ ]]; then
+              echo "${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.0" > VERSION
+              version="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.0"
+            else
+              echo "Tag '$tag' is not a version tag (expected vX.Y or vX.Y.Z)" >&2
+              exit 1
+            fi
+          else
+            version="$(.github/scripts/bump-version.sh "${{ github.event.before }}")"
+          fi
+
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "Resolved version: ${version}"
+
+      - name: Commit VERSION
+        if: github.ref_type == 'branch'
+        run: |
+          version="${{ steps.bump.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add VERSION
+          if git diff --staged --quiet; then
+            echo "VERSION already at ${version}"
+            exit 0
+          fi
+          git commit -m "chore: bump version to ${version} [skip ci]"
+          git push
+
+      - name: Commit VERSION from tag
+        if: github.ref_type == 'tag'
+        run: |
+          version="${{ steps.bump.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Tag may point at an old commit; update VERSION on main tip
+          git fetch origin main
+          git checkout -B main origin/main
+          echo "$version" > VERSION
+          git add VERSION
+          if git diff --staged --quiet; then
+            echo "VERSION already at ${version}"
+            exit 0
+          fi
+          git commit -m "chore: bump version to ${version} [skip ci]"
+          git push origin main
+
+  frontend-image:
+    name: Frontend image
+    needs: version
+    if: needs.version.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build frontend image
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          owner=$(echo "$GITHUB_REPOSITORY_OWNER" | tr '[:upper:]' '[:lower:]')
+          image="ghcr.io/${owner}/inzynierka-frontend"
+          docker build -t "${image}:${VERSION}" ./frontend
+          docker tag "${image}:${VERSION}" "${image}:latest"
+          echo "IMAGE=${image}" >> "$GITHUB_ENV"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push frontend image
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          docker push "${IMAGE}:${VERSION}"
+          docker push "${IMAGE}:latest"
+
+  backend-image:
+    name: Backend image
+    needs: version
+    if: needs.version.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Build backend image
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          owner=$(echo "$GITHUB_REPOSITORY_OWNER" | tr '[:upper:]' '[:lower:]')
+          image="ghcr.io/${owner}/inzynierka-backend"
+          mvn -f backend/pom.xml -DskipTests spring-boot:build-image \
+            -Dspring-boot.build-image.imageName="${image}:${VERSION}"
+          docker tag "${image}:${VERSION}" "${image}:latest"
+          echo "IMAGE=${image}" >> "$GITHUB_ENV"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push backend image
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          docker push "${IMAGE}:${VERSION}"
+          docker push "${IMAGE}:latest"

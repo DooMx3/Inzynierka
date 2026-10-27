@@ -1,5 +1,6 @@
-# Full stack. Images come from GHCR (latest = last push to main):
+# Full stack. Images come from GHCR (tag = VERSION x.y.z, or latest):
 #   docker compose up -d
+#   IMAGE_TAG=0.1.0 docker compose up -d
 name: inzynierka
 
 include:

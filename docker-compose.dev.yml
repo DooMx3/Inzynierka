@@ -1,6 +1,7 @@
 # Development without the frontend container. Run the UI locally (bun dev).
-# Backend image comes from GHCR (latest = last push to main):
+# Backend image comes from GHCR (tag = VERSION x.y.z, or latest):
 #   docker compose -f docker-compose.dev.yml up -d
+#   IMAGE_TAG=0.1.0 docker compose -f docker-compose.dev.yml up -d
 name: inzynierka
 
 services:
