@@ -283,6 +283,34 @@ public class OrganisationService {
     removeUserFromOrganisation(organisation, user);
   }
 
+  @Transactional
+  public void leaveOrganisation(User user) {
+    if (user == null || user.getId() == null) {
+      throw new UnauthorizedException("Authenticated user is required");
+    }
+
+    User authenticatedUser =
+        userRepository
+            .findById(user.getId())
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+    Organisation organisation = authenticatedUser.getOrganisation();
+    if (organisation == null) {
+      throw new ResourceNotFoundException("User does not belong to an organisation");
+    }
+    if (!organisation.isActive()) {
+      throw new InactiveResourceException("Cannot leave an inactive organisation");
+    }
+    if (authenticatedUser.getMembershipStatus() != MembershipStatus.MEMBER) {
+      throw new ResourceConflictException("User has not accepted the invitation yet");
+    }
+    if (authenticatedUser.getRoles().contains(RoleName.OWNER)) {
+      throw new ResourceConflictException("The organisation owner cannot leave the organisation");
+    }
+
+    removeUserFromOrganisation(organisation, authenticatedUser);
+  }
+
   public void removeUserFromOrganisation(Organisation organisation, User user) {
     if (user.getOrganisation() == null
         || !organisation.getId().equals(user.getOrganisation().getId())) {

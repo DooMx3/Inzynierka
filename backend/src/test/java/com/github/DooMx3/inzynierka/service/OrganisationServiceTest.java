@@ -326,6 +326,58 @@ class OrganisationServiceTest {
   }
 
   @Nested
+  class LeaveOrganisation {
+
+    @Test
+    void shouldLeaveOrganisationAsMember() {
+      UUID organisationId = UUID.randomUUID();
+      UUID memberId = UUID.randomUUID();
+      Organisation organisation = Organisation.builder().id(organisationId).active(true).build();
+      User member =
+          User.builder()
+              .id(memberId)
+              .organisation(organisation)
+              .membershipStatus(MembershipStatus.MEMBER)
+              .build();
+      mockAuthenticatedUser(member);
+
+      service.leaveOrganisation(member);
+
+      assertNull(member.getOrganisation());
+      assertEquals(MembershipStatus.NONE, member.getMembershipStatus());
+      verify(userRepository).save(member);
+    }
+
+    @Test
+    void shouldRejectLeavingAsOrganisationOwner() {
+      Organisation organisation = Organisation.builder().id(UUID.randomUUID()).active(true).build();
+      User owner =
+          User.builder()
+              .id(UUID.randomUUID())
+              .organisation(organisation)
+              .membershipStatus(MembershipStatus.MEMBER)
+              .roles(new HashSet<>(Set.of(RoleName.OWNER)))
+              .build();
+      mockAuthenticatedUser(owner);
+
+      assertThrows(ResourceConflictException.class, () -> service.leaveOrganisation(owner));
+
+      assertSame(organisation, owner.getOrganisation());
+      verify(userRepository, never()).save(owner);
+    }
+
+    @Test
+    void shouldRejectLeavingWhenUserDoesNotBelongToOrganisation() {
+      User user = User.builder().id(UUID.randomUUID()).build();
+      mockAuthenticatedUser(user);
+
+      assertThrows(ResourceNotFoundException.class, () -> service.leaveOrganisation(user));
+
+      verify(userRepository, never()).save(user);
+    }
+  }
+
+  @Nested
   class PatchOrganisation {
 
     @Test

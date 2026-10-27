@@ -341,6 +341,22 @@ class OrganisationControllerTest {
     }
 
     @Test
+    void shouldAllowAuthenticatedMemberToLeaveOrganisation() throws Exception {
+      mockMvc
+          .perform(delete(BASE_URL + "/leave").with(authentication(authWith("WORKER"))))
+          .andExpect(status().isNoContent());
+
+      verify(organisationService).leaveOrganisation(user);
+    }
+
+    @Test
+    void shouldReturn401WhenLeavingOrganisationWithoutAuthentication() throws Exception {
+      mockMvc.perform(delete(BASE_URL + "/leave")).andExpect(status().isUnauthorized());
+
+      verifyNoInteractions(organisationService);
+    }
+
+    @Test
     void shouldListMembersOfAuthenticatedOwnersOrganisation() throws Exception {
       mockMvc
           .perform(get(BASE_URL + "/members").with(authentication(owner())))
