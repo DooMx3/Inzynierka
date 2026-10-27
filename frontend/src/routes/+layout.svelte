@@ -28,30 +28,35 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<div class="flex h-screen flex-col bg-[#eae0d5]">
-    <TitleBar />
-    {#if session.user}
-        <div class="relative flex min-h-0 flex-1">
-            {#if showMenuBar}
-                <div class="relative z-50 w-16 shrink-0 self-stretch overflow-visible">
-                    <MenuBar />
-                </div>
-            {/if}
+<div class="relative flex h-screen bg-[#eae0d5]">
+    {#if session.user && showMenuBar}
+        <div class="pointer-events-none fixed inset-0 z-40">
+            <GlassBlur active={!menu.folded} />
+        </div>
+        <button
+            type="button"
+            aria-label="Close menu"
+            aria-hidden={menu.folded}
+            tabindex={menu.folded ? -1 : 0}
+            class={[
+                "fixed inset-0 z-40 appearance-none border-0 bg-transparent p-0",
+                menu.folded && "pointer-events-none",
+            ]}
+            onclick={toggleMenu}
+        ></button>
+        <div class="relative z-50 h-full w-16 shrink-0 overflow-visible">
+            <MenuBar />
+        </div>
+    {/if}
+    <div class="flex min-h-0 min-w-0 flex-1 flex-col">
+        <TitleBar />
+        {#if session.user}
             <div
                 class={[
                     "relative m-3 flex min-h-0 min-w-0 flex-1 overflow-hidden bg-[#eae0d5]",
                     showMenuBar && "ml-2",
                 ]}
             >
-                {#if showMenuBar && !menu.folded}
-                    <GlassBlur />
-                    <button
-                        type="button"
-                        aria-label="Close menu"
-                        class="absolute inset-0 z-40 appearance-none border-0 bg-transparent p-0"
-                        onclick={toggleMenu}
-                    ></button>
-                {/if}
                 <main class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
                     <header class="flex shrink-0 flex-col items-start gap-1 px-4 pt-4">
                         <Breadcrumbs />
@@ -62,12 +67,12 @@
                     </div>
                 </main>
             </div>
-        </div>
-    {:else}
-        <div class="relative flex min-h-0 flex-1 overflow-hidden bg-[#eae0d5]">
-            <main class="min-h-0 min-w-0 flex-1 overflow-hidden">
-                {@render children()}
-            </main>
-        </div>
-    {/if}
+        {:else}
+            <div class="relative flex min-h-0 flex-1 overflow-hidden bg-[#eae0d5]">
+                <main class="min-h-0 min-w-0 flex-1 overflow-hidden">
+                    {@render children()}
+                </main>
+            </div>
+        {/if}
+    </div>
 </div>

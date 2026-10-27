@@ -198,11 +198,69 @@ describe('Menu bar', () => {
         setUser({ ...owner, roles: [] });
         const { container } = render(MenuBar);
 
-        expect(container.querySelector('span.absolute')).not.toBeInTheDocument();
+        expect(container.querySelector('nav.absolute')).not.toBeInTheDocument();
         expect(screen.queryByRole('button')).not.toBeInTheDocument();
         for (const item of menuItems) {
             expect(screen.queryByRole('button', { name: item.name })).not.toBeInTheDocument();
         }
+    });
+
+    it('Check desktop hover expands and collapses the menu', async () => {
+        Object.defineProperty(window, 'matchMedia', {
+            configurable: true,
+            writable: true,
+            value: (query: string) => ({
+                matches: query.includes('min-width: 768px'),
+                media: query,
+                onchange: null,
+                addListener() {},
+                removeListener() {},
+                addEventListener() {},
+                removeEventListener() {},
+                dispatchEvent() {
+                    return false;
+                },
+            }),
+        });
+
+        const { container } = render(MenuBar);
+        const sidebar = getSidebar(container);
+
+        expect(sidebar).toHaveClass('!w-16');
+
+        await fireEvent.mouseEnter(sidebar);
+        expect(sidebar).not.toHaveClass('!w-16');
+        expect(menu.folded).toBe(false);
+
+        await fireEvent.mouseLeave(sidebar);
+        expect(sidebar).toHaveClass('!w-16');
+        expect(menu.folded).toBe(true);
+    });
+
+    it('Check mobile hover does not expand the menu', async () => {
+        Object.defineProperty(window, 'matchMedia', {
+            configurable: true,
+            writable: true,
+            value: (query: string) => ({
+                matches: false,
+                media: query,
+                onchange: null,
+                addListener() {},
+                removeListener() {},
+                addEventListener() {},
+                removeEventListener() {},
+                dispatchEvent() {
+                    return false;
+                },
+            }),
+        });
+
+        const { container } = render(MenuBar);
+        const sidebar = getSidebar(container);
+
+        await fireEvent.mouseEnter(sidebar);
+        expect(sidebar).toHaveClass('!w-16');
+        expect(menu.folded).toBe(true);
     });
 
     it.each(menuItems)('Check $name navigates to $path', async ({ name, path }) => {

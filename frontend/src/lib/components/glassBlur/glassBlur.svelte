@@ -1,7 +1,11 @@
 <script lang="ts">
     import type { ClassValue } from 'svelte/elements';
 
-    let { class: className, id = 'lg' }: { class?: ClassValue; id?: string } = $props();
+    let {
+        class: className,
+        id = 'lg',
+        active = true,
+    }: { class?: ClassValue; id?: string; active?: boolean } = $props();
 </script>
 
 <svg width="0" height="0" class="absolute">
@@ -12,8 +16,12 @@
 </svg>
 
 <div
-    class={['glass pointer-events-none absolute inset-0 z-40', className]}
-    style:backdrop-filter={`url(#${id}) blur(3px) saturate(100%)`}
+    class={[
+        'glass pointer-events-none absolute inset-0 z-40 transition-[opacity,backdrop-filter] duration-300 ease-in-out',
+        active ? 'opacity-100' : 'opacity-0',
+        className,
+    ]}
+    style:backdrop-filter={`url(#${id}) blur(${active ? 3 : 0}px) saturate(100%)`}
 ></div>
 
 <style>

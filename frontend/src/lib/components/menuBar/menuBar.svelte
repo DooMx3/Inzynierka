@@ -9,9 +9,24 @@
 
     import { menu, toggleMenu } from "$lib/stores/menu.svelte";
     import { session } from "$lib/stores/session.svelte";
+    import { MediaQuery } from "svelte/reactivity";
+
+    const desktop = new MediaQuery("min-width: 768px");
 
     const goTo = (path: string) => {
         window.location.href = path;
+    };
+
+    const expandOnHover = () => {
+        if (desktop.current) {
+            menu.folded = false;
+        }
+    };
+
+    const collapseOnLeave = () => {
+        if (desktop.current) {
+            menu.folded = true;
+        }
     };
 
     type Button = {
@@ -62,15 +77,19 @@
 </script>
 
 {#if visibleButtons.length > 0}
-    <span
+    <nav
         class={[
-            "absolute top-0 left-0 flex flex-col gap-2 w-72 h-full p-2 bg-[#f7f1ea] shadow-lg transition-all duration-300 ease-in-out",
+            "absolute top-0 left-0 z-50 flex flex-col gap-2 w-72 h-full p-2 bg-[#f7f1ea] shadow-lg transition-all duration-300 ease-in-out",
             menu.folded && "!w-16",
         ]}
+        onmouseenter={expandOnHover}
+        onmouseleave={collapseOnLeave}
     >
-        <div class="flex w-full items-center">
+        <div class="flex w-full items-center md:hidden">
             <span class="min-w-0 flex-1"></span>
             <button
+                type="button"
+                aria-label="Toggle menu"
                 class={["shrink-0", !menu.folded && "is-open"]}
                 onclick={toggleMenu}
             >
@@ -91,25 +110,25 @@
                 />
             {/each}
         </span>
-    </span>
+    </nav>
 {/if}
 
 <style>
     @reference "../../../app.css";
 
-    span :global(svg) {
+    nav :global(svg) {
         @apply h-8 w-8;
         fill: inherit;
         stroke: inherit;
     }
 
-    span :global(svg path:first-of-type) {
+    nav :global(svg path:first-of-type) {
         transform-box: fill-box;
         transform-origin: center;
         transition: transform 300ms ease-in-out;
     }
 
-    span :global(.is-open svg path:first-of-type) {
+    nav :global(.is-open svg path:first-of-type) {
         transform: rotate(180deg);
     }
 </style>
