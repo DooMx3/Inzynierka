@@ -9,9 +9,12 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 @RestControllerAdvice
 @Slf4j
@@ -37,6 +40,33 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(InactiveResourceException.class)
   public ResponseEntity<Map<String, String>> handleInactiveResource(InactiveResourceException ex) {
     return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", ex.getMessage()));
+  }
+
+  @ExceptionHandler(InvalidLogoException.class)
+  public ResponseEntity<Map<String, String>> handleInvalidLogo(InvalidLogoException ex) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+  }
+
+  @ExceptionHandler(LogoTooLargeException.class)
+  public ResponseEntity<Map<String, String>> handleLogoTooLarge(LogoTooLargeException ex) {
+    return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+        .body(Map.of("error", ex.getMessage()));
+  }
+
+  @ExceptionHandler(MaxUploadSizeExceededException.class)
+  public ResponseEntity<Map<String, String>> handleMaxUploadSizeExceeded(
+      MaxUploadSizeExceededException ex) {
+    return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+        .body(Map.of("error", "Logo file must not exceed 2 MB"));
+  }
+
+  @ExceptionHandler({
+    MissingServletRequestParameterException.class,
+    MissingServletRequestPartException.class
+  })
+  public ResponseEntity<Map<String, String>> handleMissingRequestValue(Exception ex) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(Map.of("error", "Required request value is missing"));
   }
 
   @ExceptionHandler(ResourceConflictException.class)
