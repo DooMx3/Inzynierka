@@ -1,16 +1,14 @@
 name: Release containers
 
-# On every push to main (successful PR merge):
-# 1. bump VERSION — z++ normally; if the push includes a vX.Y / vX.Y.Z tag → X.Y.0
-# 2. build & push only the containers whose sources changed
-#
-# Also runs when a version tag is pushed (e.g. tagged on main after merge).
+# Version lives in git tags (vX.Y.Z) — never commits to main (branch protection).
+# - push to main → z++ (or X.Y.0 if a vX.Y tag is in the push), tag vX.Y.Z, build changed images
+# - push of developer tag vX.Y → X.Y.0, tag vX.Y.0, rebuild both
+# - push of CI tag vX.Y.Z → no-op (avoids loops)
 on:
   push:
     branches: [main]
     tags:
-      - 'v*.*.*'
-      - 'v*.*'
+      - 'v*'
 
 concurrency:
   group: release-containers-main
@@ -22,31 +20,50 @@ permissions:
 
 jobs:
   version:
-    name: Bump version
+    name: Resolve version
+    # Skip bot commits; three-part tags are created by this workflow itself
     if: ${{ !contains(github.event.head_commit.message || '', '[skip ci]') }}
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.bump.outputs.version }}
-      frontend: ${{ steps.changes.outputs.frontend }}
-      backend: ${{ steps.changes.outputs.backend }}
+      frontend: ${{ steps.bump.outputs.frontend }}
+      backend: ${{ steps.bump.outputs.backend }}
+      skip: ${{ steps.bump.outputs.skip }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Detect changed paths
-        id: changes
+      - name: Resolve version and changed paths
+        id: bump
         run: |
-          frontend=false
-          backend=false
+          chmod +x .github/scripts/bump-version.sh
+          set -euo pipefail
 
+          # CI release tags (vX.Y.Z) — ignore to prevent re-entry loops
           if [[ "${{ github.ref_type }}" == "tag" ]]; then
-            # Tag-only bump: no image rebuild unless you also pushed code on main.
-            # Rebuild both so the new x.y.0 tag exists on registries when tagging a release.
-            frontend=true
-            backend=true
+            tag="${GITHUB_REF_NAME}"
+            if [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              echo "version=" >> "$GITHUB_OUTPUT"
+              echo "frontend=false" >> "$GITHUB_OUTPUT"
+              echo "backend=false" >> "$GITHUB_OUTPUT"
+              echo "Ignoring CI release tag ${tag}"
+              exit 0
+            fi
+            if [[ "$tag" =~ ^v([0-9]+)\.([0-9]+)$ ]]; then
+              version="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.0"
+              frontend=true
+              backend=true
+            else
+              echo "Tag '$tag' is not a version tag (expected vX.Y)" >&2
+              exit 1
+            fi
           else
+            version="$(.github/scripts/bump-version.sh "${{ github.event.before }}")"
+            frontend=false
+            backend=false
             before="${{ github.event.before }}"
             if [[ -z "$before" || "$before" == "0000000000000000000000000000000000000000" ]]; then
               frontend=true
@@ -67,66 +84,28 @@ jobs:
             fi
           fi
 
-          echo "frontend=${frontend}" >> "$GITHUB_OUTPUT"
-          echo "backend=${backend}" >> "$GITHUB_OUTPUT"
-
-      - name: Bump VERSION
-        id: bump
-        run: |
-          chmod +x .github/scripts/bump-version.sh
-
-          if [[ "${{ github.ref_type }}" == "tag" ]]; then
-            # Only resolve the version here — write VERSION after switching to main
-            tag="${GITHUB_REF_NAME}"
-            if [[ "$tag" =~ ^v?([0-9]+)\.([0-9]+)(\.([0-9]+))?$ ]]; then
-              version="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.0"
-            else
-              echo "Tag '$tag' is not a version tag (expected vX.Y or vX.Y.Z)" >&2
-              exit 1
-            fi
-          else
-            version="$(.github/scripts/bump-version.sh "${{ github.event.before }}")"
-          fi
-
-          echo "version=${version}" >> "$GITHUB_OUTPUT"
           echo "Resolved version: ${version}"
 
-      - name: Commit VERSION
-        if: github.ref_type == 'branch'
-        run: |
-          version="${{ steps.bump.outputs.version }}"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add VERSION
-          if git diff --staged --quiet; then
-            echo "VERSION already at ${version}"
-            exit 0
+          # Persist release as a git tag (allowed under branch protection; no push to main)
+          if git rev-parse "v${version}" >/dev/null 2>&1; then
+            echo "Tag v${version} already exists"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag "v${version}"
+            git push origin "v${version}"
+            echo "Created tag v${version}"
           fi
-          git commit -m "chore: bump version to ${version} [skip ci]"
-          git push
 
-      - name: Commit VERSION from tag
-        if: github.ref_type == 'tag'
-        run: |
-          version="${{ steps.bump.outputs.version }}"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # Tag may point at an old commit; update VERSION on main tip
-          git fetch origin main
-          git checkout -B main --force origin/main
-          echo "$version" > VERSION
-          git add VERSION
-          if git diff --staged --quiet; then
-            echo "VERSION already at ${version}"
-            exit 0
-          fi
-          git commit -m "chore: bump version to ${version} [skip ci]"
-          git push origin main
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "frontend=${frontend}" >> "$GITHUB_OUTPUT"
+          echo "backend=${backend}" >> "$GITHUB_OUTPUT"
 
   frontend-image:
     name: Frontend image
     needs: version
-    if: needs.version.outputs.frontend == 'true'
+    if: needs.version.outputs.skip != 'true' && needs.version.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -159,7 +138,7 @@ jobs:
   backend-image:
     name: Backend image
     needs: version
-    if: needs.version.outputs.backend == 'true'
+    if: needs.version.outputs.skip != 'true' && needs.version.outputs.backend == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
