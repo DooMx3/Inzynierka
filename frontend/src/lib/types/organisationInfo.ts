@@ -1,4 +1,4 @@
 export type organisationInfo = {
-    id: string;
-    name: string;
-}
+    organisationId: string;
+    organisationName: string;
+};

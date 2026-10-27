@@ -49,7 +49,7 @@ describe('Auth API', () => {
 
         const user = await login('jan.kowalski@example.com', 'Superextrasecurepassword1!');
 
-        expect(user).toEqual(userPayload);
+        expect(user).toEqual({ ...userPayload, roles: [] });
         expect(calls[0]?.url).toBe('/api/auth/authenticate');
         expect(calls[0]?.init?.method).toBe('POST');
         expect(calls[0]?.init?.credentials).toBe('include');

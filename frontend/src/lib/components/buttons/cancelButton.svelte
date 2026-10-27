@@ -8,6 +8,6 @@
     onClick={() => onClickFunction()}
     svg={cancelIcon}
     text={text}
-    class="bg-red-500 text-white fill-white"
+    class="bg-[#8f3d32] text-white fill-white"
     isFolded={false}
 />

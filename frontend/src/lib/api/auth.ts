@@ -13,13 +13,14 @@ export type SessionUser = {
     firstname: string;
     lastname: string;
     email: string;
+    roles: string[];
 };
 
 const jsonHeaders = {
     'Content-Type': 'application/json',
 };
 
-export async function toApiError(response: Response): Promise<ApiError> {
+export const toApiError = async (response: Response): Promise<ApiError> => {
     const fallback =
         response.status === 401 ? 'Invalid credentials' : `Request failed (${response.status})`;
     const text = await response.text();
@@ -49,23 +50,28 @@ export async function toApiError(response: Response): Promise<ApiError> {
     }
 
     return new ApiError(text, response.status);
-}
+};
 
-async function readUser(response: Response): Promise<SessionUser> {
+const readUser = async (response: Response): Promise<SessionUser> => {
     const body = (await response.json()) as Partial<SessionUser>;
     if (typeof body.email !== 'string') {
         throw new ApiError('Unexpected user payload', response.status);
     }
+
+    const roles = Array.isArray(body.roles)
+        ? body.roles.filter((role): role is string => typeof role === 'string')
+        : [];
 
     return {
         id: String(body.id ?? ''),
         firstname: typeof body.firstname === 'string' ? body.firstname : '',
         lastname: typeof body.lastname === 'string' ? body.lastname : '',
         email: body.email,
+        roles,
     };
-}
+};
 
-export async function fetchCurrentUser(): Promise<SessionUser | null> {
+export const fetchCurrentUser = async (): Promise<SessionUser | null> => {
     const response = await fetch('/api/user/info', { credentials: 'include' });
 
     if (response.status === 401 || response.status === 403) {
@@ -77,17 +83,17 @@ export async function fetchCurrentUser(): Promise<SessionUser | null> {
     }
 
     return readUser(response);
-}
+};
 
-async function userAfterAuth(): Promise<SessionUser> {
+const userAfterAuth = async (): Promise<SessionUser> => {
     const user = await fetchCurrentUser();
     if (!user) {
         throw new ApiError('Signed in, but the session could not be loaded.', 401);
     }
     return user;
-}
+};
 
-export async function login(email: string, password: string): Promise<SessionUser> {
+export const login = async (email: string, password: string): Promise<SessionUser> => {
     const response = await fetch('/api/auth/authenticate', {
         method: 'POST',
         credentials: 'include',
@@ -100,14 +106,14 @@ export async function login(email: string, password: string): Promise<SessionUse
     }
 
     return userAfterAuth();
-}
+};
 
-export async function register(
+export const register = async (
     firstname: string,
     lastname: string,
     email: string,
     password: string,
-): Promise<SessionUser> {
+): Promise<SessionUser> => {
     const response = await fetch('/api/auth/register', {
         method: 'POST',
         credentials: 'include',
@@ -120,9 +126,9 @@ export async function register(
     }
 
     return userAfterAuth();
-}
+};
 
-async function readMessage(response: Response, fallback: string): Promise<string> {
+const readMessage = async (response: Response, fallback: string): Promise<string> => {
     const text = (await response.text()).trim();
     if (!text) {
         return fallback;
@@ -138,9 +144,9 @@ async function readMessage(response: Response, fallback: string): Promise<string
     }
 
     return text;
-}
+};
 
-export async function requestPasswordReset(email: string): Promise<string> {
+export const requestPasswordReset = async (email: string): Promise<string> => {
     const response = await fetch('/api/user/forgot-password', {
         method: 'POST',
         credentials: 'include',
@@ -156,9 +162,9 @@ export async function requestPasswordReset(email: string): Promise<string> {
         response,
         'If an account with that email exists, a reset link has been sent.',
     );
-}
+};
 
-export async function resetPassword(token: string, newPassword: string): Promise<string> {
+export const resetPassword = async (token: string, newPassword: string): Promise<string> => {
     const response = await fetch('/api/user/reset-password', {
         method: 'POST',
         credentials: 'include',
@@ -171,9 +177,9 @@ export async function resetPassword(token: string, newPassword: string): Promise
     }
 
     return readMessage(response, 'Password reset successfully.');
-}
+};
 
-export async function logout(): Promise<void> {
+export const logout = async (): Promise<void> => {
     const response = await fetch('/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
@@ -182,4 +188,4 @@ export async function logout(): Promise<void> {
     if (!response.ok) {
         throw await toApiError(response);
     }
-}
+};

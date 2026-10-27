@@ -30,7 +30,7 @@ describe('Menu button', () => {
         render(MenuButton);
 
         const btn = screen.getByRole('button', { name: 'Agrokultura' });
-        expect(btn).toHaveClass('bg-blue-500', 'text-white', 'font-semibold', 'fill-white', 'w-full');
+        expect(btn).toHaveClass('bg-[#6b4f3a]', 'text-white', 'font-semibold', 'fill-white', 'w-full');
     });
 
     it('Check chevron is present', () => {

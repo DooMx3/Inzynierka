@@ -9,8 +9,6 @@ const jsonResponse = (body: unknown, status = 200) =>
     });
 
 const profile = {
-    firstname: 'Jane',
-    lastname: 'Doe',
     email: 'jane.doe@example.com',
     phoneNumber: '987654332',
 };
@@ -27,7 +25,7 @@ describe('User API', () => {
         globalThis.fetch = originalFetch;
     });
 
-    it('saves the profile with PUT /api/user', async () => {
+    it('saves the profile with PATCH /api/user/patch', async () => {
         globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
             calls.push({ url: String(input), init });
             return new Response('', { status: 200 });
@@ -35,8 +33,8 @@ describe('User API', () => {
 
         await updateUser(profile);
 
-        expect(calls[0]?.url).toBe('/api/user');
-        expect(calls[0]?.init?.method).toBe('PUT');
+        expect(calls[0]?.url).toBe('/api/user/patch');
+        expect(calls[0]?.init?.method).toBe('PATCH');
         expect(calls[0]?.init?.credentials).toBe('include');
         expect(calls[0]?.init?.body).toBe(JSON.stringify(profile));
     });

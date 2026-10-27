@@ -54,6 +54,7 @@ describe('Session store', () => {
             firstname: 'Anna',
             lastname: 'Nowak',
             email: 'anna@example.com',
+            roles: [],
         });
     });
 

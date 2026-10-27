@@ -37,10 +37,10 @@ describe('CancelButton', () => {
         expect(clicked).toBe(true);
     });
 
-    it('has red background class', () => {
+    it('has the app destructive background', () => {
         const { container } = render(CancelButton);
         const btn = container.querySelector('button');
-        expect(btn).toHaveClass('bg-red-500');
+        expect(btn).toHaveClass('bg-[#8f3d32]');
     });
 
     it('has white text and fill classes', () => {
