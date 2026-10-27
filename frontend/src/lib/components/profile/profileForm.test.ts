@@ -104,7 +104,7 @@ describe('Profile form', () => {
         expect(update?.init?.method).toBe('PATCH');
         expect(update?.init?.body).toBe(JSON.stringify({ email: 'jane.new@example.com' }));
 
-        await fireEvent.click(screen.getByRole('button', { name: 'Sign in again' }));
+        await fireEvent.click(screen.getByRole('button', { name: 'Log out' }));
         await waitFor(() => {
             expect(window.location.href).toBe('/auth');
         });
@@ -126,22 +126,33 @@ describe('Profile form', () => {
     });
 
     it('patches the phone number and confirms without signing out', async () => {
-        await shown();
-        await fireEvent.click(screen.getByRole('button', { name: 'Edit Phone' }));
-        const dialog = screen.getByRole('dialog');
-        await fireEvent.input(within(dialog).getByRole('textbox', { name: 'Phone' }), {
-            target: { value: '123456789' },
-        });
-        await fireEvent.click(within(dialog).getByRole('button', { name: 'Confirm' }));
+        const originalAlert = globalThis.alert;
+        const alerts: string[] = [];
+        globalThis.alert = ((message?: string) => {
+            alerts.push(String(message ?? ''));
+        }) as typeof alert;
 
-        await waitFor(() => {
-            expect(screen.getByText('Your phone number has been updated.')).toBeInTheDocument();
-        });
+        try {
+            await shown();
+            await fireEvent.click(screen.getByRole('button', { name: 'Edit Phone' }));
+            const dialog = screen.getByRole('dialog');
+            await fireEvent.input(within(dialog).getByRole('textbox', { name: 'Phone' }), {
+                target: { value: '123456789' },
+            });
+            await fireEvent.click(within(dialog).getByRole('button', { name: 'Confirm' }));
 
-        const update = calls.find((call) => call.url === '/api/user/patch');
-        expect(update?.init?.body).toBe(JSON.stringify({ phoneNumber: '123456789' }));
-        expect(calls.filter((call) => call.url === '/api/user/info').length).toBeGreaterThan(1);
-        expect(calls.some((call) => call.url === '/api/auth/logout')).toBe(false);
+            await waitFor(() => {
+                expect(alerts[0]).toBe('Your phone number has been updated.');
+            });
+            expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+            const update = calls.find((call) => call.url === '/api/user/patch');
+            expect(update?.init?.body).toBe(JSON.stringify({ phoneNumber: '123456789' }));
+            expect(calls.filter((call) => call.url === '/api/user/info').length).toBeGreaterThan(1);
+            expect(calls.some((call) => call.url === '/api/auth/logout')).toBe(false);
+        } finally {
+            globalThis.alert = originalAlert;
+        }
     });
 
     it('closes an unchanged phone popup without calling the server', async () => {
@@ -154,39 +165,47 @@ describe('Profile form', () => {
     });
 
     it('posts the current and new password from the popup', async () => {
-        await shown();
-        await fireEvent.click(screen.getByRole('button', { name: 'Change password' }));
-        const dialog = screen.getByRole('dialog');
+        const originalAlert = globalThis.alert;
+        const alerts: string[] = [];
+        globalThis.alert = ((message?: string) => {
+            alerts.push(String(message ?? ''));
+        }) as typeof alert;
 
-        await fireEvent.input(within(dialog).getByLabelText('Current password'), {
-            target: { value: 'old-password' },
-        });
-        await fireEvent.input(within(dialog).getByLabelText('New password'), {
-            target: { value: readyPassword },
-        });
-        await fireEvent.input(within(dialog).getByLabelText('Confirm password'), {
-            target: { value: readyPassword },
-        });
-        flushSync();
-        await fireEvent.click(within(dialog).getByRole('button', { name: 'Change password' }));
+        try {
+            await shown();
+            await fireEvent.click(screen.getByRole('button', { name: 'Change password' }));
+            const dialog = screen.getByRole('dialog');
 
-        await waitFor(() => {
-            expect(within(dialog).getByText('Password changed successfully.')).toBeInTheDocument();
-        });
+            await fireEvent.input(within(dialog).getByLabelText('Current password'), {
+                target: { value: 'old-password' },
+            });
+            await fireEvent.input(within(dialog).getByLabelText('New password'), {
+                target: { value: readyPassword },
+            });
+            await fireEvent.input(within(dialog).getByLabelText('Confirm password'), {
+                target: { value: readyPassword },
+            });
+            flushSync();
+            await fireEvent.click(within(dialog).getByRole('button', { name: 'Change password' }));
 
-        const update = calls.find((call) => call.url === '/api/user/change-password');
-        expect(update?.init?.method).toBe('POST');
-        expect(update?.init?.body).toBe(
-            JSON.stringify({
-                oldPassword: 'old-password',
-                newPassword: readyPassword,
-            }),
-        );
+            await waitFor(() => {
+                expect(alerts[0]).toBe('Password changed successfully.');
+            });
+            await waitFor(() => {
+                expect(window.location.href).toBe('/auth');
+            });
 
-        await fireEvent.click(within(dialog).getByRole('button', { name: 'Sign in again' }));
-        await waitFor(() => {
-            expect(window.location.href).toBe('/auth');
-        });
+            const update = calls.find((call) => call.url === '/api/user/change-password');
+            expect(update?.init?.method).toBe('POST');
+            expect(update?.init?.body).toBe(
+                JSON.stringify({
+                    oldPassword: 'old-password',
+                    newPassword: readyPassword,
+                }),
+            );
+        } finally {
+            globalThis.alert = originalAlert;
+        }
     });
 
     it('returns to the profile fields from the password and delete popups', async () => {

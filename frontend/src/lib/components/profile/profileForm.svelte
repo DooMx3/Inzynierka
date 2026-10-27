@@ -1,8 +1,11 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    import { MediaQuery } from "svelte/reactivity";
     import passwordIcon from "$lib/assets/password.svg?raw";
     import closeIcon from "$lib/assets/close.svg?raw";
     import mailIcon from "$lib/assets/mail.svg?raw";
+    import editIcon from "$lib/assets/edit.svg?raw";
+    import logoutIcon from "$lib/assets/logout.svg?raw";
     import { getUserInfo } from "$lib/functions/getUserInfo";
     import { isValidEmail } from "$lib/functions/authFormValidation";
     import { logout } from "$lib/api/auth";
@@ -15,7 +18,7 @@
     import ChangePasswordForm from "./changePasswordForm.svelte";
     import DeactivateAccountForm from "./deactivateAccountForm.svelte";
 
-    type Mode = "view" | "email" | "phone" | "password" | "deactivate" | "email-done" | "phone-done";
+    type Mode = "view" | "email" | "phone" | "password" | "deactivate" | "email-done";
 
     let userInfo = $state<UserInfo | null>(null);
     let loadError = $state("");
@@ -23,6 +26,7 @@
     let draft = $state("");
     let formError = $state("");
     let pending = $state(false);
+    const sideBySide = new MediaQuery("(min-width: 840px) and (max-width: 1499px)");
 
     onMount(async () => {
         try {
@@ -107,7 +111,8 @@
             await updateUser({ phoneNumber });
             userInfo = { ...userInfo, phoneNumber: phoneNumber.length > 0 ? phoneNumber : null };
             await refreshSession();
-            mode = "phone-done";
+            alert("Your phone number has been updated.");
+            close();
         } catch (error) {
             formError = error instanceof Error ? error.message : "Could not change your phone number.";
         } finally {
@@ -118,11 +123,11 @@
 
 <div class="w-full rounded-3xl border border-[#d9cbbd] bg-[#f7f1ea] p-6 text-zinc-800 shadow-sm">
     {#if loadError}
-        <p class="text-sm text-zinc-700">{loadError}</p>
+        <p class="text-base text-zinc-700">{loadError}</p>
     {:else if !userInfo}
-        <p class="text-sm text-zinc-700">Loading profile...</p>
+        <p class="text-base text-zinc-700">Loading profile...</p>
     {:else}
-        <p class="mb-4 text-sm text-zinc-600">
+        <p class="mb-4 text-lg leading-relaxed text-zinc-700">
             First and last name come from registration. Email and phone number can be changed here.
         </p>
         <dl class="flex flex-col">
@@ -137,7 +142,12 @@
             <div class="grid grid-cols-[8.5rem_minmax(0,1fr)_auto] items-center gap-3 border-b border-[#e4d8cb] py-3">
                 <dt class="text-sm font-medium text-zinc-700">E-mail</dt>
                 <dd class="truncate text-right text-sm text-zinc-900">{userInfo.email}</dd>
-                <button type="button" class="text-sm font-medium text-[#6b4f3a]" onclick={() => open("email")}>
+                <button
+                    type="button"
+                    class="edit-btn inline-flex cursor-pointer items-center gap-1.5 text-sm font-medium text-[#6b4f3a] fill-[#6b4f3a]"
+                    onclick={() => open("email")}
+                >
+                    <span class="edit-icon" role="img" aria-hidden="true">{@html editIcon}</span>
                     Edit E-mail
                 </button>
             </div>
@@ -146,12 +156,17 @@
                 <dd class={["truncate text-right text-sm", userInfo.phoneNumber ? "text-zinc-900" : "text-zinc-400"]}>
                     {display(userInfo.phoneNumber)}
                 </dd>
-                <button type="button" class="text-sm font-medium text-[#6b4f3a]" onclick={() => open("phone")}>
+                <button
+                    type="button"
+                    class="edit-btn inline-flex cursor-pointer items-center gap-1.5 text-sm font-medium text-[#6b4f3a] fill-[#6b4f3a]"
+                    onclick={() => open("phone")}
+                >
+                    <span class="edit-icon" role="img" aria-hidden="true">{@html editIcon}</span>
                     Edit Phone
                 </button>
             </div>
         </dl>
-        <div class="mt-6 grid grid-cols-2 gap-3">
+        <div class="mt-6 grid grid-cols-2 gap-3 px-1">
             <Button
                 svg={passwordIcon}
                 text="Change password"
@@ -195,13 +210,16 @@
     <FormWindow
         title="Email updated"
         showBreadcrumbs={false}
-        acceptText="Sign in again"
-        cancelText="Close"
+        showCancel={false}
+        acceptText="Log out"
+        acceptIcon={logoutIcon}
+        closeCountdownSeconds={5}
         onClose={() => void signInAgain()}
-        onCancel={() => void signInAgain()}
         onAccept={() => void signInAgain()}
     >
-        <p class="text-zinc-800">Your email has been updated. Sign in again with the new address.</p>
+        <p class="text-zinc-800">
+            Your email has been updated successfully. Please sign in again with the new address.
+        </p>
     </FormWindow>
 {/if}
 
@@ -223,22 +241,14 @@
     </FormWindow>
 {/if}
 
-{#if mode === "phone-done"}
-    <FormWindow
-        title="Phone number updated"
-        showBreadcrumbs={false}
-        acceptText="Close"
-        cancelText="Close"
-        onClose={close}
-        onCancel={close}
-        onAccept={close}
-    >
-        <p class="text-zinc-800">Your phone number has been updated.</p>
-    </FormWindow>
-{/if}
-
 {#if mode === "password"}
-    <FormWindow title="Change password" showBreadcrumbs={false} showActions={false} onClose={close}>
+    <FormWindow
+        title="Change password"
+        showBreadcrumbs={false}
+        showActions={false}
+        wide={sideBySide.current}
+        onClose={close}
+    >
         <ChangePasswordForm onCancel={close} onFinished={() => void signInAgain()} />
     </FormWindow>
 {/if}
@@ -248,3 +258,13 @@
         <DeactivateAccountForm onCancel={close} />
     </FormWindow>
 {/if}
+
+<style>
+    @reference "../../../app.css";
+
+    .edit-icon :global(svg) {
+        width: 1.1rem;
+        height: 1.1rem;
+        fill: currentColor;
+    }
+</style>

@@ -35,7 +35,7 @@
     let roles = $state<string[]>([]);
     let organisation = $state<Organisation | null>(null);
     let ready = $state(false);
-    let dialog = $state<"create" | "edit" | "invite" | "created" | "delete" | "leave" | null>(null);
+    let dialog = $state<"create" | "edit" | "invite" | "delete" | "leave" | null>(null);
     let formError = $state("");
     let showErrors = $state(false);
     let pending = $state(false);
@@ -159,7 +159,8 @@
             if (!roles.includes("OWNER")) {
                 roles = [...roles, "OWNER"];
             }
-            dialog = "created";
+            dialog = null;
+            alert("The organisation is ready. You are its owner.");
         } catch (error) {
             alert(error instanceof Error ? error.message : "Could not create the organisation.");
         } finally {
@@ -334,10 +335,12 @@
                 svg={passwordIcon}
                 invalid={deletePasswordMissing}
             />
-            <Button type="submit" svg={closeIcon} text="Delete vineyard" isFolded={false} gentle={true} class="bg-[#8f3d32] text-white fill-white" />
-            <button type="button" class="h-12 w-full cursor-pointer rounded-lg border border-[#c4b6a6] text-zinc-800 hover:bg-[#efe6dc]" onclick={() => (dialog = null)}>
-                Cancel
-            </button>
+            <div class="flex flex-col gap-4 px-1">
+                <Button type="submit" svg={closeIcon} text="Delete vineyard" isFolded={false} gentle={true} class="bg-[#8f3d32] text-white fill-white" />
+                <button type="button" class="h-12 w-full cursor-pointer rounded-lg border border-[#c4b6a6] text-zinc-800 hover:bg-[#efe6dc]" onclick={() => (dialog = null)}>
+                    Cancel
+                </button>
+            </div>
         </form>
     </FormWindow>
 {/if}
@@ -373,22 +376,6 @@
                 <p class="text-[#8f3d32]" role="alert">{formError}</p>
             {/if}
         </div>
-    </FormWindow>
-{/if}
-
-{#if dialog === "created"}
-    <FormWindow
-        title="Organisation created"
-        showBreadcrumbs={false}
-        acceptText="Continue"
-        cancelText="Stay here"
-        onClose={() => (dialog = null)}
-        onCancel={() => (dialog = null)}
-        onAccept={() => {
-            window.location.href = "/workers";
-        }}
-    >
-        <p class="text-lg text-zinc-800">The organisation is ready. You are its owner.</p>
     </FormWindow>
 {/if}
 
