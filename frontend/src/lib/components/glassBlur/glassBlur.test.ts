@@ -35,4 +35,20 @@ describe('Glass blur', () => {
 
         expect(overlay).toHaveClass('fixed');
     });
+
+    it('Check inactive overlay fades out blur', () => {
+        const { container } = render(GlassBlur, { active: false });
+        const overlay = container.querySelector('.glass');
+
+        expect(overlay).toHaveClass('opacity-0');
+        expect(overlay).toHaveStyle({ backdropFilter: 'url(#lg) blur(0px) saturate(100%)' });
+    });
+
+    it('Check active overlay uses full blur', () => {
+        const { container } = render(GlassBlur, { active: true });
+        const overlay = container.querySelector('.glass');
+
+        expect(overlay).toHaveClass('opacity-100');
+        expect(overlay).toHaveStyle({ backdropFilter: 'url(#lg) blur(3px) saturate(100%)' });
+    });
 });
