@@ -14,6 +14,11 @@
 
 	let { children } = $props();
 
+    const menuRoles = ["WORKER", "OENOLOGIST", "OWNER"] as const;
+    const showMenuBar = $derived(
+        menuRoles.some((role) => session.user?.roles.includes(role)),
+    );
+
     onMount(() => {
         void refreshSession();
     });
@@ -27,11 +32,18 @@
     <TitleBar />
     {#if session.user}
         <div class="relative flex min-h-0 flex-1">
-            <div class="relative z-50 w-16 shrink-0 self-stretch overflow-visible">
-                <MenuBar />
-            </div>
-            <div class="relative m-3 ml-2 flex min-h-0 min-w-0 flex-1 overflow-hidden bg-[#eae0d5]">
-                {#if !menu.folded}
+            {#if showMenuBar}
+                <div class="relative z-50 w-16 shrink-0 self-stretch overflow-visible">
+                    <MenuBar />
+                </div>
+            {/if}
+            <div
+                class={[
+                    "relative m-3 flex min-h-0 min-w-0 flex-1 overflow-hidden bg-[#eae0d5]",
+                    showMenuBar && "ml-2",
+                ]}
+            >
+                {#if showMenuBar && !menu.folded}
                     <GlassBlur />
                     <button
                         type="button"

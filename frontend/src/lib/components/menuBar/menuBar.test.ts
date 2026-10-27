@@ -194,11 +194,12 @@ describe('Menu bar', () => {
         expect(screen.queryByRole('button', { name: 'Workers' })).not.toBeInTheDocument();
     });
 
-    it('hides operational items when the account has no role', () => {
+    it('hides the whole sidebar when the account has no role', () => {
         setUser({ ...owner, roles: [] });
         const { container } = render(MenuBar);
 
-        expect(getSidebar(container).children[1].children).toHaveLength(0);
+        expect(container.querySelector('span.absolute')).not.toBeInTheDocument();
+        expect(screen.queryByRole('button')).not.toBeInTheDocument();
         for (const item of menuItems) {
             expect(screen.queryByRole('button', { name: item.name })).not.toBeInTheDocument();
         }

@@ -61,36 +61,38 @@
     );
 </script>
 
-<span
-    class={[
-        "absolute top-0 left-0 flex flex-col gap-2 w-72 h-full p-2 bg-[#f7f1ea] shadow-lg transition-all duration-300 ease-in-out",
-        menu.folded && "!w-16",
-    ]}
->
-    <div class="flex w-full items-center">
-        <span class="min-w-0 flex-1"></span>
-        <button
-            class={["shrink-0", !menu.folded && "is-open"]}
-            onclick={toggleMenu}
-        >
-            {@html openIcon}
-        </button>
-        <span
-            class="min-w-0 transition-[flex-grow] duration-300 ease-in-out"
-            style:flex-grow={menu.folded ? 1 : 0}
-        ></span>
-    </div>
-    <span class="flex flex-col gap-2 justify-center items-stretch flex-1">
-        {#each visibleButtons as button (button.goTo)}
-            <MenuButton
-                text={button.name}
-                svg={button.icon}
-                onClick={() => goTo(button.goTo)}
-                isFolded={menu.folded}
-            />
-        {/each}
+{#if visibleButtons.length > 0}
+    <span
+        class={[
+            "absolute top-0 left-0 flex flex-col gap-2 w-72 h-full p-2 bg-[#f7f1ea] shadow-lg transition-all duration-300 ease-in-out",
+            menu.folded && "!w-16",
+        ]}
+    >
+        <div class="flex w-full items-center">
+            <span class="min-w-0 flex-1"></span>
+            <button
+                class={["shrink-0", !menu.folded && "is-open"]}
+                onclick={toggleMenu}
+            >
+                {@html openIcon}
+            </button>
+            <span
+                class="min-w-0 transition-[flex-grow] duration-300 ease-in-out"
+                style:flex-grow={menu.folded ? 1 : 0}
+            ></span>
+        </div>
+        <span class="flex flex-col gap-2 justify-center items-stretch flex-1">
+            {#each visibleButtons as button (button.goTo)}
+                <MenuButton
+                    text={button.name}
+                    svg={button.icon}
+                    onClick={() => goTo(button.goTo)}
+                    isFolded={menu.folded}
+                />
+            {/each}
+        </span>
     </span>
-</span>
+{/if}
 
 <style>
     @reference "../../../app.css";
