@@ -332,6 +332,15 @@ class OrganisationControllerTest {
     }
 
     @Test
+    void shouldRemoveUserFromAuthenticatedOwnersOrganisation() throws Exception {
+      mockMvc
+          .perform(delete(BASE_URL + "/users/{userId}", targetUserId).with(authentication(owner())))
+          .andExpect(status().isNoContent());
+
+      verify(organisationService).removeUserFromOrganisation(targetUserId, user);
+    }
+
+    @Test
     void shouldListMembersOfAuthenticatedOwnersOrganisation() throws Exception {
       mockMvc
           .perform(get(BASE_URL + "/members").with(authentication(owner())))

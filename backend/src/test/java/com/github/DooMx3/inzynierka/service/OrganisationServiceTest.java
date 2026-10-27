@@ -242,6 +242,90 @@ class OrganisationServiceTest {
   }
 
   @Nested
+  class RemoveUserFromOrganisation {
+
+    @Test
+    void shouldRemoveMemberFromOrganisation() {
+      UUID organisationId = UUID.randomUUID();
+      UUID ownerId = UUID.randomUUID();
+      UUID memberId = UUID.randomUUID();
+      Organisation organisation = Organisation.builder().id(organisationId).active(true).build();
+      User owner =
+          User.builder()
+              .id(ownerId)
+              .organisation(organisation)
+              .roles(new HashSet<>(Set.of(RoleName.OWNER)))
+              .build();
+      User member =
+          User.builder()
+              .id(memberId)
+              .organisation(organisation)
+              .membershipStatus(MembershipStatus.MEMBER)
+              .build();
+      mockAuthenticatedUser(owner);
+      when(userRepository.findById(memberId)).thenReturn(Optional.of(member));
+
+      service.removeUserFromOrganisation(memberId, owner);
+
+      assertNull(member.getOrganisation());
+      assertEquals(MembershipStatus.NONE, member.getMembershipStatus());
+      verify(userRepository).save(member);
+    }
+
+    @Test
+    void shouldRejectRemovingPendingInvitation() {
+      UUID organisationId = UUID.randomUUID();
+      UUID ownerId = UUID.randomUUID();
+      UUID invitedUserId = UUID.randomUUID();
+      Organisation organisation = Organisation.builder().id(organisationId).active(true).build();
+      User owner =
+          User.builder()
+              .id(ownerId)
+              .organisation(organisation)
+              .roles(new HashSet<>(Set.of(RoleName.OWNER)))
+              .build();
+      User invitedUser =
+          User.builder()
+              .id(invitedUserId)
+              .organisation(organisation)
+              .membershipStatus(MembershipStatus.PENDING)
+              .build();
+      mockAuthenticatedUser(owner);
+      when(userRepository.findById(invitedUserId)).thenReturn(Optional.of(invitedUser));
+
+      assertThrows(
+          ResourceConflictException.class,
+          () -> service.removeUserFromOrganisation(invitedUserId, owner));
+
+      assertSame(organisation, invitedUser.getOrganisation());
+      verify(userRepository, never()).save(invitedUser);
+    }
+
+    @Test
+    void shouldRejectRemovingOrganisationOwner() {
+      UUID organisationId = UUID.randomUUID();
+      UUID ownerId = UUID.randomUUID();
+      Organisation organisation = Organisation.builder().id(organisationId).active(true).build();
+      User owner =
+          User.builder()
+              .id(ownerId)
+              .organisation(organisation)
+              .membershipStatus(MembershipStatus.MEMBER)
+              .roles(new HashSet<>(Set.of(RoleName.OWNER)))
+              .build();
+      mockAuthenticatedUser(owner);
+      when(userRepository.findById(ownerId)).thenReturn(Optional.of(owner));
+
+      assertThrows(
+          ResourceConflictException.class,
+          () -> service.removeUserFromOrganisation(ownerId, owner));
+
+      assertSame(organisation, owner.getOrganisation());
+      verify(userRepository, never()).save(owner);
+    }
+  }
+
+  @Nested
   class PatchOrganisation {
 
     @Test
