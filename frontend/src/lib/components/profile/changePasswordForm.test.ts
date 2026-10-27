@@ -107,18 +107,16 @@ describe('Change password form', () => {
         expect(calls).toBe(0);
     });
 
-    it('shows the success message and asks to sign in again', async () => {
+    it('alerts on success and finishes so the user can sign in again', async () => {
         let finished = false;
         render(ChangePasswordForm, { onFinished: () => (finished = true) });
         await fill('old-password', readyPassword, readyPassword);
         await fireEvent.click(screen.getByRole('button', { name: 'Change password' }));
 
         await waitFor(() => {
-            expect(screen.getByText('Password changed successfully.')).toBeInTheDocument();
+            expect(alerts[0]).toBe('Password changed successfully.');
         });
-        expect(screen.queryByLabelText('New password')).not.toBeInTheDocument();
-
-        await fireEvent.click(screen.getByRole('button', { name: 'Sign in again' }));
         expect(finished).toBe(true);
+        expect(calls).toBe(1);
     });
 });

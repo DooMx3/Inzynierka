@@ -17,10 +17,16 @@
     {type}
     class={[
         className,
-        "rounded-lg p-2 flex h-12 items-center cursor-pointer shadow-lg overflow-hidden",
-        "transition-all duration-300 ease-in-out",
+        "rounded-lg p-2 flex h-12 items-center cursor-pointer shadow-lg",
+        "transition-[transform,width,gap,max-width,opacity] duration-300 ease-in-out",
         gentle ? "hover:scale-[1.02]" : "hover:scale-110",
-        isFolded ? "w-12 justify-center gap-0" : "w-full gap-2",
+        // Menu buttons stay w-full so they shrink/grow with the animated nav
+        // (w-full ↔ w-12 does not interpolate and snaps on collapse).
+        isMenuButton
+            ? ["w-full overflow-hidden", isFolded ? "justify-center gap-0" : "justify-start gap-2"]
+            : isFolded
+              ? "w-12 justify-center gap-0 overflow-hidden"
+              : "w-full gap-2 overflow-visible",
     ]}
     onclick={() => onClickFunction()}
 >
@@ -31,7 +37,7 @@
     {#if text}
         <span
             class={[
-                "overflow-hidden whitespace-nowrap transition-all duration-300",
+                "overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out",
                 isFolded ? "max-w-0 opacity-0" : isMenuButton ? "max-w-40 opacity-100" : "max-w-full opacity-100",
             ]}
         >
@@ -42,7 +48,7 @@
     {#if isMenuButton}
         <span
             class={[
-                "ml-auto shrink-0 overflow-hidden transition-all duration-300",
+                "ml-auto shrink-0 overflow-hidden transition-all duration-300 ease-in-out",
                 isFolded ? "w-0 opacity-0" : "w-8 opacity-100",
             ]}
             role="img"

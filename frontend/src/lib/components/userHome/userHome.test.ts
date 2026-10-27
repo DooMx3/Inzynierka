@@ -150,6 +150,11 @@ describe('User home', () => {
     });
 
     it('opens the organisation form over a blurred page', async () => {
+        const alerts: string[] = [];
+        globalThis.alert = ((message?: string) => {
+            alerts.push(String(message ?? ''));
+        }) as typeof alert;
+
         setUser(user);
         await shown();
         await fireEvent.click(screen.getByRole('button', { name: /Create new vineyard/i }));
@@ -161,8 +166,9 @@ describe('User home', () => {
         await fireEvent.click(screen.getByRole('button', { name: 'Create' }));
 
         await waitFor(() => {
-            expect(screen.getByText('The organisation is ready. You are its owner.')).toBeInTheDocument();
+            expect(alerts[0]).toBe('The organisation is ready. You are its owner.');
         });
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
         const create = calls.find((call) => call.url === '/api/organisations' && call.init?.method === 'POST');
         expect(create?.init?.body).toBe(
             JSON.stringify({
