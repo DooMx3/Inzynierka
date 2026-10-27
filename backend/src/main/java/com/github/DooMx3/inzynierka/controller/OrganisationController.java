@@ -238,6 +238,29 @@ public class OrganisationController {
   }
 
   @Operation(
+      summary = "Leave organisation",
+      description =
+          "Removes the authenticated user from their organisation. Organisation owners cannot leave.")
+  @ApiResponses({
+    @ApiResponse(responseCode = "204", description = "Organisation left", content = @Content),
+    @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content),
+    @ApiResponse(
+        responseCode = "404",
+        description = "User does not belong to an organisation",
+        content = @Content),
+    @ApiResponse(
+        responseCode = "409",
+        description =
+            "Inactive organisation, pending invitation, or authenticated user is the organisation owner",
+        content = @Content)
+  })
+  @DeleteMapping("/leave")
+  public ResponseEntity<Void> leave(@Parameter(hidden = true) @AuthenticationPrincipal User user) {
+    organisationService.leaveOrganisation(user);
+    return ResponseEntity.noContent().build();
+  }
+
+  @Operation(
       summary = "Add role to user in organisation",
       description =
           "Adds a role to a member of the organisation. The OWNER role cannot be assigned. Requires the OWNER authority for this organisation.")
