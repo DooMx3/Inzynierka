@@ -80,7 +80,7 @@ public class OrganisationLogoService {
   private Organisation getActiveOrganisation(User user) {
     Organisation organisation = organisationService.getOrganisation(user);
     if (!organisation.isActive()) {
-      throw new InactiveResourceException("Cannot change the logo of an inactive vineyard");
+      throw new InactiveResourceException("Cannot change the logo of an inactive organisation");
     }
     return organisation;
   }

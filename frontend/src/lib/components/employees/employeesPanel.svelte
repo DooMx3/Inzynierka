@@ -85,7 +85,7 @@
             employees = [];
             loadError =
                 error instanceof ApiError && error.status === 403
-                    ? "Only the vineyard owner can manage employees."
+                    ? "Only the organisation owner can manage employees."
                     : error instanceof Error
                       ? error.message
                       : "Could not load employees.";
@@ -255,7 +255,7 @@
 
 <div class="flex flex-col gap-4">
     {#if !isOwner}
-        <p class="text-sm text-zinc-700">Only the vineyard owner can manage employees.</p>
+        <p class="text-sm text-zinc-700">Only the organisation owner can manage employees.</p>
     {:else}
     <div class="flex justify-end">
         <div class="w-52">
@@ -414,7 +414,7 @@
         title={removing.pending ? "Cancel invitation" : "Remove employee"}
         text={removeError || (removing.pending
             ? `Cancel the invitation for ${removing.firstname} ${removing.lastname}? They will no longer be able to join.`
-            : `Remove ${removing.firstname} ${removing.lastname} from the vineyard? They will lose access immediately.`)}
+            : `Remove ${removing.firstname} ${removing.lastname} from the organisation? They will lose access immediately.`)}
         acceptText="Remove"
         onClose={() => (removing = null)}
         onCancel={() => (removing = null)}

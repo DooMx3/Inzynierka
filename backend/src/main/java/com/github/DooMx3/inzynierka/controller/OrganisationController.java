@@ -142,7 +142,7 @@ public class OrganisationController {
     @ApiResponse(
         responseCode = "400",
         description =
-            "Invalid email, account not found, or user already belongs to a vineyard or has a pending invitation",
+            "Invalid email, account not found, or user already belongs to an organisation or has a pending invitation",
         content = @Content),
     @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content),
     @ApiResponse(
@@ -246,7 +246,7 @@ public class OrganisationController {
     @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content),
     @ApiResponse(
         responseCode = "404",
-        description = "User does not belong to a vineyard",
+        description = "User does not belong to an organisation",
         content = @Content),
     @ApiResponse(
         responseCode = "409",

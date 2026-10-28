@@ -156,7 +156,7 @@
     const organisationMessages = () => {
         const messages: string[] = [];
         if (name.trim().length === 0) {
-            messages.push("Enter the vineyard name.");
+            messages.push("Enter the organisation name.");
         }
         if (city.trim().length === 0) {
             messages.push("Enter the city.");
@@ -191,9 +191,9 @@
                 }
             }
             dialog = null;
-            alert("The vineyard is ready. You are its owner.");
+            alert("The organisation is ready. You are its owner.");
         } catch (error) {
-            alert(error instanceof Error ? error.message : "Could not create the vineyard.");
+            alert(error instanceof Error ? error.message : "Could not create the organisation.");
         } finally {
             pending = false;
         }
@@ -223,7 +223,7 @@
             }
             dialog = null;
         } catch (error) {
-            alert(error instanceof Error ? error.message : "Could not update the vineyard.");
+            alert(error instanceof Error ? error.message : "Could not update the organisation.");
         } finally {
             pending = false;
         }
@@ -247,7 +247,7 @@
             roles = roles.filter((role) => role !== "OWNER");
             dialog = null;
         } catch (error) {
-            alert(error instanceof Error ? error.message : "Could not delete the vineyard.");
+            alert(error instanceof Error ? error.message : "Could not delete the organisation.");
         } finally {
             pending = false;
         }
@@ -279,7 +279,7 @@
             await acceptInvitation();
             window.location.href = "/workers";
         } catch (error) {
-            formError = error instanceof Error ? error.message : "Could not join the vineyard.";
+            formError = error instanceof Error ? error.message : "Could not join the organisation.";
             pending = false;
         }
     };
@@ -376,7 +376,7 @@
 
 {#if dialog === "create" || dialog === "edit"}
     <FormWindow
-        title={dialog === "edit" ? "Edit vineyard" : "Create vineyard"}
+        title={dialog === "edit" ? "Edit vineyard" : "Create organisation"}
         showBreadcrumbs={false}
         acceptText={dialog === "edit" ? "Save" : "Create"}
         wide={sideBySide.current}
@@ -431,7 +431,7 @@
 
 {#if dialog === "invite"}
     <FormWindow
-        title="Vineyard invitation"
+        title="Organisation invitation"
         showBreadcrumbs={false}
         acceptText="Join"
         onClose={() => (dialog = null)}
