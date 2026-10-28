@@ -169,7 +169,7 @@ describe('User home', () => {
         await fireEvent.click(screen.getByRole('button', { name: 'Create' }));
 
         await waitFor(() => {
-            expect(alerts[0]).toBe('The vineyard is ready. You are its owner.');
+            expect(alerts[0]).toBe('The organisation is ready. You are its owner.');
         });
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
         const create = calls.find((call) => call.url === '/api/organisations' && call.init?.method === 'POST');
@@ -245,7 +245,7 @@ describe('User home', () => {
         await fireEvent.click(screen.getByRole('button', { name: /Create new vineyard/i }));
         await fireEvent.click(screen.getByRole('button', { name: 'Create' }));
 
-        expect(alerts).toEqual(['Enter the vineyard name.\nEnter the city.']);
+        expect(alerts).toEqual(['Enter the organisation name.\nEnter the city.']);
         expect(screen.getByLabelText('Name').parentElement).toHaveClass('border-red-500');
         expect(screen.getByLabelText('City').parentElement).toHaveClass('border-red-500');
         expect(screen.getByLabelText('Street').parentElement).not.toHaveClass('border-red-500');

@@ -32,12 +32,12 @@ public class OrganisationService {
   @Transactional
   public Organisation createOrganisation(OrganisationRequest request, User user) {
     if (user == null) {
-      throw new UnauthorizedException("Authenticated user is required to create a vineyard");
+      throw new UnauthorizedException("Authenticated user is required to create an organisation");
     }
 
     if (user.getOrganisation() != null) {
       throw new OrganisationAlreadyAssignedException(
-          "You cannot create another vineyard because you already belong to one");
+          "You cannot create another organisation because you already belong to one");
     }
 
     Organisation organisation =
@@ -70,7 +70,7 @@ public class OrganisationService {
     Organisation organisation = getOwnedOrganisation(user);
 
     if (!organisation.isActive()) {
-      throw new InactiveResourceException("Cannot update an inactive vineyard");
+      throw new InactiveResourceException("Cannot update an inactive organisation");
     }
 
     organisation.setName(request.name());
@@ -113,7 +113,7 @@ public class OrganisationService {
     Organisation organisation = getOwnedOrganisation(user);
 
     if (!organisation.isActive()) {
-      throw new InactiveResourceException("Cannot update an inactive vineyard");
+      throw new InactiveResourceException("Cannot update an inactive organisation");
     }
 
     if (request.name() != null) {
@@ -145,7 +145,7 @@ public class OrganisationService {
   public void inviteUser(OrganisationInvitationRequest request, User owner) {
     Organisation organisation = getOwnedOrganisation(owner);
     if (!organisation.isActive()) {
-      throw new InactiveResourceException("Cannot invite a user to an inactive vineyard");
+      throw new InactiveResourceException("Cannot invite a user to an inactive organisation");
     }
 
     User invitedUser =
@@ -160,7 +160,7 @@ public class OrganisationService {
     if (invitedUser.getOrganisation() != null
         || invitedUser.getMembershipStatus() != MembershipStatus.NONE) {
       throw new ResourceConflictException(
-          "User already belongs to a vineyard or has a pending invitation");
+          "User already belongs to an organisation or has a pending invitation");
     }
 
     invitedUser.setOrganisation(organisation);
@@ -210,7 +210,7 @@ public class OrganisationService {
     if (authenticatedUser.getOrganisation() == null
         || authenticatedUser.getRoles().stream().noneMatch(RoleName.OWNER::equals)) {
       throw new InsufficientPermissionException(
-          "Only the vineyard owner can access the vineyard");
+          "Only the organisation owner can access the organisation");
     }
     return authenticatedUser.getOrganisation();
   }
@@ -223,7 +223,7 @@ public class OrganisationService {
 
     if (user.getOrganisation() == null
         || !organisation.getId().equals(user.getOrganisation().getId())) {
-      throw new ResourceNotFoundException("User does not belong to this vineyard");
+      throw new ResourceNotFoundException("User does not belong to this organisation");
     }
     return user;
   }
@@ -243,7 +243,7 @@ public class OrganisationService {
   private User prepareRoleChange(UUID userId, RoleName role, User owner) {
     Organisation organisation = getOwnedOrganisation(owner);
     if (!organisation.isActive()) {
-      throw new InactiveResourceException("Cannot change roles in an inactive vineyard");
+      throw new InactiveResourceException("Cannot change roles in an inactive organisation");
     }
     if (role == RoleName.OWNER) {
       throw new ResourceConflictException("The OWNER role cannot be added or removed this way");
@@ -259,7 +259,7 @@ public class OrganisationService {
   public List<User> getOrganisationMembers(User owner) {
     Organisation organisation = getOwnedOrganisation(owner);
     if (!organisation.isActive()) {
-      throw new InactiveResourceException("Cannot view members of an inactive vineyard");
+      throw new InactiveResourceException("Cannot view members of an inactive organisation");
     }
     return userRepository.findByOrganisationIdAndMembershipStatus(
         organisation.getId(), MembershipStatus.MEMBER);
@@ -269,7 +269,7 @@ public class OrganisationService {
   public void removeUserFromOrganisation(UUID userId, User owner) {
     Organisation organisation = getOwnedOrganisation(owner);
     if (!organisation.isActive()) {
-      throw new InactiveResourceException("Cannot remove a user from an inactive vineyard");
+      throw new InactiveResourceException("Cannot remove a user from an inactive organisation");
     }
 
     User user = getUserFromOrganisationById(organisation, userId);
@@ -277,7 +277,7 @@ public class OrganisationService {
       throw new ResourceConflictException("User has not accepted the invitation yet");
     }
     if (user.getRoles().contains(RoleName.OWNER)) {
-      throw new ResourceConflictException("The vineyard owner cannot be removed");
+      throw new ResourceConflictException("The organisation owner cannot be removed");
     }
 
     removeUserFromOrganisation(organisation, user);
@@ -296,16 +296,16 @@ public class OrganisationService {
 
     Organisation organisation = authenticatedUser.getOrganisation();
     if (organisation == null) {
-      throw new ResourceNotFoundException("User does not belong to a vineyard");
+      throw new ResourceNotFoundException("User does not belong to an organisation");
     }
     if (!organisation.isActive()) {
-      throw new InactiveResourceException("Cannot leave an inactive vineyard");
+      throw new InactiveResourceException("Cannot leave an inactive organisation");
     }
     if (authenticatedUser.getMembershipStatus() != MembershipStatus.MEMBER) {
       throw new ResourceConflictException("User has not accepted the invitation yet");
     }
     if (authenticatedUser.getRoles().contains(RoleName.OWNER)) {
-      throw new ResourceConflictException("The vineyard owner cannot leave the vineyard");
+      throw new ResourceConflictException("The organisation owner cannot leave the organisation");
     }
 
     removeUserFromOrganisation(organisation, authenticatedUser);
@@ -314,7 +314,7 @@ public class OrganisationService {
   public void removeUserFromOrganisation(Organisation organisation, User user) {
     if (user.getOrganisation() == null
         || !organisation.getId().equals(user.getOrganisation().getId())) {
-      throw new ResourceNotFoundException("User does not belong to the specified vineyard");
+      throw new ResourceNotFoundException("User does not belong to the specified organisation");
     }
 
     user.setOrganisation(null);

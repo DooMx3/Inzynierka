@@ -102,7 +102,7 @@ class OrganisationServiceTest {
               UnauthorizedException.class, () -> service.createOrganisation(request, null));
 
       assertEquals(
-          "Authenticated user is required to create a vineyard", exception.getMessage());
+          "Authenticated user is required to create an organisation", exception.getMessage());
       verifyNoInteractions(repository, userRepository);
     }
 
@@ -129,7 +129,7 @@ class OrganisationServiceTest {
               () -> service.createOrganisation(request, user));
 
       assertEquals(
-          "You cannot create another vineyard because you already belong to one",
+          "You cannot create another organisation because you already belong to one",
           exception.getMessage());
       verifyNoInteractions(repository, userRepository);
     }
@@ -502,7 +502,7 @@ class OrganisationServiceTest {
           assertThrows(ResourceConflictException.class, () -> service.inviteUser(request, owner));
 
       assertEquals(
-          "User already belongs to a vineyard or has a pending invitation",
+          "User already belongs to an organisation or has a pending invitation",
           exception.getMessage());
       assertEquals(MembershipStatus.PENDING, invitedUser.getMembershipStatus());
       assertSame(organisation, invitedUser.getOrganisation());
