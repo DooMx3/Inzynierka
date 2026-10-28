@@ -21,6 +21,7 @@
         getPendingInvitations,
         inviteEmployee,
         removeOrganisationRole,
+        removeUserFromOrganisation,
         type OrganisationRole,
     } from "$lib/api/organisation";
     import { roleLabel, type Employee } from "$lib/types/employee";
@@ -84,7 +85,7 @@
             employees = [];
             loadError =
                 error instanceof ApiError && error.status === 403
-                    ? "Only the organisation owner can manage employees."
+                    ? "Only the vineyard owner can manage employees."
                     : error instanceof Error
                       ? error.message
                       : "Could not load employees.";
@@ -237,11 +238,15 @@
         removePending = true;
         removeError = "";
         try {
-            await cancelInvitation(removing.id);
+            if (removing.pending) {
+                await cancelInvitation(removing.id);
+            } else {
+                await removeUserFromOrganisation(removing.id);
+            }
             removing = null;
             await load();
         } catch (error) {
-            removeError = error instanceof Error ? error.message : "Could not cancel the invitation.";
+            removeError = error instanceof Error ? error.message : "Could not remove this person.";
         } finally {
             removePending = false;
         }
@@ -250,7 +255,7 @@
 
 <div class="flex flex-col gap-4">
     {#if !isOwner}
-        <p class="text-sm text-zinc-700">Only the organisation owner can manage employees.</p>
+        <p class="text-sm text-zinc-700">Only the vineyard owner can manage employees.</p>
     {:else}
     <div class="flex justify-end">
         <div class="w-52">
@@ -406,8 +411,10 @@
 
 {#if removing}
     <ConfirmationDialog
-        title="Remove invitation"
-        text={removeError || `Cancel the invitation for ${removing.firstname} ${removing.lastname}?`}
+        title={removing.pending ? "Cancel invitation" : "Remove employee"}
+        text={removeError || (removing.pending
+            ? `Cancel the invitation for ${removing.firstname} ${removing.lastname}? They will no longer be able to join.`
+            : `Remove ${removing.firstname} ${removing.lastname} from the vineyard? They will lose access immediately.`)}
         acceptText="Remove"
         onClose={() => (removing = null)}
         onCancel={() => (removing = null)}

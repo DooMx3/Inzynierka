@@ -53,7 +53,7 @@
 <form class="flex w-full flex-col gap-4 text-zinc-800" novalidate onsubmit={submit}>
     <h2 class="text-xl font-semibold">Delete your account.</h2>
     <p class="text-sm text-zinc-700">
-        This deactivates the account. If you own an organisation, delete that organisation first. Enter your password to confirm.
+        This deactivates the account. If you own a vineyard, delete that vineyard first. Enter your password to confirm.
     </p>
     <hr class="border-[#e4d8cb]" />
     <InputField

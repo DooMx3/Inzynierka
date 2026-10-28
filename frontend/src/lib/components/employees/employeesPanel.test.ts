@@ -157,7 +157,7 @@ describe('Employees panel', () => {
 
         render(EmployeesPanel);
 
-        expect(screen.getByText('Only the organisation owner can manage employees.')).toBeInTheDocument();
+        expect(screen.getByText('Only the vineyard owner can manage employees.')).toBeInTheDocument();
         expect(screen.queryByRole('button', { name: 'New employee' })).not.toBeInTheDocument();
         expect(calls.some((call) => call.url === '/api/organisations/members')).toBe(false);
     });
@@ -169,7 +169,7 @@ describe('Employees panel', () => {
         render(EmployeesPanel);
 
         await waitFor(() => {
-            expect(screen.getByText('Only the organisation owner can manage employees.')).toBeInTheDocument();
+            expect(screen.getByText('Only the vineyard owner can manage employees.')).toBeInTheDocument();
         });
     });
 

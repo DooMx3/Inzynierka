@@ -26,6 +26,8 @@
         getUserInvitations,
         leaveOrganisation,
         updateOrganisation,
+        uploadOrganisationLogo,
+        getOrganisationLogoUrl,
         type Organisation,
         type OrganisationInvitation,
     } from "$lib/api/organisation";
@@ -47,6 +49,9 @@
     let postalCode = $state("");
     let taxId = $state("");
     let motto = $state("");
+    let logoFile = $state<File | null>(null);
+    let logoPreviewUrl = $state<string | null>(null);
+    let logoTimestamp = $state(Date.now());
 
     const sideBySide = new MediaQuery("(min-width: 840px) and (max-width: 1499px)");
     const invited = $derived(invitations.length > 0);
@@ -63,6 +68,11 @@
         postalCode = source?.postalCode ?? "";
         taxId = source?.taxId ?? "";
         motto = source?.motto ?? "";
+        logoFile = null;
+        if (logoPreviewUrl) {
+            URL.revokeObjectURL(logoPreviewUrl);
+            logoPreviewUrl = null;
+        }
     };
 
     onMount(async () => {
@@ -121,6 +131,19 @@
         dialog = "delete";
     };
 
+    const onLogoFileChange = (event: Event) => {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0] ?? null;
+        if (logoPreviewUrl) {
+            URL.revokeObjectURL(logoPreviewUrl);
+            logoPreviewUrl = null;
+        }
+        logoFile = file;
+        if (file) {
+            logoPreviewUrl = URL.createObjectURL(file);
+        }
+    };
+
     const draft = () => ({
         name: name.trim(),
         city: city.trim(),
@@ -133,7 +156,7 @@
     const organisationMessages = () => {
         const messages: string[] = [];
         if (name.trim().length === 0) {
-            messages.push("Enter the organisation name.");
+            messages.push("Enter the vineyard name.");
         }
         if (city.trim().length === 0) {
             messages.push("Enter the city.");
@@ -159,10 +182,18 @@
             if (!roles.includes("OWNER")) {
                 roles = [...roles, "OWNER"];
             }
+            if (logoFile) {
+                try {
+                    await uploadOrganisationLogo(logoFile);
+                    logoTimestamp = Date.now();
+                } catch {
+                    // logo upload failure is non-critical
+                }
+            }
             dialog = null;
-            alert("The organisation is ready. You are its owner.");
+            alert("The vineyard is ready. You are its owner.");
         } catch (error) {
-            alert(error instanceof Error ? error.message : "Could not create the organisation.");
+            alert(error instanceof Error ? error.message : "Could not create the vineyard.");
         } finally {
             pending = false;
         }
@@ -182,9 +213,17 @@
         pending = true;
         try {
             organisation = await updateOrganisation(draft());
+            if (logoFile) {
+                try {
+                    await uploadOrganisationLogo(logoFile);
+                    logoTimestamp = Date.now();
+                } catch {
+                    // logo upload failure is non-critical
+                }
+            }
             dialog = null;
         } catch (error) {
-            alert(error instanceof Error ? error.message : "Could not update the organisation.");
+            alert(error instanceof Error ? error.message : "Could not update the vineyard.");
         } finally {
             pending = false;
         }
@@ -208,7 +247,7 @@
             roles = roles.filter((role) => role !== "OWNER");
             dialog = null;
         } catch (error) {
-            alert(error instanceof Error ? error.message : "Could not delete the organisation.");
+            alert(error instanceof Error ? error.message : "Could not delete the vineyard.");
         } finally {
             pending = false;
         }
@@ -240,7 +279,7 @@
             await acceptInvitation();
             window.location.href = "/workers";
         } catch (error) {
-            formError = error instanceof Error ? error.message : "Could not join the organisation.";
+            formError = error instanceof Error ? error.message : "Could not join the vineyard.";
             pending = false;
         }
     };
@@ -254,6 +293,27 @@
         <InputField class="field-postal" label="Postal code" placeholder="00-000" bind:value={postalCode} svg={postalCodeIcon} />
         <InputField class="field-tax" label="Tax ID" placeholder="Tax ID" bind:value={taxId} svg={taxIcon} />
         <InputField class="field-motto" label="Motto" placeholder="Motto" bind:value={motto} svg={mottoIcon} />
+        <div class="logo-field">
+            <span class="text-sm text-zinc-600">Logo</span>
+            <label class="logo-upload-label" aria-label="Choose a logo image">
+                {#if logoPreviewUrl}
+                    <img src={logoPreviewUrl} alt="Logo preview" class="logo-preview" />
+                {:else if organisation?.logoPath}
+                    <img src="{getOrganisationLogoUrl()}?t={logoTimestamp}" alt="Current logo" class="logo-preview" />
+                {:else}
+                    <span class="logo-placeholder">Click to upload logo</span>
+                {/if}
+                <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    class="sr-only"
+                    onchange={onLogoFileChange}
+                />
+            </label>
+            {#if logoFile}
+                <p class="text-xs text-zinc-500 mt-1">{logoFile.name}</p>
+            {/if}
+        </div>
     </div>
 {/snippet}
 
@@ -266,6 +326,13 @@
         <p class="text-lg text-zinc-700">Loading your vineyard...</p>
     {:else if isOwner}
         <section class="home-card" aria-label="Vineyard">
+            {#if organisation?.logoPath}
+                <img
+                    src="{getOrganisationLogoUrl()}?t={logoTimestamp}"
+                    alt="Vineyard logo"
+                    class="org-logo"
+                />
+            {/if}
             <h2>{organisation?.name || "Your vineyard"}</h2>
             <p>
                 {#if organisation?.motto}
@@ -285,6 +352,12 @@
         </section>
     {:else if isMember}
         <section class="home-card" aria-label="Vineyard">
+            <img
+                src="{getOrganisationLogoUrl()}?t={logoTimestamp}"
+                alt="Vineyard logo"
+                class="org-logo"
+                onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
             <h2>You are part of the vineyard.</h2>
             <p>
                 The rows, the work and the harvest are open to you. Leave only when you are ready to step away.
@@ -303,7 +376,7 @@
 
 {#if dialog === "create" || dialog === "edit"}
     <FormWindow
-        title={dialog === "edit" ? "Edit vineyard" : "Create organisation"}
+        title={dialog === "edit" ? "Edit vineyard" : "Create vineyard"}
         showBreadcrumbs={false}
         acceptText={dialog === "edit" ? "Save" : "Create"}
         wide={sideBySide.current}
@@ -358,7 +431,7 @@
 
 {#if dialog === "invite"}
     <FormWindow
-        title="Organisation invitation"
+        title="Vineyard invitation"
         showBreadcrumbs={false}
         acceptText="Join"
         onClose={() => (dialog = null)}
@@ -422,7 +495,8 @@
         grid-template-areas:
             "name city"
             "street postal"
-            "tax motto";
+            "tax motto"
+            "logo logo";
         align-items: start;
         column-gap: 1.25rem;
         row-gap: 1rem;
@@ -450,5 +524,51 @@
 
     .org-fields.is-side :global(.field-motto) {
         grid-area: motto;
+    }
+
+    .org-fields.is-side .logo-field {
+        grid-area: logo;
+    }
+
+    .logo-field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .logo-upload-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 10rem;
+        border-radius: 0.75rem;
+        border: 2px dashed #c4b6a6;
+        background: #fdfaf7;
+        cursor: pointer;
+        overflow: hidden;
+        transition: border-color 0.2s;
+    }
+
+    .logo-upload-label:hover {
+        border-color: #8c735c;
+    }
+
+    .logo-preview {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .logo-placeholder {
+        font-size: 0.875rem;
+        color: #a89180;
+    }
+
+    .org-logo {
+        width: 7rem;
+        height: 7rem;
+        object-fit: contain;
+        border-radius: 0.75rem;
     }
 </style>
