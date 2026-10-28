@@ -85,6 +85,7 @@ describe('Organisation API', () => {
             street: '',
             postalCode: '',
             motto: '',
+            logoPath: null,
         });
         expect(calls[0]?.url).toBe('/api/organisations');
         expect(calls[0]?.init?.method).toBe('GET');
@@ -143,17 +144,14 @@ describe('Organisation API', () => {
         expect(calls[0]?.init?.body).toBe(JSON.stringify({ password: 'Superextrasecurepassword1!' }));
     });
 
-    it('reports that leaving a vineyard is not available yet', async () => {
-        globalThis.fetch = (async () => {
-            calls.push({ url: 'should-not-run' });
-            return new Response('', { status: 204 });
-        }) as typeof fetch;
+    it('leaves the current vineyard', async () => {
+        capture(new Response('', { status: 204 }));
 
-        const error = await leaveOrganisation().catch((caught: unknown) => caught);
+        await leaveOrganisation();
 
-        expect(error).toBeInstanceOf(Error);
-        expect((error as Error).message).toBe('Leaving a vineyard is not available yet.');
-        expect(calls).toEqual([]);
+        expect(calls[0]?.url).toBe('/api/organisations/leave');
+        expect(calls[0]?.init?.method).toBe('DELETE');
+        expect(calls[0]?.init?.credentials).toBe('include');
     });
 
     it('reads members and drops records that have no id or email', async () => {
