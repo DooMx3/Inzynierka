@@ -87,7 +87,7 @@ describe('Employees panel', () => {
         expect(screen.getByRole('button', { name: 'Change roles' })).toBeInTheDocument();
         expect(screen.getByText('pending@gmail.com')).toBeInTheDocument();
         expect(screen.getByText('Pending')).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: 'Remove' })).toBeInTheDocument();
+        expect(screen.getAllByRole('button', { name: 'Remove' })).toHaveLength(2);
         expect(screen.getByLabelText('Results toolbar')).toBeInTheDocument();
     });
 
@@ -175,7 +175,9 @@ describe('Employees panel', () => {
 
     it('cancels a pending invitation after confirmation', async () => {
         await shown();
-        await fireEvent.click(screen.getByRole('button', { name: 'Remove' }));
+        const pendingRow = screen.getByText('pending@gmail.com').closest('tr');
+        expect(pendingRow).toBeTruthy();
+        await fireEvent.click(within(pendingRow as HTMLElement).getByRole('button', { name: 'Remove' }));
         await fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Remove' }));
 
         await waitFor(() => {

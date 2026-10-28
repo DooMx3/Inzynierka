@@ -85,6 +85,9 @@ describe('User home', () => {
             if (url === '/api/user/invitations/accept' && init?.method === 'POST') {
                 return new Response('', { status: 204 });
             }
+            if (url === '/api/organisations/leave' && init?.method === 'DELETE') {
+                return new Response('', { status: 204 });
+            }
             return new Response('missing', { status: 500 });
         }) as typeof fetch;
     });
@@ -265,8 +268,13 @@ describe('User home', () => {
         expect(screen.getByText(/Leave the vineyard/)).toBeInTheDocument();
         await fireEvent.click(screen.getByRole('button', { name: 'Leave' }));
 
-        expect(alerts).toEqual(['Leaving a vineyard is not available yet.']);
-        expect(calls.some((call) => call.url === '/api/organisations' && call.init?.method === 'DELETE')).toBe(false);
+        await waitFor(() => {
+            expect(screen.getByRole('button', { name: /Create new vineyard/i })).toBeEnabled();
+        });
+        expect(alerts).toEqual([]);
+        expect(
+            calls.some((call) => call.url === '/api/organisations/leave' && call.init?.method === 'DELETE'),
+        ).toBe(true);
     });
 
     it('lets the owner edit and delete the vineyard', async () => {
