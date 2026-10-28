@@ -783,7 +783,7 @@ class OrganisationControllerTest {
 
     @Test
     void shouldReturn409WhenOrganisationIsInactive() throws Exception {
-      doThrow(new InactiveResourceException("Cannot change roles in an inactive organisation"))
+      doThrow(new InactiveResourceException("Cannot change roles in an inactive vineyard"))
           .when(organisationService)
           .addRoleToUser(targetUserId, RoleName.WORKER, user);
 
@@ -884,7 +884,7 @@ class OrganisationControllerTest {
 
     @Test
     void shouldReturn404WhenOrganisationOrUserNotFound() throws Exception {
-      doThrow(new ResourceNotFoundException("User does not belong to this organisation"))
+      doThrow(new ResourceNotFoundException("User does not belong to this vineyard"))
           .when(organisationService)
           .removeRoleFromUser(targetUserId, RoleName.WORKER, user);
 
@@ -926,7 +926,7 @@ class OrganisationControllerTest {
 
     @Test
     void shouldReturn409WhenOrganisationIsInactive() throws Exception {
-      doThrow(new InactiveResourceException("Cannot change roles in an inactive organisation"))
+      doThrow(new InactiveResourceException("Cannot change roles in an inactive vineyard"))
           .when(organisationService)
           .removeRoleFromUser(targetUserId, RoleName.WORKER, user);
 

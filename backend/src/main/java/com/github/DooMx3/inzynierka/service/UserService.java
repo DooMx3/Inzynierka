@@ -131,7 +131,7 @@ public class UserService {
   public void acceptInvitation(User authenticatedUser) {
     User user = requirePendingInvitation(authenticatedUser);
     if (!user.getOrganisation().isActive()) {
-      throw new InactiveResourceException("The organisation is inactive");
+      throw new InactiveResourceException("The vineyard is inactive");
     }
 
     user.setMembershipStatus(MembershipStatus.MEMBER);

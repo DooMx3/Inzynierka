@@ -26,6 +26,7 @@ export type Organisation = {
     street: string;
     postalCode: string;
     motto: string;
+    logoPath: string | null;
 };
 
 export type OrganisationRole = 'WORKER' | 'OENOLOGIST';
@@ -65,6 +66,7 @@ const readOrganisation = (data: unknown): Organisation => {
         street: asText(record.street),
         postalCode: asText(record.postalCode),
         motto: asText(record.motto),
+        logoPath: typeof record.logoPath === 'string' ? record.logoPath : null,
     };
 };
 
@@ -156,8 +158,12 @@ export const deleteOrganisation = async (password: string) => {
     await ensureOk(response);
 };
 
-export const leaveOrganisation = async () => {
-    throw new Error('Leaving a vineyard is not available yet.');
+export const leaveOrganisation = async (): Promise<void> => {
+    const response = await fetch('/api/organisations/leave', {
+        method: 'DELETE',
+        credentials: 'include',
+    });
+    await ensureOk(response);
 };
 
 export const getOrganisationMembers = async (): Promise<OrganisationMember[]> => {
@@ -244,6 +250,14 @@ export const cancelInvitation = async (userId: string) => {
     await ensureOk(response);
 };
 
+export const removeUserFromOrganisation = async (userId: string): Promise<void> => {
+    const response = await fetch(`/api/organisations/users/${userId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+    });
+    await ensureOk(response);
+};
+
 export const addOrganisationRole = async (userId: string, role: OrganisationRole) => {
     const response = await fetch(
         `/api/organisations/users/${userId}/roles?role=${encodeURIComponent(role)}`,
@@ -265,3 +279,24 @@ export const removeOrganisationRole = async (userId: string, role: OrganisationR
     );
     await ensureOk(response);
 };
+
+export const uploadOrganisationLogo = async (file: File): Promise<void> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await fetch('/api/organisations/logo', {
+        method: 'PUT',
+        credentials: 'include',
+        body: formData,
+    });
+    await ensureOk(response);
+};
+
+export const deleteOrganisationLogo = async (): Promise<void> => {
+    const response = await fetch('/api/organisations/logo', {
+        method: 'DELETE',
+        credentials: 'include',
+    });
+    await ensureOk(response);
+};
+
+export const getOrganisationLogoUrl = () => '/api/organisations/logo';

@@ -121,6 +121,18 @@
                         onClick={onChangeRoles}
                     />
                 </div>
+                {#if !employee.roles.includes("OWNER")}
+                    <div class="w-36">
+                        <Button
+                            svg={closeIcon}
+                            text="Remove"
+                            isFolded={false}
+                            gentle={true}
+                            class="bg-[#8f3d32] text-white fill-white"
+                            onClick={onRemove}
+                        />
+                    </div>
+                {/if}
             {/if}
         </div>
     </td>
