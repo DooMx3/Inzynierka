@@ -43,6 +43,7 @@ public class OrganisationController {
     @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content)
   })
   @PostMapping
+  @PreAuthorize("isAuthenticated()")
   public ResponseEntity<Organisation> create(
       @RequestBody @Valid OrganisationRequest request,
       @Parameter(hidden = true) @AuthenticationPrincipal User user) {
@@ -255,6 +256,7 @@ public class OrganisationController {
         content = @Content)
   })
   @DeleteMapping("/leave")
+  @PreAuthorize("isAuthenticated()")
   public ResponseEntity<Void> leave(@Parameter(hidden = true) @AuthenticationPrincipal User user) {
     organisationService.leaveOrganisation(user);
     return ResponseEntity.noContent().build();
