@@ -12,8 +12,10 @@ import com.github.DooMx3.inzynierka.entities.OrganisationLogo;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.exceptions.InvalidLogoException;
 import com.github.DooMx3.inzynierka.exceptions.LogoTooLargeException;
+import com.github.DooMx3.inzynierka.exceptions.ResourceNotFoundException;
 import com.github.DooMx3.inzynierka.repositories.OrganisationLogoRepository;
 import com.github.DooMx3.inzynierka.repositories.OrganisationRepository;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,7 +54,7 @@ class OrganisationLogoServiceTest {
     assertEquals(organisationId, logoCaptor.getValue().getOrganisationId());
     assertEquals("image/png", logoCaptor.getValue().getContentType());
     assertEquals(pngHeader.length, logoCaptor.getValue().getFileSize());
-    assertEquals(OrganisationLogoService.LOGO_URL, organisation.getLogoPath());
+    assertEquals("/api/organisations/" + organisationId + "/logo", organisation.getLogoPath());
     verify(organisationRepository).save(organisation);
   }
 
@@ -84,5 +86,36 @@ class OrganisationLogoServiceTest {
     assertThrows(LogoTooLargeException.class, () -> service.upload(file, user));
 
     verify(organisationLogoRepository, never()).save(any(OrganisationLogo.class));
+  }
+
+  @Test
+  void returnsLogoForActiveOrganisationWithoutOwnerAuthentication() {
+    UUID organisationId = UUID.randomUUID();
+    Organisation organisation = new Organisation();
+    organisation.setId(organisationId);
+    organisation.setActive(true);
+    byte[] image = {1, 2, 3};
+    OrganisationLogo logo =
+        new OrganisationLogo(organisationId, "image/png", image, image.length, null);
+    when(organisationRepository.findById(organisationId)).thenReturn(Optional.of(organisation));
+    when(organisationLogoRepository.findById(organisationId)).thenReturn(Optional.of(logo));
+
+    var result = service.get(organisationId);
+
+    assertEquals("image/png", result.contentType());
+    assertEquals(image, result.imageData());
+  }
+
+  @Test
+  void doesNotReturnLogoForInactiveOrganisation() {
+    UUID organisationId = UUID.randomUUID();
+    Organisation organisation = new Organisation();
+    organisation.setId(organisationId);
+    organisation.setActive(false);
+    when(organisationRepository.findById(organisationId)).thenReturn(Optional.of(organisation));
+
+    assertThrows(ResourceNotFoundException.class, () -> service.get(organisationId));
+
+    verify(organisationLogoRepository, never()).findById(organisationId);
   }
 }

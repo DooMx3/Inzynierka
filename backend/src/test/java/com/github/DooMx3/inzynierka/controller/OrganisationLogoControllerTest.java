@@ -19,6 +19,7 @@ import com.github.DooMx3.inzynierka.dto.organisation.OrganisationLogoContent;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.service.JwtService;
 import com.github.DooMx3.inzynierka.service.OrganisationLogoService;
+import java.util.UUID;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,13 +58,14 @@ class OrganisationLogoControllerTest {
   }
 
   @Test
-  void getsImageWithDetectedContentType() throws Exception {
+  void getsImageWithoutAuthenticationWithDetectedContentType() throws Exception {
     byte[] image = {1, 2, 3};
-    when(organisationLogoService.get(user))
+    UUID organisationId = UUID.randomUUID();
+    when(organisationLogoService.get(organisationId))
         .thenReturn(new OrganisationLogoContent(image, "image/png"));
 
     mockMvc
-        .perform(get(OrganisationLogoService.LOGO_URL).with(authentication(authWith("OWNER"))))
+        .perform(get("/api/organisations/{organisationId}/logo", organisationId))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.IMAGE_PNG))
         .andExpect(content().bytes(image))
@@ -93,7 +95,7 @@ class OrganisationLogoControllerTest {
   @Test
   void rejectsNonOwnersBeforeCallingTheService() throws Exception {
     mockMvc
-        .perform(get(OrganisationLogoService.LOGO_URL).with(authentication(authWith("MEMBER"))))
+        .perform(delete(OrganisationLogoService.LOGO_URL).with(authentication(authWith("MEMBER"))))
         .andExpect(status().isForbidden());
 
     verifyNoInteractions(organisationLogoService);

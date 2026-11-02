@@ -51,16 +51,19 @@ public class OrganisationLogoService {
     UUID organisationId = organisation.getId();
     organisationLogoRepository.save(
         new OrganisationLogo(organisationId, contentType, imageData, imageData.length, null));
-    organisation.setLogoPath(LOGO_URL);
+    organisation.setLogoPath("/api/organisations/" + organisationId + "/logo");
     organisationRepository.save(organisation);
   }
 
   @Transactional(readOnly = true)
-  public OrganisationLogoContent get(User user) {
-    Organisation organisation = organisationService.getOrganisation(user);
+  public OrganisationLogoContent get(UUID organisationId) {
+    organisationRepository
+        .findById(organisationId)
+        .filter(Organisation::isActive)
+        .orElseThrow(() -> new ResourceNotFoundException("Organisation not found"));
     OrganisationLogo logo =
         organisationLogoRepository
-            .findById(organisation.getId())
+            .findById(organisationId)
             .orElseThrow(() -> new ResourceNotFoundException("Organisation logo not found"));
     return new OrganisationLogoContent(logo.getImageData(), logo.getContentType());
   }

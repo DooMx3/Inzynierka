@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="DooMx3" id="2026-10-28-001-update-public-organisation-logo-paths">
+        <sql>
+            UPDATE organisation
+            SET logo_path = '/api/organisations/' || organisation.id || '/logo'
+            WHERE logo_path = '/api/organisations/logo'
+              AND EXISTS (
+                  SELECT 1
+                  FROM organisation_logo
+                  WHERE organisation_logo.organisation_id = organisation.id
+              )
+        </sql>
+    </changeSet>
+</databaseChangeLog>
