@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
@@ -17,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -24,9 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Organisation logo", description = "Upload and retrieve an organisation logo")
-@SecurityRequirement(name = "cookieAuth")
 @RestController
-@RequestMapping(OrganisationLogoService.LOGO_URL)
+@RequestMapping("/api/organisations")
 @RequiredArgsConstructor
 public class OrganisationLogoController {
 
@@ -52,7 +53,8 @@ public class OrganisationLogoController {
         description = "Image exceeds 2 MB",
         content = @io.swagger.v3.oas.annotations.media.Content)
   })
-  @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @PutMapping(value = "/logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @SecurityRequirement(name = "cookieAuth")
   @PreAuthorize("hasAuthority('OWNER')")
   public ResponseEntity<Void> upload(
       @RequestPart("file") MultipartFile file, @AuthenticationPrincipal User user)
@@ -65,22 +67,13 @@ public class OrganisationLogoController {
   @ApiResponses({
     @ApiResponse(responseCode = "200", description = "Image returned"),
     @ApiResponse(
-        responseCode = "401",
-        description = "Not authenticated",
-        content = @io.swagger.v3.oas.annotations.media.Content),
-    @ApiResponse(
-        responseCode = "403",
-        description = "Owner access required",
-        content = @io.swagger.v3.oas.annotations.media.Content),
-    @ApiResponse(
         responseCode = "404",
         description = "Logo not found",
         content = @io.swagger.v3.oas.annotations.media.Content)
   })
-  @GetMapping
-  @PreAuthorize("hasAuthority('OWNER')")
-  public ResponseEntity<byte[]> get(@AuthenticationPrincipal User user) {
-    OrganisationLogoContent logo = organisationLogoService.get(user);
+  @GetMapping("/{organisationId}/logo")
+  public ResponseEntity<byte[]> get(@PathVariable UUID organisationId) {
+    OrganisationLogoContent logo = organisationLogoService.get(organisationId);
     return ResponseEntity.ok()
         .contentType(MediaType.parseMediaType(logo.contentType()))
         .contentLength(logo.imageData().length)
@@ -105,7 +98,8 @@ public class OrganisationLogoController {
         description = "Logo not found",
         content = @io.swagger.v3.oas.annotations.media.Content)
   })
-  @DeleteMapping
+  @DeleteMapping("/logo")
+  @SecurityRequirement(name = "cookieAuth")
   @PreAuthorize("hasAuthority('OWNER')")
   public ResponseEntity<Void> delete(@AuthenticationPrincipal User user) {
     organisationLogoService.delete(user);
