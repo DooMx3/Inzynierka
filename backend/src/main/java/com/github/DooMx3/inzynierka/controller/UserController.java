@@ -128,10 +128,8 @@ public class UserController {
   @GetMapping("/invitations")
   public ResponseEntity<UserInvitationResponse> getInvitations(
       @Parameter(hidden = true) @AuthenticationPrincipal User user) {
-    return service
-        .getInvitations(user)
-        .map(ResponseEntity::ok)
-        .orElseGet(() -> ResponseEntity.noContent().build());
+    UserInvitationResponse invitation = service.getInvitations(user);
+    return invitation == null ? ResponseEntity.noContent().build() : ResponseEntity.ok(invitation);
   }
 
   @Operation(

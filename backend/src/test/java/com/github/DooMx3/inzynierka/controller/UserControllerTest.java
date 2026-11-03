@@ -22,7 +22,6 @@ import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.service.JwtService;
 import com.github.DooMx3.inzynierka.service.UserService;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -401,7 +400,7 @@ class UserControllerTest {
 
     @Test
     void shouldReturn204WhenThereIsNoInvitation() throws Exception {
-      when(userService.getInvitations(user)).thenReturn(Optional.empty());
+      when(userService.getInvitations(user)).thenReturn(null);
 
       mockMvc
           .perform(get(BASE_URL + "/invitations").with(authenticated()))
@@ -414,8 +413,7 @@ class UserControllerTest {
     @Test
     void shouldReturnSingleInvitation() throws Exception {
       when(userService.getInvitations(user))
-          .thenReturn(
-              Optional.of(new UserInvitationResponse(java.util.UUID.randomUUID(), "Winnica")));
+          .thenReturn(new UserInvitationResponse(java.util.UUID.randomUUID(), "Winnica"));
 
       mockMvc
           .perform(get(BASE_URL + "/invitations").with(authenticated()))
