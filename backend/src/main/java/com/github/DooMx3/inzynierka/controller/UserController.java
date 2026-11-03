@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -120,15 +119,19 @@ public class UserController {
   @Operation(
       summary = "Get current user's invitations",
       description =
-          "Returns the pending organisation invitation for the authenticated user, or an empty list if there is none.")
+          "Returns the authenticated user's pending organisation invitation, if one exists.")
   @ApiResponses({
-    @ApiResponse(responseCode = "200", description = "Pending invitations returned"),
+    @ApiResponse(responseCode = "200", description = "Pending invitation returned"),
+    @ApiResponse(responseCode = "204", description = "No pending invitation", content = @Content),
     @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content)
   })
   @GetMapping("/invitations")
-  public ResponseEntity<List<UserInvitationResponse>> getInvitations(
+  public ResponseEntity<UserInvitationResponse> getInvitations(
       @Parameter(hidden = true) @AuthenticationPrincipal User user) {
-    return ResponseEntity.ok(service.getInvitations(user));
+    return service
+        .getInvitations(user)
+        .map(ResponseEntity::ok)
+        .orElseGet(() -> ResponseEntity.noContent().build());
   }
 
   @Operation(

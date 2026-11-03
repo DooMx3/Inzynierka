@@ -24,20 +24,20 @@ const organisation = {
     motto: 'Sun in every glass.',
 };
 
-const invitation = [{ organisationId: 'org-1', organisationName: 'North vineyard' }];
+const invitation = { organisationId: 'org-1', organisationName: 'North vineyard' };
 
 describe('User home', () => {
     const originalFetch = globalThis.fetch;
     const originalAlert = globalThis.alert;
     const originalLocation = window.location;
     let calls: { url: string; init?: RequestInit }[];
-    let invitations: unknown = invitation;
+    let invitationPayload: unknown = invitation;
     let membershipStatus = 'NONE';
     let roles: string[] = [];
 
     beforeEach(() => {
         calls = [];
-        invitations = invitation;
+        invitationPayload = invitation;
         membershipStatus = 'NONE';
         roles = [];
         setUser(null);
@@ -71,7 +71,7 @@ describe('User home', () => {
                 return new Response('', { status: 204 });
             }
             if (url === '/api/user/invitations') {
-                return new Response(JSON.stringify(invitations), {
+                return new Response(JSON.stringify(invitationPayload), {
                     status: 200,
                     headers: { 'Content-Type': 'application/json' },
                 });
@@ -131,7 +131,7 @@ describe('User home', () => {
     });
 
     it('keeps the join button disabled when there is no invitation', async () => {
-        invitations = [];
+        invitationPayload = null;
         setUser(user);
         await shown();
 
@@ -258,7 +258,7 @@ describe('User home', () => {
             alerts.push(String(message ?? ''));
         }) as typeof alert;
         membershipStatus = 'MEMBER';
-        invitations = [];
+        invitationPayload = null;
         setUser(user);
         await shown();
 
@@ -284,7 +284,7 @@ describe('User home', () => {
         }) as typeof alert;
         membershipStatus = 'MEMBER';
         roles = ['OWNER'];
-        invitations = [];
+        invitationPayload = null;
         setUser(user);
         await shown();
 
