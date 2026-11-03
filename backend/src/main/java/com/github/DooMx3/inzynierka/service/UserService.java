@@ -115,15 +115,14 @@ public class UserService {
   }
 
   @Transactional
-  public Optional<UserInvitationResponse> getInvitations(User authenticatedUser) {
+  public UserInvitationResponse getInvitations(User authenticatedUser) {
     User user = loadAuthenticatedUser(authenticatedUser);
     if (user.getMembershipStatus() != MembershipStatus.PENDING || user.getOrganisation() == null) {
-      return Optional.empty();
+      return null;
     }
 
-    return Optional.of(
-        new UserInvitationResponse(
-            user.getOrganisation().getId(), user.getOrganisation().getName()));
+    return new UserInvitationResponse(
+        user.getOrganisation().getId(), user.getOrganisation().getName());
   }
 
   @Transactional

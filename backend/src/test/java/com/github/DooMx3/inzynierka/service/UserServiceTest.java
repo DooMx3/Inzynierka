@@ -312,17 +312,16 @@ class UserServiceTest {
       when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
       assertEquals(
-          Optional.of(new UserInvitationResponse(organisationId, "Winnica")),
-          service.getInvitations(user));
+          new UserInvitationResponse(organisationId, "Winnica"), service.getInvitations(user));
     }
 
     @Test
-    void shouldReturnEmptyWhenThereIsNoPendingInvitation() {
+    void shouldReturnNullWhenThereIsNoPendingInvitation() {
       UUID userId = UUID.randomUUID();
       User user = User.builder().id(userId).membershipStatus(MembershipStatus.NONE).build();
       when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-      assertEquals(Optional.empty(), service.getInvitations(user));
+      assertNull(service.getInvitations(user));
     }
 
     @Test
