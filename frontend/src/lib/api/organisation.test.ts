@@ -41,27 +41,29 @@ describe('Organisation API', () => {
         }) as typeof fetch;
     };
 
-    it('reads the current user invitations and skips incomplete records', async () => {
+    it('reads the current user invitation', async () => {
         capture(
-            json([
-                { organisationId: 'org-1', organisationName: 'North vineyard' },
-                { organisationName: 'Missing id' },
-                null,
-            ]),
+            json({ organisationId: 'org-1', organisationName: 'North vineyard' }),
         );
 
-        const invitations = await getUserInvitations();
+        const invitation = await getUserInvitations();
 
-        expect(invitations).toEqual([{ organisationId: 'org-1', organisationName: 'North vineyard' }]);
+        expect(invitation).toEqual({ organisationId: 'org-1', organisationName: 'North vineyard' });
         expect(calls[0]?.url).toBe('/api/user/invitations');
         expect(calls[0]?.init?.method).toBe('GET');
         expect(calls[0]?.init?.credentials).toBe('include');
     });
 
-    it('returns no invitations when the payload is not a list', async () => {
+    it('returns no invitation when the endpoint has no content', async () => {
+        capture(new Response('', { status: 204 }));
+
+        expect(await getUserInvitations()).toBeNull();
+    });
+
+    it('returns no invitation for an invalid payload', async () => {
         capture(json({ organisationId: 'org-1' }));
 
-        expect(await getUserInvitations()).toEqual([]);
+        expect(await getUserInvitations()).toBeNull();
     });
 
     it('accepts an invitation with an empty body', async () => {

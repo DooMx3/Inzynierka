@@ -80,33 +80,29 @@ const organisationBody = (draft: OrganisationDraft) =>
         motto: draft.motto || undefined,
     });
 
-export const getUserInvitations = async (): Promise<OrganisationInvitation[]> => {
+export const getUserInvitations = async (): Promise<OrganisationInvitation | null> => {
     const response = await fetch('/api/user/invitations', {
         method: 'GET',
         credentials: 'include',
     });
     await ensureOk(response);
-
-    const data: unknown = await response.json();
-    if (!Array.isArray(data)) {
-        return [];
+    if (response.status === 204) {
+        return null;
     }
 
-    return data.flatMap((item) => {
-        if (!item || typeof item !== 'object') {
-            return [];
-        }
-        const record = item as Record<string, unknown>;
-        if (typeof record.organisationId !== 'string' || typeof record.organisationName !== 'string') {
-            return [];
-        }
-        return [
-            {
-                organisationId: record.organisationId,
-                organisationName: record.organisationName,
-            },
-        ];
-    });
+    const data: unknown = await response.json();
+    if (!data || typeof data !== 'object') {
+        return null;
+    }
+
+    const record = data as Record<string, unknown>;
+    if (typeof record.organisationId !== 'string' || typeof record.organisationName !== 'string') {
+        return null;
+    }
+    return {
+        organisationId: record.organisationId,
+        organisationName: record.organisationName,
+    };
 };
 
 export const acceptInvitation = async () => {

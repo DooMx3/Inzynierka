@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import com.github.DooMx3.inzynierka.dto.user.ChangePasswordRequest;
 import com.github.DooMx3.inzynierka.dto.user.DeactivateUserRequest;
 import com.github.DooMx3.inzynierka.dto.user.ResetPasswordRequest;
+import com.github.DooMx3.inzynierka.dto.user.UserInvitationResponse;
 import com.github.DooMx3.inzynierka.dto.user.UserPatchRequest;
 import com.github.DooMx3.inzynierka.entities.Organisation;
 import com.github.DooMx3.inzynierka.entities.PasswordResetToken;
@@ -297,6 +298,33 @@ class UserServiceTest {
 
   @Nested
   class UserInvitation {
+    @Test
+    void shouldReturnPendingInvitation() {
+      UUID userId = UUID.randomUUID();
+      UUID organisationId = UUID.randomUUID();
+      Organisation organisation = Organisation.builder().id(organisationId).name("Winnica").build();
+      User user =
+          User.builder()
+              .id(userId)
+              .organisation(organisation)
+              .membershipStatus(MembershipStatus.PENDING)
+              .build();
+      when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+      assertEquals(
+          Optional.of(new UserInvitationResponse(organisationId, "Winnica")),
+          service.getInvitations(user));
+    }
+
+    @Test
+    void shouldReturnEmptyWhenThereIsNoPendingInvitation() {
+      UUID userId = UUID.randomUUID();
+      User user = User.builder().id(userId).membershipStatus(MembershipStatus.NONE).build();
+      when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+      assertEquals(Optional.empty(), service.getInvitations(user));
+    }
+
     @Test
     void shouldAcceptPendingInvitation() {
       // arrange

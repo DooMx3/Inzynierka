@@ -15,7 +15,6 @@ import com.github.DooMx3.inzynierka.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -116,13 +115,13 @@ public class UserService {
   }
 
   @Transactional
-  public List<UserInvitationResponse> getInvitations(User authenticatedUser) {
+  public Optional<UserInvitationResponse> getInvitations(User authenticatedUser) {
     User user = loadAuthenticatedUser(authenticatedUser);
     if (user.getMembershipStatus() != MembershipStatus.PENDING || user.getOrganisation() == null) {
-      return List.of();
+      return Optional.empty();
     }
 
-    return List.of(
+    return Optional.of(
         new UserInvitationResponse(
             user.getOrganisation().getId(), user.getOrganisation().getName()));
   }

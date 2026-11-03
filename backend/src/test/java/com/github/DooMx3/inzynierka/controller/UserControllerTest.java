@@ -17,10 +17,12 @@ import com.github.DooMx3.inzynierka.config.TestSecurityConfig;
 import com.github.DooMx3.inzynierka.dto.user.ChangePasswordRequest;
 import com.github.DooMx3.inzynierka.dto.user.DeactivateUserRequest;
 import com.github.DooMx3.inzynierka.dto.user.ResetPasswordRequest;
+import com.github.DooMx3.inzynierka.dto.user.UserInvitationResponse;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.service.JwtService;
 import com.github.DooMx3.inzynierka.service.UserService;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -398,14 +400,27 @@ class UserControllerTest {
   class GetInvitations {
 
     @Test
-    void shouldReturn200AndEmptyListWhenNoInvitations() throws Exception {
-      when(userService.getInvitations(user)).thenReturn(List.of());
+    void shouldReturn204WhenThereIsNoInvitation() throws Exception {
+      when(userService.getInvitations(user)).thenReturn(Optional.empty());
+
+      mockMvc
+          .perform(get(BASE_URL + "/invitations").with(authenticated()))
+          .andExpect(status().isNoContent())
+          .andExpect(content().string(""));
+
+      verify(userService).getInvitations(user);
+    }
+
+    @Test
+    void shouldReturnSingleInvitation() throws Exception {
+      when(userService.getInvitations(user))
+          .thenReturn(
+              Optional.of(new UserInvitationResponse(java.util.UUID.randomUUID(), "Winnica")));
 
       mockMvc
           .perform(get(BASE_URL + "/invitations").with(authenticated()))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$").isArray())
-          .andExpect(jsonPath("$").isEmpty());
+          .andExpect(jsonPath("$.organisationName").value("Winnica"));
 
       verify(userService).getInvitations(user);
     }

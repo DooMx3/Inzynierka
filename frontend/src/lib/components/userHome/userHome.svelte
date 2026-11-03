@@ -32,7 +32,7 @@
         type OrganisationInvitation,
     } from "$lib/api/organisation";
 
-    let invitations = $state<OrganisationInvitation[]>([]);
+    let invitation = $state<OrganisationInvitation | null>(null);
     let membership = $state("NONE");
     let roles = $state<string[]>([]);
     let organisation = $state<Organisation | null>(null);
@@ -54,7 +54,7 @@
     let logoTimestamp = $state(Date.now());
 
     const sideBySide = new MediaQuery("(min-width: 840px) and (max-width: 1499px)");
-    const invited = $derived(invitations.length > 0);
+    const invited = $derived(invitation !== null);
     const isOwner = $derived(roles.includes("OWNER"));
     const isMember = $derived(membership === "MEMBER" || isOwner);
     const nameInvalid = $derived(showErrors && name.trim().length === 0);
@@ -101,9 +101,9 @@
         }
 
         try {
-            invitations = await getUserInvitations();
+            invitation = await getUserInvitations();
         } catch {
-            invitations = [];
+            invitation = null;
         }
         ready = true;
     });
@@ -440,11 +440,7 @@
     >
         <div class="flex flex-col gap-3 text-lg text-zinc-800">
             <p>You have been invited to join:</p>
-            <ul class="list-disc pl-5">
-                {#each invitations as invitation (invitation.organisationId)}
-                    <li>{invitation.organisationName}</li>
-                {/each}
-            </ul>
+            <p>{invitation?.organisationName}</p>
             {#if formError}
                 <p class="text-[#8f3d32]" role="alert">{formError}</p>
             {/if}
