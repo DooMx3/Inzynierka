@@ -50,7 +50,7 @@ public class SubstanceController {
 
   @Operation(summary = "List active substances")
   @GetMapping
-  @PreAuthorize("hasAuthority('OWNER')")
+  @PreAuthorize("hasAuthority('OWNER') or hasAuthority('WORKER')")
   public ResponseEntity<List<Substance>> getAll(
       @Parameter(hidden = true) @AuthenticationPrincipal User user) {
     return ResponseEntity.ok(substanceService.getAll(user));
@@ -58,7 +58,7 @@ public class SubstanceController {
 
   @Operation(summary = "Get substance")
   @GetMapping("/{id}")
-  @PreAuthorize("hasAuthority('OWNER')")
+  @PreAuthorize("hasAuthority('OWNER') or hasAuthority('WORKER')")
   public ResponseEntity<Substance> getById(
       @PathVariable UUID id, @Parameter(hidden = true) @AuthenticationPrincipal User user) {
     return ResponseEntity.ok(substanceService.getById(id, user));
