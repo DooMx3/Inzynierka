@@ -71,7 +71,7 @@
 
     const visibleButtons = $derived(
         buttons.filter((button) =>
-            button.roles.some((role) => session.user?.roles.includes(role)),
+            button.roles.some((role) => session.user?.roles?.includes(role)),
         ),
     );
 </script>
