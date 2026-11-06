@@ -1,6 +1,7 @@
 package com.github.DooMx3.inzynierka.configuration;
 
 import com.github.DooMx3.inzynierka.service.JwtService;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -13,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -48,19 +50,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       return;
     }
 
-    userEmail = jwtService.extractUsername(jwt);
+    try {
+      userEmail = jwtService.extractUsername(jwt);
 
-    if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-      UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+      if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
-      if (jwtService.isTokenValid(jwt, userDetails)) {
-        UsernamePasswordAuthenticationToken authToken =
-            new UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.getAuthorities());
-        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        SecurityContextHolder.getContext().setAuthentication(authToken);
+        if (jwtService.isTokenValid(jwt, userDetails)) {
+          UsernamePasswordAuthenticationToken authToken =
+              new UsernamePasswordAuthenticationToken(
+                  userDetails, null, userDetails.getAuthorities());
+          authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+          SecurityContextHolder.getContext().setAuthentication(authToken);
+        } else {
+          expireJwtCookie(response);
+        }
+      } else if (userEmail == null) {
+        expireJwtCookie(response);
       }
+    } catch (UsernameNotFoundException | JwtException | IllegalArgumentException exception) {
+      SecurityContextHolder.clearContext();
+      expireJwtCookie(response);
     }
     filterChain.doFilter(request, response);
+  }
+
+  private void expireJwtCookie(HttpServletResponse response) {
+    Cookie cookie = new Cookie("jwt", null);
+    cookie.setHttpOnly(true);
+    cookie.setPath("/");
+    cookie.setMaxAge(0);
+    response.addCookie(cookie);
   }
 }
