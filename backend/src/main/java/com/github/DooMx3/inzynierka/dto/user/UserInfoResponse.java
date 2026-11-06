@@ -1,5 +1,6 @@
 package com.github.DooMx3.inzynierka.dto.user;
 
+import com.github.DooMx3.inzynierka.entities.Organisation;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.enums.MembershipStatus;
 import java.util.Set;
@@ -14,8 +15,10 @@ public record UserInfoResponse(
     String phoneNumber,
     String email,
     boolean active,
-    Set<String> roles) {
+    Set<String> roles,
+    String logoPath) {
   public static UserInfoResponse from(User user) {
+    Organisation org = user.getOrganisation();
     return new UserInfoResponse(
         user.getId(),
         user.getMembershipStatus(),
@@ -24,6 +27,7 @@ public record UserInfoResponse(
         user.getPhoneNumber(),
         user.getEmail(),
         user.isActive(),
-        user.getRoles().stream().map(Enum::name).collect(Collectors.toSet()));
+        user.getRoles().stream().map(Enum::name).collect(Collectors.toSet()),
+        org != null ? org.getLogoPath() : null);
   }
 }

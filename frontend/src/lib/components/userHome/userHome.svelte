@@ -28,6 +28,7 @@
         updateOrganisation,
         uploadOrganisationLogo,
         getOrganisationLogoUrl,
+        getOrganisationLogoByIdUrl,
         type Organisation,
         type OrganisationInvitation,
     } from "$lib/api/organisation";
@@ -52,6 +53,7 @@
     let logoFile = $state<File | null>(null);
     let logoPreviewUrl = $state<string | null>(null);
     let logoTimestamp = $state(Date.now());
+    let organisationId = $state<string | null>(null);
 
     const sideBySide = new MediaQuery("(min-width: 840px) and (max-width: 1499px)");
     const invited = $derived(invitation !== null);
@@ -87,6 +89,13 @@
             roles = Array.isArray(info.roles)
                 ? info.roles.filter((role: unknown): role is string => typeof role === "string")
                 : [];
+            // Backend may return organisation.id for all members
+            if (info && typeof info === "object" && info.organisation && typeof info.organisation === "object") {
+                const orgData = info.organisation as Record<string, unknown>;
+                if (typeof orgData.id === "string") {
+                    organisationId = orgData.id;
+                }
+            }
         } catch {
             membership = "NONE";
             roles = [];
@@ -95,6 +104,7 @@
         if (roles.includes("OWNER")) {
             try {
                 organisation = await getOrganisation();
+                organisationId = organisation?.id ?? organisationId;
             } catch {
                 organisation = null;
             }
@@ -326,11 +336,19 @@
         <p class="text-lg text-zinc-700">Loading your vineyard...</p>
     {:else if isOwner}
         <section class="home-card" aria-label="Vineyard">
-            {#if organisation?.logoPath}
+            {#if organisationId}
+                <img
+                    src="{getOrganisationLogoByIdUrl(organisationId)}?t={logoTimestamp}"
+                    alt="Vineyard logo"
+                    class="org-logo"
+                    onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+            {:else if organisation?.logoPath}
                 <img
                     src="{getOrganisationLogoUrl()}?t={logoTimestamp}"
                     alt="Vineyard logo"
                     class="org-logo"
+                    onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 />
             {/if}
             <h2>{organisation?.name || "Your vineyard"}</h2>
@@ -352,12 +370,14 @@
         </section>
     {:else if isMember}
         <section class="home-card" aria-label="Vineyard">
-            <img
-                src="{getOrganisationLogoUrl()}?t={logoTimestamp}"
-                alt="Vineyard logo"
-                class="org-logo"
-                onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-            />
+            {#if organisationId}
+                <img
+                    src="{getOrganisationLogoByIdUrl(organisationId)}?t={logoTimestamp}"
+                    alt="Vineyard logo"
+                    class="org-logo"
+                    onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+            {/if}
             <h2>You are part of the vineyard.</h2>
             <p>
                 The rows, the work and the harvest are open to you. Leave only when you are ready to step away.

@@ -296,3 +296,7 @@ export const deleteOrganisationLogo = async (): Promise<void> => {
 };
 
 export const getOrganisationLogoUrl = () => '/api/organisations/logo';
+
+export const getOrganisationLogoByIdUrl = (organisationId: string) =>
+    `/api/organisations/${organisationId}/logo`;
+
