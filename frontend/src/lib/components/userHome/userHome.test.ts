@@ -2,7 +2,7 @@ import { render, screen, waitFor, fireEvent, within } from '@testing-library/sve
 import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
 import { tick } from 'svelte';
 import UserHome from './userHome.svelte';
-import { setUser } from '$lib/stores/session.svelte';
+import { session, setUser } from '$lib/stores/session.svelte';
 
 const user = { id: '1', firstname: 'Anna', lastname: 'Nowak', email: 'anna@example.com' };
 
@@ -68,6 +68,8 @@ describe('User home', () => {
                 });
             }
             if (url === '/api/organisations' && init?.method === 'DELETE') {
+                membershipStatus = 'NONE';
+                roles = [];
                 return new Response('', { status: 204 });
             }
             if (url === '/api/user/invitations') {
@@ -77,6 +79,8 @@ describe('User home', () => {
                 });
             }
             if (url === '/api/organisations' && init?.method === 'POST') {
+                membershipStatus = 'MEMBER';
+                roles = ['OWNER'];
                 return new Response(JSON.stringify({ id: 'org-1', name: 'North vineyard' }), {
                     status: 200,
                     headers: { 'Content-Type': 'application/json' },
@@ -86,6 +90,8 @@ describe('User home', () => {
                 return new Response('', { status: 204 });
             }
             if (url === '/api/organisations/leave' && init?.method === 'DELETE') {
+                membershipStatus = 'NONE';
+                roles = [];
                 return new Response('', { status: 204 });
             }
             return new Response('missing', { status: 500 });
@@ -172,6 +178,7 @@ describe('User home', () => {
             expect(alerts[0]).toBe('The organisation is ready. You are its owner.');
         });
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        expect(session.user?.roles).toContain('OWNER');
         const create = calls.find((call) => call.url === '/api/organisations' && call.init?.method === 'POST');
         expect(create?.init?.body).toBe(
             JSON.stringify({

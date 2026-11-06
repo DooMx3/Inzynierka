@@ -16,7 +16,7 @@
 
     const menuRoles = ["WORKER", "OENOLOGIST", "OWNER"] as const;
     const showMenuBar = $derived(
-        menuRoles.some((role) => session.user?.roles.includes(role)),
+        menuRoles.some((role) => session.user?.roles?.includes(role)),
     );
 
     onMount(() => {

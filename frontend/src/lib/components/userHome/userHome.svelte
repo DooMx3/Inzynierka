@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { MediaQuery } from "svelte/reactivity";
-    import { session } from "$lib/stores/session.svelte";
+    import { refreshSession, session, setUser } from "$lib/stores/session.svelte";
     import CreateVineyardButton from "../userMenu/createVineyardButton.svelte";
     import InvitationButton from "../userMenu/invitationButton.svelte";
     import FormWindow from "$lib/components/formWindow/formWindow.svelte";
@@ -186,6 +186,15 @@
             if (!roles.includes("OWNER")) {
                 roles = [...roles, "OWNER"];
             }
+            if (session.user) {
+                const currentRoles = Array.isArray(session.user.roles) ? session.user.roles : [];
+                if (!currentRoles.includes("OWNER")) {
+                    setUser({
+                        ...session.user,
+                        roles: [...currentRoles, "OWNER"],
+                    });
+                }
+            }
             if (logoFile) {
                 try {
                     await uploadOrganisationLogo(logoFile);
@@ -196,6 +205,7 @@
                 }
             }
             dialog = null;
+            await refreshSession();
             alert("The organisation is ready. You are its owner.");
         } catch (error) {
             alert(error instanceof Error ? error.message : "Could not create the organisation.");
@@ -251,7 +261,15 @@
             organisation = null;
             membership = "NONE";
             roles = roles.filter((role) => role !== "OWNER");
+            if (session.user) {
+                const currentRoles = Array.isArray(session.user.roles) ? session.user.roles : [];
+                setUser({
+                    ...session.user,
+                    roles: currentRoles.filter((role) => role !== "OWNER"),
+                });
+            }
             dialog = null;
+            await refreshSession();
         } catch (error) {
             alert(error instanceof Error ? error.message : "Could not delete the organisation.");
         } finally {
@@ -268,7 +286,15 @@
             await leaveOrganisation();
             organisation = null;
             membership = "NONE";
+            if (session.user) {
+                const currentRoles = Array.isArray(session.user.roles) ? session.user.roles : [];
+                setUser({
+                    ...session.user,
+                    roles: currentRoles.filter((role) => role !== "WORKER" && role !== "OENOLOGIST"),
+                });
+            }
             dialog = null;
+            await refreshSession();
         } catch (error) {
             alert(error instanceof Error ? error.message : "Could not leave the vineyard.");
         } finally {
