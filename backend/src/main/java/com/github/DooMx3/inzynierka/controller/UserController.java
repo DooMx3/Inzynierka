@@ -36,7 +36,7 @@ public class UserController {
   @GetMapping("/info")
   public ResponseEntity<UserInfoResponse> getUser(
       @Parameter(hidden = true) @AuthenticationPrincipal User user) {
-    return ResponseEntity.ok(UserInfoResponse.from(user));
+    return ResponseEntity.ok(service.getUserInfo(user));
   }
 
   @Operation(

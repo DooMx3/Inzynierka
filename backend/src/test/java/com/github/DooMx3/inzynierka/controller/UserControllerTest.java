@@ -17,6 +17,7 @@ import com.github.DooMx3.inzynierka.config.TestSecurityConfig;
 import com.github.DooMx3.inzynierka.dto.user.ChangePasswordRequest;
 import com.github.DooMx3.inzynierka.dto.user.DeactivateUserRequest;
 import com.github.DooMx3.inzynierka.dto.user.ResetPasswordRequest;
+import com.github.DooMx3.inzynierka.dto.user.UserInfoResponse;
 import com.github.DooMx3.inzynierka.dto.user.UserInvitationResponse;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.service.JwtService;
@@ -65,6 +66,8 @@ class UserControllerTest {
 
     @Test
     void shouldReturn200AndJsonBody() throws Exception {
+      when(userService.getUserInfo(user)).thenReturn(UserInfoResponse.from(user));
+
       mockMvc
           .perform(get(BASE_URL + "/info").with(authenticated()))
           .andExpect(status().isOk())

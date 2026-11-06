@@ -7,4 +7,5 @@ export type UserInfo = {
     membershipStatus: string;
     phoneNumber: string | null;
     roles: string[];
+    logoPath?: string | null;
 }

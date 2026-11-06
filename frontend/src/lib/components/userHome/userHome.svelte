@@ -89,7 +89,12 @@
             roles = Array.isArray(info.roles)
                 ? info.roles.filter((role: unknown): role is string => typeof role === "string")
                 : [];
-            // Backend may return organisation.id for all members
+            if (typeof info.logoPath === "string" && info.logoPath.length > 0) {
+                const match = info.logoPath.match(/\/api\/organisations\/([^/]+)\/logo/);
+                if (match && match[1]) {
+                    organisationId = match[1];
+                }
+            }
             if (info && typeof info === "object" && info.organisation && typeof info.organisation === "object") {
                 const orgData = info.organisation as Record<string, unknown>;
                 if (typeof orgData.id === "string") {
@@ -112,8 +117,22 @@
 
         try {
             invitation = await getUserInvitations();
+            if (invitation?.organisationId && typeof localStorage !== "undefined" && session.user?.id) {
+                localStorage.setItem(`wms_org_${session.user.id}`, invitation.organisationId);
+            }
         } catch {
             invitation = null;
+        }
+
+        if (!organisationId && typeof localStorage !== "undefined" && session.user?.id) {
+            const cachedOrgId = localStorage.getItem(`wms_org_${session.user.id}`);
+            if (cachedOrgId) {
+                organisationId = cachedOrgId;
+            }
+        }
+
+        if (organisationId && typeof localStorage !== "undefined" && session.user?.id) {
+            localStorage.setItem(`wms_org_${session.user.id}`, organisationId);
         }
         ready = true;
     });
@@ -188,6 +207,9 @@
         pending = true;
         try {
             organisation = await createOrganisation(draft());
+            if (organisation?.id) {
+                organisationId = organisation.id;
+            }
             membership = "MEMBER";
             if (!roles.includes("OWNER")) {
                 roles = [...roles, "OWNER"];
@@ -196,6 +218,10 @@
                 try {
                     await uploadOrganisationLogo(logoFile);
                     logoTimestamp = Date.now();
+                    organisation = await getOrganisation();
+                    if (organisation?.id) {
+                        organisationId = organisation.id;
+                    }
                 } catch {
                     // logo upload failure is non-critical
                 }
@@ -223,10 +249,17 @@
         pending = true;
         try {
             organisation = await updateOrganisation(draft());
+            if (organisation?.id) {
+                organisationId = organisation.id;
+            }
             if (logoFile) {
                 try {
                     await uploadOrganisationLogo(logoFile);
                     logoTimestamp = Date.now();
+                    organisation = await getOrganisation();
+                    if (organisation?.id) {
+                        organisationId = organisation.id;
+                    }
                 } catch {
                     // logo upload failure is non-critical
                 }
@@ -253,6 +286,10 @@
         try {
             await deleteOrganisation(deletePassword);
             organisation = null;
+            organisationId = null;
+            if (typeof localStorage !== "undefined" && session.user?.id) {
+                localStorage.removeItem(`wms_org_${session.user.id}`);
+            }
             membership = "NONE";
             roles = roles.filter((role) => role !== "OWNER");
             dialog = null;
@@ -271,6 +308,10 @@
         try {
             await leaveOrganisation();
             membership = "NONE";
+            organisationId = null;
+            if (typeof localStorage !== "undefined" && session.user?.id) {
+                localStorage.removeItem(`wms_org_${session.user.id}`);
+            }
             dialog = null;
         } catch (error) {
             alert(error instanceof Error ? error.message : "Could not leave the vineyard.");
@@ -286,6 +327,9 @@
         pending = true;
         formError = "";
         try {
+            if (invitation?.organisationId && typeof localStorage !== "undefined" && session.user?.id) {
+                localStorage.setItem(`wms_org_${session.user.id}`, invitation.organisationId);
+            }
             await acceptInvitation();
             window.location.href = "/workers";
         } catch (error) {
@@ -308,8 +352,10 @@
             <label class="logo-upload-label" aria-label="Choose a logo image">
                 {#if logoPreviewUrl}
                     <img src={logoPreviewUrl} alt="Logo preview" class="logo-preview" />
-                {:else if organisation?.logoPath}
-                    <img src="{getOrganisationLogoUrl()}?t={logoTimestamp}" alt="Current logo" class="logo-preview" />
+                {:else if organisationId}
+                    <img src="{getOrganisationLogoByIdUrl(organisationId)}?t={logoTimestamp}" alt="Current logo" class="logo-preview" />
+                {:else if organisation?.logoPath && organisation?.id}
+                    <img src="{getOrganisationLogoByIdUrl(organisation.id)}?t={logoTimestamp}" alt="Current logo" class="logo-preview" />
                 {:else}
                     <span class="logo-placeholder">Click to upload logo</span>
                 {/if}
