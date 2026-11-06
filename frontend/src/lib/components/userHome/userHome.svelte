@@ -53,7 +53,6 @@
     let logoFile = $state<File | null>(null);
     let logoPreviewUrl = $state<string | null>(null);
     let logoTimestamp = $state(Date.now());
-    let organisationId = $state<string | null>(null);
 
     const sideBySide = new MediaQuery("(min-width: 840px) and (max-width: 1499px)");
     const invited = $derived(invitation !== null);
@@ -89,17 +88,8 @@
             roles = Array.isArray(info.roles)
                 ? info.roles.filter((role: unknown): role is string => typeof role === "string")
                 : [];
-            if (typeof info.logoPath === "string" && info.logoPath.length > 0) {
-                const match = info.logoPath.match(/\/api\/organisations\/([^/]+)\/logo/);
-                if (match && match[1]) {
-                    organisationId = match[1];
-                }
-            }
-            if (info && typeof info === "object" && info.organisation && typeof info.organisation === "object") {
-                const orgData = info.organisation as Record<string, unknown>;
-                if (typeof orgData.id === "string") {
-                    organisationId = orgData.id;
-                }
+            if (info.organisation) {
+                organisation = info.organisation;
             }
         } catch {
             membership = "NONE";
@@ -109,30 +99,15 @@
         if (roles.includes("OWNER")) {
             try {
                 organisation = await getOrganisation();
-                organisationId = organisation?.id ?? organisationId;
             } catch {
-                organisation = null;
+                // keep organisation from info if getOrganisation fails
             }
         }
 
         try {
             invitation = await getUserInvitations();
-            if (invitation?.organisationId && typeof localStorage !== "undefined" && session.user?.id) {
-                localStorage.setItem(`wms_org_${session.user.id}`, invitation.organisationId);
-            }
         } catch {
             invitation = null;
-        }
-
-        if (!organisationId && typeof localStorage !== "undefined" && session.user?.id) {
-            const cachedOrgId = localStorage.getItem(`wms_org_${session.user.id}`);
-            if (cachedOrgId) {
-                organisationId = cachedOrgId;
-            }
-        }
-
-        if (organisationId && typeof localStorage !== "undefined" && session.user?.id) {
-            localStorage.setItem(`wms_org_${session.user.id}`, organisationId);
         }
         ready = true;
     });
@@ -207,9 +182,6 @@
         pending = true;
         try {
             organisation = await createOrganisation(draft());
-            if (organisation?.id) {
-                organisationId = organisation.id;
-            }
             membership = "MEMBER";
             if (!roles.includes("OWNER")) {
                 roles = [...roles, "OWNER"];
@@ -219,9 +191,6 @@
                     await uploadOrganisationLogo(logoFile);
                     logoTimestamp = Date.now();
                     organisation = await getOrganisation();
-                    if (organisation?.id) {
-                        organisationId = organisation.id;
-                    }
                 } catch {
                     // logo upload failure is non-critical
                 }
@@ -249,17 +218,11 @@
         pending = true;
         try {
             organisation = await updateOrganisation(draft());
-            if (organisation?.id) {
-                organisationId = organisation.id;
-            }
             if (logoFile) {
                 try {
                     await uploadOrganisationLogo(logoFile);
                     logoTimestamp = Date.now();
                     organisation = await getOrganisation();
-                    if (organisation?.id) {
-                        organisationId = organisation.id;
-                    }
                 } catch {
                     // logo upload failure is non-critical
                 }
@@ -286,10 +249,6 @@
         try {
             await deleteOrganisation(deletePassword);
             organisation = null;
-            organisationId = null;
-            if (typeof localStorage !== "undefined" && session.user?.id) {
-                localStorage.removeItem(`wms_org_${session.user.id}`);
-            }
             membership = "NONE";
             roles = roles.filter((role) => role !== "OWNER");
             dialog = null;
@@ -307,11 +266,8 @@
         pending = true;
         try {
             await leaveOrganisation();
+            organisation = null;
             membership = "NONE";
-            organisationId = null;
-            if (typeof localStorage !== "undefined" && session.user?.id) {
-                localStorage.removeItem(`wms_org_${session.user.id}`);
-            }
             dialog = null;
         } catch (error) {
             alert(error instanceof Error ? error.message : "Could not leave the vineyard.");
@@ -327,9 +283,6 @@
         pending = true;
         formError = "";
         try {
-            if (invitation?.organisationId && typeof localStorage !== "undefined" && session.user?.id) {
-                localStorage.setItem(`wms_org_${session.user.id}`, invitation.organisationId);
-            }
             await acceptInvitation();
             window.location.href = "/workers";
         } catch (error) {
@@ -352,9 +305,7 @@
             <label class="logo-upload-label" aria-label="Choose a logo image">
                 {#if logoPreviewUrl}
                     <img src={logoPreviewUrl} alt="Logo preview" class="logo-preview" />
-                {:else if organisationId}
-                    <img src="{getOrganisationLogoByIdUrl(organisationId)}?t={logoTimestamp}" alt="Current logo" class="logo-preview" />
-                {:else if organisation?.logoPath && organisation?.id}
+                {:else if organisation?.id && organisation?.logoPath}
                     <img src="{getOrganisationLogoByIdUrl(organisation.id)}?t={logoTimestamp}" alt="Current logo" class="logo-preview" />
                 {:else}
                     <span class="logo-placeholder">Click to upload logo</span>
@@ -382,16 +333,9 @@
         <p class="text-lg text-zinc-700">Loading your vineyard...</p>
     {:else if isOwner}
         <section class="home-card" aria-label="Vineyard">
-            {#if organisationId}
+            {#if organisation?.id && organisation?.logoPath}
                 <img
-                    src="{getOrganisationLogoByIdUrl(organisationId)}?t={logoTimestamp}"
-                    alt="Vineyard logo"
-                    class="org-logo"
-                    onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                />
-            {:else if organisation?.logoPath}
-                <img
-                    src="{getOrganisationLogoUrl()}?t={logoTimestamp}"
+                    src="{getOrganisationLogoByIdUrl(organisation.id)}?t={logoTimestamp}"
                     alt="Vineyard logo"
                     class="org-logo"
                     onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
@@ -416,17 +360,21 @@
         </section>
     {:else if isMember}
         <section class="home-card" aria-label="Vineyard">
-            {#if organisationId}
+            {#if organisation?.id && organisation?.logoPath}
                 <img
-                    src="{getOrganisationLogoByIdUrl(organisationId)}?t={logoTimestamp}"
+                    src="{getOrganisationLogoByIdUrl(organisation.id)}?t={logoTimestamp}"
                     alt="Vineyard logo"
                     class="org-logo"
                     onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 />
             {/if}
-            <h2>You are part of the vineyard.</h2>
+<h2>{organisation?.name || "You are part of the vineyard."}</h2>
             <p>
-                The rows, the work and the harvest are open to you. Leave only when you are ready to step away.
+                {#if organisation?.motto}
+                    {organisation.motto}
+                {:else}
+                    The rows, the work and the harvest are open to you. Leave only when you are ready to step away.
+                {/if}
             </p>
             <div class="w-56">
                 <Button svg={closeIcon} text="Leave vineyard" isFolded={false} gentle={true} class="bg-[#8f3d32] text-white fill-white" onClick={() => (dialog = "leave")} />

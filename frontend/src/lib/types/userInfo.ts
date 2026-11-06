@@ -1,3 +1,5 @@
+import type { Organisation } from '$lib/api/organisation';
+
 export type UserInfo = {
     active: boolean;
     email: string;
@@ -7,5 +9,5 @@ export type UserInfo = {
     membershipStatus: string;
     phoneNumber: string | null;
     roles: string[];
-    logoPath?: string | null;
-}
+    organisation?: Organisation | null;
+};
