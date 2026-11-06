@@ -16,9 +16,8 @@ public record UserInfoResponse(
     String email,
     boolean active,
     Set<String> roles,
-    String logoPath) {
+    Organisation organisation) {
   public static UserInfoResponse from(User user) {
-    Organisation org = user.getOrganisation();
     return new UserInfoResponse(
         user.getId(),
         user.getMembershipStatus(),
@@ -28,6 +27,6 @@ public record UserInfoResponse(
         user.getEmail(),
         user.isActive(),
         user.getRoles().stream().map(Enum::name).collect(Collectors.toSet()),
-        org != null ? org.getLogoPath() : null);
+        user.getOrganisation());
   }
 }
