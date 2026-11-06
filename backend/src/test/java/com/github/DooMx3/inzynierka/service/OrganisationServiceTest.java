@@ -378,6 +378,51 @@ class OrganisationServiceTest {
   }
 
   @Nested
+  class UpdateOrganisation {
+
+    @Test
+    void shouldPreserveExistingLogoPathWhenRequestOmitsLogo() {
+      UUID id = UUID.randomUUID();
+      String existingLogoPath = "/api/organisations/" + id + "/logo";
+      Organisation organisation =
+          Organisation.builder()
+              .id(id)
+              .name("Stara nazwa")
+              .taxId("111")
+              .street("ul. Stara 1")
+              .postalCode("20-001")
+              .city("Lublin")
+              .logoPath(existingLogoPath)
+              .motto("Stare motto")
+              .active(true)
+              .build();
+      User user =
+          User.builder()
+              .id(UUID.randomUUID())
+              .organisation(organisation)
+              .roles(new HashSet<>(Set.of(RoleName.OWNER)))
+              .build();
+      mockAuthenticatedUser(user);
+
+      OrganisationRequest request =
+          new OrganisationRequest(
+              "Nowa nazwa", "222", "ul. Nowa 2", "20-002", "Warszawa", null, "Nowe motto");
+      when(repository.save(organisation)).thenReturn(organisation);
+
+      Organisation result = service.updateOrganisation(request, user);
+
+      assertEquals("Nowa nazwa", result.getName());
+      assertEquals("222", result.getTaxId());
+      assertEquals("ul. Nowa 2", result.getStreet());
+      assertEquals("20-002", result.getPostalCode());
+      assertEquals("Warszawa", result.getCity());
+      assertEquals("Nowe motto", result.getMotto());
+      assertEquals(existingLogoPath, result.getLogoPath());
+      verify(repository).save(organisation);
+    }
+  }
+
+  @Nested
   class PatchOrganisation {
 
     @Test

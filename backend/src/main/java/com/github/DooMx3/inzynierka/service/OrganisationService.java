@@ -78,7 +78,6 @@ public class OrganisationService {
     organisation.setStreet(request.street());
     organisation.setPostalCode(request.postalCode());
     organisation.setCity(request.city());
-    organisation.setLogoPath(request.logoPath());
     organisation.setMotto(request.motto());
 
     return organisationRepository.save(organisation);
