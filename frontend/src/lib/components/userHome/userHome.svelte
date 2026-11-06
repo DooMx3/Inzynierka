@@ -28,6 +28,7 @@
         updateOrganisation,
         uploadOrganisationLogo,
         getOrganisationLogoUrl,
+        getOrganisationLogoByIdUrl,
         type Organisation,
         type OrganisationInvitation,
     } from "$lib/api/organisation";
@@ -87,6 +88,9 @@
             roles = Array.isArray(info.roles)
                 ? info.roles.filter((role: unknown): role is string => typeof role === "string")
                 : [];
+            if (info.organisation) {
+                organisation = info.organisation;
+            }
         } catch {
             membership = "NONE";
             roles = [];
@@ -96,7 +100,7 @@
             try {
                 organisation = await getOrganisation();
             } catch {
-                organisation = null;
+                // keep organisation from info if getOrganisation fails
             }
         }
 
@@ -186,6 +190,7 @@
                 try {
                     await uploadOrganisationLogo(logoFile);
                     logoTimestamp = Date.now();
+                    organisation = await getOrganisation();
                 } catch {
                     // logo upload failure is non-critical
                 }
@@ -217,6 +222,7 @@
                 try {
                     await uploadOrganisationLogo(logoFile);
                     logoTimestamp = Date.now();
+                    organisation = await getOrganisation();
                 } catch {
                     // logo upload failure is non-critical
                 }
@@ -260,6 +266,7 @@
         pending = true;
         try {
             await leaveOrganisation();
+            organisation = null;
             membership = "NONE";
             dialog = null;
         } catch (error) {
@@ -298,8 +305,8 @@
             <label class="logo-upload-label" aria-label="Choose a logo image">
                 {#if logoPreviewUrl}
                     <img src={logoPreviewUrl} alt="Logo preview" class="logo-preview" />
-                {:else if organisation?.logoPath}
-                    <img src="{getOrganisationLogoUrl()}?t={logoTimestamp}" alt="Current logo" class="logo-preview" />
+                {:else if organisation?.id && organisation?.logoPath}
+                    <img src="{getOrganisationLogoByIdUrl(organisation.id)}?t={logoTimestamp}" alt="Current logo" class="logo-preview" />
                 {:else}
                     <span class="logo-placeholder">Click to upload logo</span>
                 {/if}
@@ -326,11 +333,12 @@
         <p class="text-lg text-zinc-700">Loading your vineyard...</p>
     {:else if isOwner}
         <section class="home-card" aria-label="Vineyard">
-            {#if organisation?.logoPath}
+            {#if organisation?.id && organisation?.logoPath}
                 <img
-                    src="{getOrganisationLogoUrl()}?t={logoTimestamp}"
+                    src="{getOrganisationLogoByIdUrl(organisation.id)}?t={logoTimestamp}"
                     alt="Vineyard logo"
                     class="org-logo"
+                    onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 />
             {/if}
             <h2>{organisation?.name || "Your vineyard"}</h2>
@@ -352,15 +360,21 @@
         </section>
     {:else if isMember}
         <section class="home-card" aria-label="Vineyard">
-            <img
-                src="{getOrganisationLogoUrl()}?t={logoTimestamp}"
-                alt="Vineyard logo"
-                class="org-logo"
-                onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-            />
-            <h2>You are part of the vineyard.</h2>
+            {#if organisation?.id && organisation?.logoPath}
+                <img
+                    src="{getOrganisationLogoByIdUrl(organisation.id)}?t={logoTimestamp}"
+                    alt="Vineyard logo"
+                    class="org-logo"
+                    onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+            {/if}
+<h2>{organisation?.name || "You are part of the vineyard."}</h2>
             <p>
-                The rows, the work and the harvest are open to you. Leave only when you are ready to step away.
+                {#if organisation?.motto}
+                    {organisation.motto}
+                {:else}
+                    The rows, the work and the harvest are open to you. Leave only when you are ready to step away.
+                {/if}
             </p>
             <div class="w-56">
                 <Button svg={closeIcon} text="Leave vineyard" isFolded={false} gentle={true} class="bg-[#8f3d32] text-white fill-white" onClick={() => (dialog = "leave")} />

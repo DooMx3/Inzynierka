@@ -3,6 +3,7 @@ package com.github.DooMx3.inzynierka.service;
 import com.github.DooMx3.inzynierka.dto.user.ChangePasswordRequest;
 import com.github.DooMx3.inzynierka.dto.user.DeactivateUserRequest;
 import com.github.DooMx3.inzynierka.dto.user.ResetPasswordRequest;
+import com.github.DooMx3.inzynierka.dto.user.UserInfoResponse;
 import com.github.DooMx3.inzynierka.dto.user.UserInvitationResponse;
 import com.github.DooMx3.inzynierka.dto.user.UserPatchRequest;
 import com.github.DooMx3.inzynierka.entities.PasswordResetToken;
@@ -35,6 +36,17 @@ public class UserService {
 
   @Value("${app.reset-password.url}")
   private String resetPasswordBaseUrl;
+
+  public UserInfoResponse getUserInfo(User authenticatedUser) {
+    if (authenticatedUser == null || authenticatedUser.getId() == null) {
+      throw new UnauthorizedException("Authenticated user is required");
+    }
+    User user =
+        userRepository
+            .findByEmailWithOrganisation(authenticatedUser.getEmail())
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    return UserInfoResponse.from(user);
+  }
 
   public void changePassword(ChangePasswordRequest request, String email) {
     User user =
