@@ -19,6 +19,11 @@ Simple yet powerfull app made to help everyone involved in making wine. It allow
 
 # Screenshots
 
+# Demo
+To check it out visit demo instance on:
+
+https://inzynierka.ksolecki.net
+
 # Run Locally
 
 ## Clone the project
