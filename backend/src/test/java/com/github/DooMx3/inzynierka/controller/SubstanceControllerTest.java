@@ -154,9 +154,9 @@ class SubstanceControllerTest {
   }
 
   @Test
-  void shouldRejectNonOwner() throws Exception {
+  void shouldRejectNonOwnerOrWorker() throws Exception {
     mockMvc
-        .perform(get(BASE_URL).with(authentication(authWith("WORKER"))))
+        .perform(get(BASE_URL).with(authentication(authWith("OENOLOGIST"))))
         .andExpect(status().isForbidden());
 
     verifyNoInteractions(substanceService);
