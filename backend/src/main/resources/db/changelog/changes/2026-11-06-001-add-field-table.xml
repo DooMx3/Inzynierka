@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="DooMx3" id="2026-11-06-001-add-field-table">
+        <createTable tableName="field">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="field_pk"/>
+            </column>
+            <column name="organisation_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="grape_variety" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="other_grape_variety" type="VARCHAR(100)"/>
+            <column name="grape_color" type="VARCHAR(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="area_are" type="NUMERIC(8, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+            baseTableName="field"
+            baseColumnNames="organisation_id"
+            referencedTableName="organisation"
+            referencedColumnNames="id"
+            constraintName="fk_field_organisation"/>
+        <sql>
+            ALTER TABLE field
+            ADD CONSTRAINT chk_field_area_are_positive CHECK (area_are &gt; 0)
+        </sql>
+    </changeSet>
+</databaseChangeLog>
