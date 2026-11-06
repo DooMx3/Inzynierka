@@ -61,6 +61,20 @@
     const nameInvalid = $derived(showErrors && name.trim().length === 0);
     const cityInvalid = $derived(showErrors && city.trim().length === 0);
     const deletePasswordMissing = $derived(showErrors && deletePassword.length === 0);
+    const inviteName = $derived(organisation?.name || invitation?.organisationName || "");
+    const inviteMotto = $derived(organisation?.motto?.trim() || "");
+    const inviteStreet = $derived(organisation?.street?.trim() || "");
+    const invitePostalCode = $derived(organisation?.postalCode?.trim() || "");
+    const inviteCity = $derived(organisation?.city?.trim() || "");
+    const inviteHasAddress = $derived(
+        inviteStreet.length > 0 || invitePostalCode.length > 0 || inviteCity.length > 0,
+    );
+    const invitePlace = $derived([invitePostalCode, inviteCity].filter(Boolean).join(" "));
+    const inviteLogoUrl = $derived(
+        organisation?.id && organisation?.logoPath
+            ? `${getOrganisationLogoByIdUrl(organisation.id)}?t=${logoTimestamp}`
+            : null,
+    );
 
     const fillForm = (source: Organisation | null) => {
         name = source?.name ?? "";
@@ -478,11 +492,34 @@
         onCancel={() => (dialog = null)}
         onAccept={() => void joinOrganisation()}
     >
-        <div class="flex flex-col gap-3 text-lg text-zinc-800">
-            <p>You have been invited to join:</p>
-            <p>{invitation?.organisationName}</p>
+        <div class="invite-preview" aria-label="Inviting organisation">
+            <p class="invite-lead">You have been invited to join</p>
+            {#if inviteLogoUrl}
+                <img
+                    src={inviteLogoUrl}
+                    alt="Organisation logo"
+                    class="org-logo"
+                    onerror={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                    }}
+                />
+            {/if}
+            <h3 class="invite-name">{inviteName}</h3>
+            {#if inviteMotto}
+                <p class="invite-motto">{inviteMotto}</p>
+            {/if}
+            {#if inviteHasAddress}
+                <div class="invite-address">
+                    {#if inviteStreet}
+                        <p>{inviteStreet}</p>
+                    {/if}
+                    {#if invitePlace}
+                        <p>{invitePlace}</p>
+                    {/if}
+                </div>
+            {/if}
             {#if formError}
-                <p class="text-[#8f3d32]" role="alert">{formError}</p>
+                <p class="invite-error" role="alert">{formError}</p>
             {/if}
         </div>
     </FormWindow>
@@ -606,5 +643,50 @@
         height: 7rem;
         object-fit: contain;
         border-radius: 0.75rem;
+    }
+
+    .invite-preview {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        text-align: center;
+        color: #27272a;
+    }
+
+    .invite-lead {
+        font-size: 1.25rem;
+        line-height: 1.75rem;
+        color: #71717a;
+    }
+
+    .invite-name {
+        font-size: 1.75rem;
+        line-height: 2.25rem;
+        font-weight: 700;
+        color: #3f2e22;
+    }
+
+    .invite-motto {
+        max-width: 28rem;
+        font-size: 1.125rem;
+        line-height: 1.75rem;
+        font-style: italic;
+        color: #52525b;
+    }
+
+    .invite-address {
+        margin-top: 0.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        font-size: 1rem;
+        line-height: 1.5rem;
+        color: #3f3f46;
+    }
+
+    .invite-error {
+        margin-top: 0.5rem;
+        color: #8f3d32;
     }
 </style>

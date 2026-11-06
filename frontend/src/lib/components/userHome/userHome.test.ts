@@ -22,9 +22,20 @@ const organisation = {
     postalCode: '27-600',
     taxId: '123',
     motto: 'Sun in every glass.',
+    logoPath: '/api/organisations/org-1/logo',
 };
 
 const invitation = { organisationId: 'org-1', organisationName: 'North vineyard' };
+const invitedOrganisation = {
+    id: 'org-1',
+    name: 'North vineyard',
+    city: 'Sandomierz',
+    street: 'Winna 12',
+    postalCode: '27-600',
+    taxId: '456',
+    motto: 'Rows worth joining.',
+    logoPath: '/api/organisations/org-1/logo',
+};
 
 describe('User home', () => {
     const originalFetch = globalThis.fetch;
@@ -34,12 +45,14 @@ describe('User home', () => {
     let invitationPayload: unknown = invitation;
     let membershipStatus = 'NONE';
     let roles: string[] = [];
+    let infoOrganisation: unknown = null;
 
     beforeEach(() => {
         calls = [];
         invitationPayload = invitation;
         membershipStatus = 'NONE';
         roles = [];
+        infoOrganisation = null;
         setUser(null);
         Object.defineProperty(window, 'location', {
             configurable: true,
@@ -50,10 +63,18 @@ describe('User home', () => {
             const url = String(input);
             calls.push({ url, init });
             if (url === '/api/user/info') {
-                return new Response(JSON.stringify({ ...userInfo, membershipStatus, roles }), {
-                    status: 200,
-                    headers: { 'Content-Type': 'application/json' },
-                });
+                return new Response(
+                    JSON.stringify({
+                        ...userInfo,
+                        membershipStatus,
+                        roles,
+                        organisation: infoOrganisation,
+                    }),
+                    {
+                        status: 200,
+                        headers: { 'Content-Type': 'application/json' },
+                    },
+                );
             }
             if (url === '/api/organisations' && (!init?.method || init.method === 'GET')) {
                 return new Response(JSON.stringify(organisation), {
@@ -188,12 +209,32 @@ describe('User home', () => {
         );
     });
 
-    it('accepts an invitation from the popup', async () => {
+    it('shows the inviting organisation details in the popup', async () => {
+        membershipStatus = 'PENDING';
+        infoOrganisation = invitedOrganisation;
         setUser(user);
         await shown();
         await fireEvent.click(screen.getByRole('button', { name: /invited/i }));
 
-        expect(screen.getByText('North vineyard')).toBeInTheDocument();
+        const preview = screen.getByLabelText('Inviting organisation');
+        expect(within(preview).getByRole('heading', { name: 'North vineyard' })).toBeInTheDocument();
+        expect(within(preview).getByText('Rows worth joining.')).toBeInTheDocument();
+        expect(within(preview).getByText('Winna 12')).toBeInTheDocument();
+        expect(within(preview).getByText('27-600 Sandomierz')).toBeInTheDocument();
+        expect(within(preview).getByAltText('Organisation logo')).toHaveAttribute(
+            'src',
+            expect.stringContaining('/api/organisations/org-1/logo'),
+        );
+    });
+
+    it('accepts an invitation from the popup', async () => {
+        membershipStatus = 'PENDING';
+        infoOrganisation = invitedOrganisation;
+        setUser(user);
+        await shown();
+        await fireEvent.click(screen.getByRole('button', { name: /invited/i }));
+
+        expect(screen.getByRole('heading', { name: 'North vineyard' })).toBeInTheDocument();
         await fireEvent.click(screen.getByRole('button', { name: 'Join' }));
 
         await waitFor(() => {
@@ -266,10 +307,11 @@ describe('User home', () => {
         }) as typeof alert;
         membershipStatus = 'MEMBER';
         invitationPayload = null;
+        infoOrganisation = organisation;
         setUser(user);
         await shown();
 
-        expect(screen.getByText('You are part of the vineyard.')).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: 'Winnica Anna' })).toBeInTheDocument();
         expect(screen.queryByRole('button', { name: /Create new vineyard/i })).not.toBeInTheDocument();
         await fireEvent.click(screen.getByRole('button', { name: 'Leave vineyard' }));
         expect(screen.getByText(/Leave the vineyard/)).toBeInTheDocument();
@@ -292,6 +334,7 @@ describe('User home', () => {
         membershipStatus = 'MEMBER';
         roles = ['OWNER'];
         invitationPayload = null;
+        infoOrganisation = organisation;
         setUser(user);
         await shown();
 
