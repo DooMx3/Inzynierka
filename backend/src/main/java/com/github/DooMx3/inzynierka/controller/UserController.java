@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -67,8 +69,16 @@ public class UserController {
   @PatchMapping("/patch")
   public ResponseEntity<String> patchUser(
       @RequestBody @Valid UserPatchRequest request,
-      @Parameter(hidden = true) @AuthenticationPrincipal User user) {
+      @Parameter(hidden = true) @AuthenticationPrincipal User user,
+      @Parameter(hidden = true) HttpServletResponse response) {
     service.patchUser(request, user.getEmail());
+    if (request.email() != null) {
+      Cookie cookie = new Cookie("jwt", null);
+      cookie.setHttpOnly(true);
+      cookie.setPath("/");
+      cookie.setMaxAge(0);
+      response.addCookie(cookie);
+    }
     return ResponseEntity.ok("User patched successfully");
   }
 
