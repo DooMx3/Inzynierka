@@ -1,15 +1,58 @@
-# Full stack. Images come from GHCR (tag = git release vX.Y.Z → X.Y.Z, or latest):
-#   docker compose up -d
-#   IMAGE_TAG=0.2.0 docker compose up -d
+# Backend image comes from GHCR (tag = git release vX.Y.Z → X.Y.Z, or latest):
+#   docker compose -f docker-compose.yml up -d
+#   IMAGE_TAG=0.2.0 docker compose -f docker-compose.dev.yml up -d
 name: inzynierka
 
-include:
-  - docker-compose.dev.yml
-
 services:
+  postgres:
+    image: postgres:16
+    container_name: inzynierka-psql
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: backend
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d backend"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: inzynierka-mailpit
+    ports:
+      - "8025:8025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    restart: unless-stopped
+
+  backend:
+    image: ghcr.io/doomx3/inzynierka-backend:${IMAGE_TAG:-latest}
+    container_name: inzynierka-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/backend
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_MAIL_HOST: mailpit
+      SPRING_MAIL_PORT: "1025"
+      APP_RESET_PASSWORD_URL: http://localhost:3000/reset-password
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mailpit:
+        condition: service_healthy
+    restart: unless-stopped
+
   frontend:
     image: ghcr.io/doomx3/inzynierka-frontend:${IMAGE_TAG:-latest}
-    pull_policy: always
     container_name: inzynierka-frontend
     environment:
       HOST: 0.0.0.0
@@ -21,3 +64,6 @@ services:
       backend:
         condition: service_started
     restart: unless-stopped
+
+volumes:
+  postgres_data:
