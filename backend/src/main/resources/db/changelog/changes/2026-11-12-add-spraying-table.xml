@@ -1,0 +1,40 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="karolsol (generated)" id="1794499043257-5">
+        <createTable tableName="spraying">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="sprayingPK"/>
+            </column>
+            <column name="due" type="TIMESTAMP(6) WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quantity" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="spraying_date" type="TIMESTAMP(6) WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="equipment_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="field_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="substance_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1794499043257-6">
+        <addForeignKeyConstraint baseColumnNames="field_id" baseTableName="spraying" constraintName="FK20lf4u4txxn77nqqgcbeckxu8" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="field" validate="true"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1794499043257-7">
+        <addForeignKeyConstraint baseColumnNames="equipment_id" baseTableName="spraying" constraintName="FKel5xcgsa42txp2svmkcxd2p3o" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="equipment" validate="true"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1794499043257-8">
+        <addForeignKeyConstraint baseColumnNames="substance_id" baseTableName="spraying" constraintName="FKn6fx3jjme9d2rq97cbqbo1k3u" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="substance" validate="true"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1794499043257-1">
+        <dropDefaultValue columnDataType="boolean" columnName="active" tableName="equipment"/>
+    </changeSet>
+</databaseChangeLog>
