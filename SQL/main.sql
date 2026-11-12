@@ -75,7 +75,7 @@ COMMENT ON COLUMN "task"."description" IS 'Additional user''''''''''''''''''''''
 
 CREATE TABLE IF NOT EXISTS "field" (
 	"id" UUID NOT NULL,
-	"grapeTypeId" UUID NOT NULL,
+	"grapeType" VARCHAR(255) NOT NULL,
 	"organisationId" UUID NOT NULL,
 	"active" BOOLEAN NOT NULL DEFAULT true,
 	"area" INTEGER,
@@ -109,14 +109,6 @@ CREATE TABLE IF NOT EXISTS "substance" (
 );
 
 
-
-
-CREATE TABLE IF NOT EXISTS "grape_type" (
-	"id" UUID NOT NULL,
-	"name" VARCHAR(255) NOT NULL,
-	"colorId" UUID NOT NULL,
-	PRIMARY KEY("id")
-);
 
 
 
@@ -207,14 +199,6 @@ CREATE TABLE IF NOT EXISTS "task_type" (
 	PRIMARY KEY("id")
 );
 
-
-
-
-CREATE TABLE IF NOT EXISTS "grape_color" (
-	"id" UUID NOT NULL,
-	"name" VARCHAR(255) NOT NULL,
-	PRIMARY KEY("id")
-);
 
 
 
@@ -428,12 +412,6 @@ ADD FOREIGN KEY("typeId") REFERENCES "equipment_type"("id")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "field"
 ADD FOREIGN KEY("organisationId") REFERENCES "organisation"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "field"
-ADD FOREIGN KEY("grapeTypeId") REFERENCES "grape_type"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "grape_type"
-ADD FOREIGN KEY("colorId") REFERENCES "grape_color"("id")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "spraying"
 ADD FOREIGN KEY("fieldId") REFERENCES "field"("id")
