@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="DooMx3" id="2026-11-12-001-add-harvest-table">
+        <createTable tableName="harvest">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="harvest_pk"/>
+            </column>
+            <column name="organisation_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="field_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="harvest_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount_kg" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+            baseTableName="harvest"
+            baseColumnNames="organisation_id"
+            referencedTableName="organisation"
+            referencedColumnNames="id"
+            constraintName="fk_harvest_organisation"/>
+        <addForeignKeyConstraint
+            baseTableName="harvest"
+            baseColumnNames="field_id"
+            referencedTableName="field"
+            referencedColumnNames="id"
+            constraintName="fk_harvest_field"/>
+        <sql>
+            ALTER TABLE harvest
+            ADD CONSTRAINT chk_harvest_amount_kg_positive CHECK (amount_kg &gt; 0)
+        </sql>
+        <createIndex tableName="harvest" indexName="idx_harvest_org_date">
+            <column name="organisation_id"/>
+            <column name="harvest_date"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>
