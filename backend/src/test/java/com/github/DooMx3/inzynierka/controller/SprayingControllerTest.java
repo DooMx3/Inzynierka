@@ -90,7 +90,7 @@ class SprayingControllerTest {
     when(sprayingService.getById(sprayingId, user)).thenReturn(spraying);
 
     mockMvc
-        .perform(get(BASE_URL + "/" + sprayingId).with(authentication(oenologist())))
+        .perform(get(BASE_URL + "/" + sprayingId).with(authentication(worker())))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.fieldId").value(spraying.fieldId().toString()));
 
@@ -139,7 +139,7 @@ class SprayingControllerTest {
     mockMvc
         .perform(
             post(BASE_URL)
-                .with(authentication(worker()))
+                .with(authentication(oenologist()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestJson()))
         .andExpect(status().isForbidden());
