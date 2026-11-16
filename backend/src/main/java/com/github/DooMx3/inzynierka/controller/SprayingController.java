@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/spraying")
 @RequiredArgsConstructor
+@PreAuthorize("hasAuthority('OWNER') or hasAuthority('WORKER')")
 public class SprayingController {
 
   private final SprayingService sprayingService;
@@ -40,7 +41,6 @@ public class SprayingController {
         content = @Content)
   })
   @PostMapping
-  @PreAuthorize("hasAuthority('OWNER')")
   public ResponseEntity<SprayingResponse> create(
       @RequestBody @Valid SprayingRequest request,
       @Parameter(hidden = true) @AuthenticationPrincipal User user) {
@@ -57,7 +57,6 @@ public class SprayingController {
         content = @Content)
   })
   @GetMapping
-  @PreAuthorize("hasAuthority('OWNER') or hasAuthority('WORKER') or hasAuthority('OENOLOGIST')")
   public ResponseEntity<List<SprayingResponse>> getAll(
       @Parameter(hidden = true) @AuthenticationPrincipal User user) {
     return ResponseEntity.ok(sprayingService.getAll(user));
@@ -77,7 +76,6 @@ public class SprayingController {
         content = @Content)
   })
   @GetMapping("/{id}")
-  @PreAuthorize("hasAuthority('OWNER') or hasAuthority('WORKER') or hasAuthority('OENOLOGIST')")
   public ResponseEntity<SprayingResponse> getById(
       @PathVariable UUID id, @Parameter(hidden = true) @AuthenticationPrincipal User user) {
     return ResponseEntity.ok(sprayingService.getById(id, user));
@@ -98,7 +96,6 @@ public class SprayingController {
         content = @Content)
   })
   @PutMapping("/{id}")
-  @PreAuthorize("hasAuthority('OWNER')")
   public ResponseEntity<SprayingResponse> update(
       @PathVariable UUID id,
       @RequestBody @Valid SprayingRequest request,
@@ -120,7 +117,6 @@ public class SprayingController {
         content = @Content)
   })
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasAuthority('OWNER')")
   public ResponseEntity<Void> delete(
       @PathVariable UUID id, @Parameter(hidden = true) @AuthenticationPrincipal User user) {
     sprayingService.delete(id, user);
