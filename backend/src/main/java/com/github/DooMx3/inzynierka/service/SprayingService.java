@@ -45,7 +45,7 @@ public class SprayingService {
   @Transactional
   public List<SprayingResponse> getAll(User user) {
     Organisation organisation = getActiveOrganisationForReading(user);
-    return sprayingRepository.findByFieldOrganisationOrderBySprayingDateDesc(organisation).stream()
+    return sprayingRepository.findByOrganisationOrderBySprayingDateDesc(organisation).stream()
         .map(SprayingResponse::from)
         .toList();
   }
@@ -70,6 +70,7 @@ public class SprayingService {
   }
 
   private void applyRequest(Spraying spraying, SprayingRequest request, Organisation organisation) {
+    spraying.setOrganisation(organisation);
     spraying.setField(getActiveField(request.fieldId(), organisation));
     spraying.setEquipment(getActiveEquipment(request.equipmentId(), organisation));
     spraying.setSubstance(getActiveSubstance(request.substanceId(), organisation));
@@ -83,9 +84,8 @@ public class SprayingService {
         sprayingRepository
             .findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Spraying not found"));
-    if (spraying.getField() == null
-        || spraying.getField().getOrganisation() == null
-        || !organisation.getId().equals(spraying.getField().getOrganisation().getId())) {
+    if (spraying.getOrganisation() == null
+        || !organisation.getId().equals(spraying.getOrganisation().getId())) {
       throw new ResourceNotFoundException("Spraying not found");
     }
     return spraying;

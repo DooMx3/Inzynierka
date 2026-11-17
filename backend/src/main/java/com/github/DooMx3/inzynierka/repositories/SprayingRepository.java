@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SprayingRepository extends JpaRepository<Spraying, UUID> {
 
-  List<Spraying> findByFieldOrganisationOrderBySprayingDateDesc(Organisation organisation);
+  List<Spraying> findByOrganisationOrderBySprayingDateDesc(Organisation organisation);
 }

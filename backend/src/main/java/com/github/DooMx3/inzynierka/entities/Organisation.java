@@ -1,5 +1,6 @@
 package com.github.DooMx3.inzynierka.entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -26,11 +27,16 @@ public class Organisation {
   @UuidGenerator(style = UuidGenerator.Style.TIME)
   private UUID id;
 
+  @Column(nullable = false, length = 255)
   private String name;
+
   private String taxId;
   private String street;
   private String postalCode;
+
+  @Column(nullable = false, length = 255)
   private String city;
+
   private String logoPath;
   private String motto;
   @Builder.Default private boolean active = true;

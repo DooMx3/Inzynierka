@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.github.DooMx3.inzynierka.config.TestSecurityConfig;
+import com.github.DooMx3.inzynierka.dto.field.FieldResponse;
 import com.github.DooMx3.inzynierka.dto.harvest.HarvestResponse;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.enums.GrapeVariety;
@@ -51,9 +52,7 @@ class HarvestControllerTest {
     harvest =
         new HarvestResponse(
             harvestId,
-            fieldId,
-            GrapeVariety.SOLARIS,
-            "Solaris",
+            List.of(new FieldResponse(fieldId, null, GrapeVariety.SOLARIS, "Solaris", null, true)),
             125,
             LocalDate.of(2026, 9, 20),
             true);
@@ -70,12 +69,12 @@ class HarvestControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
-                        {"fieldId":"%s","amountKg":125,"harvestDate":"2026-09-20"}
+                        {"fieldIds":["%s"],"amountKg":125,"harvestDate":"2026-09-20"}
                         """
                         .formatted(fieldId)))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.fieldId").value(fieldId.toString()))
-        .andExpect(jsonPath("$.grapeVarietyName").value("Solaris"))
+        .andExpect(jsonPath("$.fields[0].id").value(fieldId.toString()))
+        .andExpect(jsonPath("$.fields[0].grapeVarietyName").value("Solaris"))
         .andExpect(jsonPath("$.amountKg").value(125))
         .andExpect(jsonPath("$.harvestDate").value("2026-09-20"));
 
@@ -120,7 +119,7 @@ class HarvestControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
-                        {"fieldId":"%s","amountKg":125,"harvestDate":"2026-09-20"}
+                        {"fieldIds":["%s"],"amountKg":125,"harvestDate":"2026-09-20"}
                         """
                         .formatted(fieldId)))
         .andExpect(status().isOk());
@@ -137,7 +136,7 @@ class HarvestControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
-                        {"fieldId":"%s","amountKg":0,"harvestDate":"2026-09-20"}
+                        {"fieldIds":["%s"],"amountKg":0,"harvestDate":"2026-09-20"}
                         """
                         .formatted(fieldId)))
         .andExpect(status().isBadRequest());

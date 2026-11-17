@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="DooMx3" id="2026-11-17-002-require-resource-organisation-links">
+        <preConditions onFail="HALT" onError="HALT">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM organisation WHERE name IS NULL OR city IS NULL
+            </sqlCheck>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM substance WHERE organisation_id IS NULL
+            </sqlCheck>
+        </preConditions>
+        <addNotNullConstraint
+            tableName="organisation"
+            columnName="name"
+            columnDataType="VARCHAR(255)"/>
+        <addNotNullConstraint
+            tableName="organisation"
+            columnName="city"
+            columnDataType="VARCHAR(255)"/>
+        <addNotNullConstraint
+            tableName="substance"
+            columnName="organisation_id"
+            columnDataType="UUID"/>
+        <addColumn tableName="spraying">
+            <column name="organisation_id" type="UUID"/>
+        </addColumn>
+        <sql>
+            UPDATE spraying s
+            SET organisation_id = f.organisation_id
+            FROM field f
+            WHERE s.field_id = f.id
+        </sql>
+        <addNotNullConstraint
+            tableName="spraying"
+            columnName="organisation_id"
+            columnDataType="UUID"/>
+        <addForeignKeyConstraint
+            baseTableName="spraying"
+            baseColumnNames="organisation_id"
+            referencedTableName="organisation"
+            referencedColumnNames="id"
+            constraintName="fk_spraying_organisation"/>
+        <createIndex tableName="spraying" indexName="idx_spraying_organisation_id">
+            <column name="organisation_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

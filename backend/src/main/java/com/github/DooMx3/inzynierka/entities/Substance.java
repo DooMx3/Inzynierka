@@ -15,8 +15,8 @@ public class Substance {
 
   private String name;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "organisation_id")
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "organisation_id", nullable = false)
   private Organisation organisation;
 
   private boolean active = true;

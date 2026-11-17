@@ -56,16 +56,17 @@ class HarvestServiceTest {
 
   @Test
   void shouldCreateHarvestForWorkersActiveField() {
-    when(fieldRepository.findByIdAndOrganisation(field.getId(), organisation))
-        .thenReturn(Optional.of(field));
+    when(fieldRepository.findByIdInAndOrganisation(Set.of(field.getId()), organisation))
+        .thenReturn(List.of(field));
     when(harvestRepository.save(any(Harvest.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
     HarvestResponse result = service.create(request(field.getId(), 125), worker);
 
-    assertEquals(field.getId(), result.fieldId());
-    assertEquals(GrapeVariety.SOLARIS, result.grapeVariety());
-    assertEquals("Solaris", result.grapeVarietyName());
+    assertEquals(1, result.fields().size());
+    assertEquals(field.getId(), result.fields().get(0).id());
+    assertEquals(GrapeVariety.SOLARIS, result.fields().get(0).grapeVariety());
+    assertEquals("Solaris", result.fields().get(0).grapeVarietyName());
     assertEquals(125, result.amountKg());
     assertEquals(LocalDate.of(2026, 9, 20), result.harvestDate());
     assertTrue(result.active());
@@ -74,8 +75,25 @@ class HarvestServiceTest {
             argThat(
                 harvest ->
                     harvest.getOrganisation() == organisation
-                        && harvest.getField() == field
+                        && harvest.getFields().equals(List.of(field))
                         && harvest.isActive()));
+  }
+
+  @Test
+  void shouldCreateHarvestForMultipleFields() {
+    Field otherField = field(true);
+    when(fieldRepository.findByIdInAndOrganisation(
+            Set.of(field.getId(), otherField.getId()), organisation))
+        .thenReturn(List.of(otherField, field));
+    when(harvestRepository.save(any(Harvest.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    HarvestResponse result =
+        service.create(request(Set.of(field.getId(), otherField.getId()), 125), worker);
+
+    assertEquals(
+        List.of(field.getId(), otherField.getId()).stream().sorted().toList(),
+        result.fields().stream().map(fieldResponse -> fieldResponse.id()).toList());
   }
 
   @Test
@@ -83,8 +101,9 @@ class HarvestServiceTest {
     Harvest harvest = harvest(field);
     when(fieldRepository.findByIdAndOrganisation(field.getId(), organisation))
         .thenReturn(Optional.of(field));
-    when(harvestRepository.findByOrganisationAndFieldIdAndActiveTrueOrderByHarvestDateDescIdAsc(
-            organisation, field.getId()))
+    when(harvestRepository
+            .findDistinctByOrganisationAndFields_IdAndActiveTrueOrderByHarvestDateDescIdAsc(
+                organisation, field.getId()))
         .thenReturn(List.of(harvest));
 
     List<HarvestResponse> result = service.getAll(field.getId(), worker);
@@ -100,15 +119,17 @@ class HarvestServiceTest {
     Field otherField = field(true);
     when(harvestRepository.findByIdAndOrganisation(id, organisation))
         .thenReturn(Optional.of(harvest));
-    when(fieldRepository.findByIdAndOrganisation(otherField.getId(), organisation))
-        .thenReturn(Optional.of(otherField));
+    when(fieldRepository.findByIdInAndOrganisation(Set.of(otherField.getId()), organisation))
+        .thenReturn(List.of(otherField));
     when(harvestRepository.save(harvest)).thenReturn(harvest);
 
     HarvestResponse result =
         service.update(
-            id, new HarvestRequest(otherField.getId(), 240, LocalDate.of(2026, 9, 25)), worker);
+            id,
+            new HarvestRequest(Set.of(otherField.getId()), 240, LocalDate.of(2026, 9, 25)),
+            worker);
 
-    assertEquals(otherField.getId(), result.fieldId());
+    assertEquals(otherField.getId(), result.fields().get(0).id());
     assertEquals(240, result.amountKg());
     assertEquals(LocalDate.of(2026, 9, 25), result.harvestDate());
   }
@@ -128,8 +149,8 @@ class HarvestServiceTest {
 
   @Test
   void shouldRejectFieldOutsideOrganisation() {
-    when(fieldRepository.findByIdAndOrganisation(field.getId(), organisation))
-        .thenReturn(Optional.empty());
+    when(fieldRepository.findByIdInAndOrganisation(Set.of(field.getId()), organisation))
+        .thenReturn(List.of());
 
     assertThrows(
         ResourceNotFoundException.class, () -> service.create(request(field.getId(), 10), worker));
@@ -139,8 +160,8 @@ class HarvestServiceTest {
   @Test
   void shouldRejectInactiveField() {
     field.setActive(false);
-    when(fieldRepository.findByIdAndOrganisation(field.getId(), organisation))
-        .thenReturn(Optional.of(field));
+    when(fieldRepository.findByIdInAndOrganisation(Set.of(field.getId()), organisation))
+        .thenReturn(List.of(field));
 
     assertThrows(
         InactiveResourceException.class, () -> service.create(request(field.getId(), 10), worker));
@@ -173,14 +194,18 @@ class HarvestServiceTest {
   }
 
   private HarvestRequest request(UUID fieldId, int amountKg) {
-    return new HarvestRequest(fieldId, amountKg, LocalDate.of(2026, 9, 20));
+    return request(Set.of(fieldId), amountKg);
+  }
+
+  private HarvestRequest request(Set<UUID> fieldIds, int amountKg) {
+    return new HarvestRequest(fieldIds, amountKg, LocalDate.of(2026, 9, 20));
   }
 
   private Harvest harvest(Field harvestField) {
     Harvest harvest = new Harvest();
     harvest.setId(UUID.randomUUID());
     harvest.setOrganisation(organisation);
-    harvest.setField(harvestField);
+    harvest.setFields(List.of(harvestField));
     harvest.setAmountKg(125);
     harvest.setHarvestDate(LocalDate.of(2026, 9, 20));
     harvest.setActive(true);
