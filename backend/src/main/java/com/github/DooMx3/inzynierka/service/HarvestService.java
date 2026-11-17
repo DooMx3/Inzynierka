@@ -15,7 +15,9 @@ import com.github.DooMx3.inzynierka.repositories.FieldRepository;
 import com.github.DooMx3.inzynierka.repositories.HarvestRepository;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
 import jakarta.transaction.Transactional;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,10 +33,9 @@ public class HarvestService {
   @Transactional
   public HarvestResponse create(HarvestRequest request, User user) {
     Organisation organisation = getActiveOrganisation(user);
-    Field field = getActiveField(request.fieldId(), organisation);
     Harvest harvest = new Harvest();
     harvest.setOrganisation(organisation);
-    harvest.setField(field);
+    harvest.setFields(getActiveFields(request.fieldIds(), organisation));
     applyRequest(harvest, request);
     return HarvestResponse.from(harvestRepository.save(harvest));
   }
@@ -50,8 +51,9 @@ public class HarvestService {
     } else {
       getActiveField(fieldId, organisation);
       harvests =
-          harvestRepository.findByOrganisationAndFieldIdAndActiveTrueOrderByHarvestDateDescIdAsc(
-              organisation, fieldId);
+          harvestRepository
+              .findDistinctByOrganisationAndFields_IdAndActiveTrueOrderByHarvestDateDescIdAsc(
+                  organisation, fieldId);
     }
     return harvests.stream().map(HarvestResponse::from).toList();
   }
@@ -65,7 +67,7 @@ public class HarvestService {
   public HarvestResponse update(UUID id, HarvestRequest request, User user) {
     Organisation organisation = getActiveOrganisation(user);
     Harvest harvest = getActiveHarvest(id, organisation);
-    harvest.setField(getActiveField(request.fieldId(), organisation));
+    harvest.setFields(getActiveFields(request.fieldIds(), organisation));
     applyRequest(harvest, request);
     return HarvestResponse.from(harvestRepository.save(harvest));
   }
@@ -80,6 +82,17 @@ public class HarvestService {
   private void applyRequest(Harvest harvest, HarvestRequest request) {
     harvest.setAmountKg(request.amountKg());
     harvest.setHarvestDate(request.harvestDate());
+  }
+
+  private List<Field> getActiveFields(Set<UUID> ids, Organisation organisation) {
+    List<Field> fields = fieldRepository.findByIdInAndOrganisation(ids, organisation);
+    if (fields.size() != ids.size()) {
+      throw new ResourceNotFoundException("One or more fields not found");
+    }
+    if (fields.stream().anyMatch(field -> !field.isActive())) {
+      throw new InactiveResourceException("Cannot record harvest for an inactive field");
+    }
+    return fields.stream().sorted(Comparator.comparing(Field::getId)).toList();
   }
 
   private Field getActiveField(UUID id, Organisation organisation) {

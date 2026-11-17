@@ -12,7 +12,7 @@ public interface HarvestRepository extends JpaRepository<Harvest, UUID> {
   List<Harvest> findByOrganisationAndActiveTrueOrderByHarvestDateDescIdAsc(
       Organisation organisation);
 
-  List<Harvest> findByOrganisationAndFieldIdAndActiveTrueOrderByHarvestDateDescIdAsc(
+  List<Harvest> findDistinctByOrganisationAndFields_IdAndActiveTrueOrderByHarvestDateDescIdAsc(
       Organisation organisation, UUID fieldId);
 
   Optional<Harvest> findByIdAndOrganisation(UUID id, Organisation organisation);

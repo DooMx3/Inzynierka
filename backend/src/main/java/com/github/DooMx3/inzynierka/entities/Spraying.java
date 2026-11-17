@@ -16,6 +16,10 @@ public class Spraying {
   private UUID id;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "organisation_id", nullable = false)
+  private Organisation organisation;
+
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "field_id", nullable = false)
   private Field field;
 

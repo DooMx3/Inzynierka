@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="DooMx3" id="2026-11-17-001-change-harvest-field-to-many-to-many">
+        <createTable tableName="field_harvest">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="field_harvest_pk"/>
+            </column>
+            <column name="field_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="harvest_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+            baseTableName="field_harvest"
+            baseColumnNames="field_id"
+            referencedTableName="field"
+            referencedColumnNames="id"
+            constraintName="fk_field_harvest_field"/>
+        <addForeignKeyConstraint
+            baseTableName="field_harvest"
+            baseColumnNames="harvest_id"
+            referencedTableName="harvest"
+            referencedColumnNames="id"
+            constraintName="fk_field_harvest_harvest"/>
+        <addUniqueConstraint
+            tableName="field_harvest"
+            columnNames="field_id, harvest_id"
+            constraintName="uq_field_harvest"/>
+        <sql>
+            INSERT INTO field_harvest (field_id, harvest_id)
+            SELECT field_id, id FROM harvest
+        </sql>
+        <dropForeignKeyConstraint
+            baseTableName="harvest"
+            constraintName="fk_harvest_field"/>
+        <dropColumn tableName="harvest" columnName="field_id"/>
+        <createIndex tableName="field_harvest" indexName="idx_field_harvest_harvest_id">
+            <column name="harvest_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

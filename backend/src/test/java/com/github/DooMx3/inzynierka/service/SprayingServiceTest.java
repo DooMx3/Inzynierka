@@ -89,13 +89,14 @@ class SprayingServiceTest {
     assertEquals(equipment.getId(), result.equipmentId());
     assertEquals(substance.getId(), result.substanceId());
     assertEquals(25, result.quantity());
-    verify(sprayingRepository).save(any(Spraying.class));
+    verify(sprayingRepository)
+        .save(argThat(savedSpraying -> savedSpraying.getOrganisation() == organisation));
   }
 
   @Test
   void shouldListSprayingForOwnersOrganisation() {
     Spraying spraying = spraying(UUID.randomUUID());
-    when(sprayingRepository.findByFieldOrganisationOrderBySprayingDateDesc(organisation))
+    when(sprayingRepository.findByOrganisationOrderBySprayingDateDesc(organisation))
         .thenReturn(List.of(spraying));
 
     List<SprayingResponse> result = service.getAll(owner);
@@ -137,6 +138,7 @@ class SprayingServiceTest {
     otherField.setId(UUID.randomUUID());
     otherField.setOrganisation(otherOrganisation);
     Spraying spraying = spraying(UUID.randomUUID());
+    spraying.setOrganisation(otherOrganisation);
     spraying.setField(otherField);
     when(sprayingRepository.findById(spraying.getId())).thenReturn(Optional.of(spraying));
 
@@ -175,6 +177,7 @@ class SprayingServiceTest {
   private Spraying spraying(UUID id) {
     Spraying spraying = new Spraying();
     spraying.setId(id);
+    spraying.setOrganisation(organisation);
     spraying.setField(field);
     spraying.setEquipment(equipment);
     spraying.setSubstance(substance);
