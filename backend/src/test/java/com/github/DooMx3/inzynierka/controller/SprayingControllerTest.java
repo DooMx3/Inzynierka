@@ -135,7 +135,7 @@ class SprayingControllerTest {
   }
 
   @Test
-  void shouldRejectWorkerTryingToCreateSpraying() throws Exception {
+  void shouldRejectOenologistTryingToCreateSpraying() throws Exception {
     mockMvc
         .perform(
             post(BASE_URL)

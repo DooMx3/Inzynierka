@@ -153,16 +153,16 @@ class SprayingServiceTest {
   }
 
   @Test
-  void shouldRejectWorkerTryingToCreateSpraying() {
-    User worker =
+  void shouldRejectOenologistTryingToCreateSpraying() {
+    User oenologist =
         User.builder()
             .id(UUID.randomUUID())
             .organisation(organisation)
-            .roles(new HashSet<>(Set.of(RoleName.WORKER)))
+            .roles(new HashSet<>(Set.of(RoleName.OENOLOGIST)))
             .build();
-    when(userRepository.findById(worker.getId())).thenReturn(Optional.of(worker));
+    when(userRepository.findById(oenologist.getId())).thenReturn(Optional.of(oenologist));
 
-    assertThrows(InsufficientPermissionException.class, () -> service.create(request, worker));
+    assertThrows(InsufficientPermissionException.class, () -> service.create(request, oenologist));
     verifyNoInteractions(sprayingRepository);
   }
 
