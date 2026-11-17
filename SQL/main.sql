@@ -204,25 +204,16 @@ CREATE TABLE "bottling" (
 	"id"             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	"organisationId" UUID NOT NULL REFERENCES "organisation"("id"),
 	"batchId"        UUID NOT NULL REFERENCES "batch"("id"),
-	"quantity"       NUMERIC(10,2) NOT NULL,  -- litry
-	"bottledAt"      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE "bottled_wine" (
-	"id"               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	"organisationId"   UUID NOT NULL REFERENCES "organisation"("id"),
-	"bottlingId"       UUID NOT NULL REFERENCES "bottling"("id"),
 	"name"             VARCHAR(255) NOT NULL,
 	"description"      TEXT,
-	"quantity"         INTEGER NOT NULL CHECK,
-	"productPhotoPath" VARCHAR(255),
-	"deleted"          BOOLEAN NOT NULL DEFAULT false
+	"quantity"       NUMERIC(10,2) NOT NULL,  -- litry
+	"bottledAt"      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE "offering" (
 	"id"             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	"organisationId" UUID NOT NULL REFERENCES "organisation"("id"),
-	"wineId"         UUID NOT NULL REFERENCES "bottled_wine"("id"),
+	"wineId"         UUID NOT NULL REFERENCES "bottling"("id"),
 	"price"          INTEGER NOT NULL
 );
 
