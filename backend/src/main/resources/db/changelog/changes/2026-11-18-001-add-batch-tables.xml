@@ -1,0 +1,118 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="karolsol (generated)" id="1795019544135-7">
+        <createTable tableName="batch">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="batchPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_spoiled" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="quantity" type="numeric(10, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="stage" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organisation_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1795019544135-8">
+        <createTable tableName="batch_source">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="batch_sourcePK"/>
+            </column>
+            <column name="quantity" type="numeric(10, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organisation_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_batch_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_batch_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1795019544135-9">
+        <createTable tableName="harvest_batch">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="harvest_batchPK"/>
+            </column>
+            <column name="quantity" type="numeric(10, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="batch_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="harvest_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organisation_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1795019544135-10">
+        <addUniqueConstraint columnNames="source_batch_id, target_batch_id" constraintName="UK3slr1j0vq59fe735dalnyvuom" tableName="batch_source"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1795019544135-11">
+        <addForeignKeyConstraint baseColumnNames="organisation_id" baseTableName="batch" constraintName="FK9wqdia5irkh2pc5um3oabrg3g" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organisation" validate="true"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1795019544135-12">
+        <addForeignKeyConstraint baseColumnNames="source_batch_id" baseTableName="batch_source" constraintName="FKgp66aas7q69t4cesqleo3amdw" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="batch" validate="true"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1795019544135-13">
+        <addForeignKeyConstraint baseColumnNames="harvest_id" baseTableName="harvest_batch" constraintName="FKgq6r9ii1dimjfi7wbyhqiykpv" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="harvest" validate="true"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1795019544135-14">
+        <addForeignKeyConstraint baseColumnNames="target_batch_id" baseTableName="batch_source" constraintName="FKmu440y64gy0godghwk62a2drj" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="batch" validate="true"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1795019544135-15">
+        <addForeignKeyConstraint baseColumnNames="batch_id" baseTableName="harvest_batch" constraintName="FKor78yu76drtv20ljdlh2ncfij" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="batch" validate="true"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1795019544135-16">
+        <addForeignKeyConstraint baseColumnNames="organisation_id" baseTableName="batch_source" constraintName="FKowrgi4nvnvvu7pgrgg5v0utyq" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organisation" validate="true"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1795019544135-17">
+        <addForeignKeyConstraint baseColumnNames="organisation_id" baseTableName="harvest_batch" constraintName="FKqdrqd7ulghrk40p1klb4opaiq" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organisation" validate="true"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1795019544135-18">
+        <dropUniqueConstraint constraintName="uq_field_harvest" tableName="field_harvest"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1795019544135-19">
+        <dropPrimaryKey constraintName="field_harvest_pk" tableName="field_harvest"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1795019544135-20">
+        <dropColumn columnName="id" tableName="field_harvest"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1795019544135-1">
+        <dropDefaultValue columnDataType="boolean" columnName="active" tableName="field"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1795019544135-2">
+        <dropDefaultValue columnDataType="boolean" columnName="active" tableName="field"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1795019544135-3">
+        <dropDefaultValue columnDataType="boolean" columnName="active" tableName="harvest"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1795019544135-4">
+        <dropDefaultValue columnDataType="boolean" columnName="active" tableName="harvest"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1795019544135-5">
+        <dropDefaultValue columnDataType="boolean" columnName="active" tableName="pest_observation"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1795019544135-6">
+        <dropDefaultValue columnDataType="boolean" columnName="active" tableName="pest_observation"/>
+    </changeSet>
+</databaseChangeLog>

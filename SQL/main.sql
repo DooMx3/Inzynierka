@@ -1,26 +1,7 @@
--- =========================`============================================
--- Schemat bazy winnicy (PostgreSQL 13+)
--- Skrypt dla pustej bazy. Wykonywany w jednej transakcji.
--- Konwencje jednostek:
---   * ilosci partii (batch, bottling)  -> litry
---   * field.area                       -> m2
---   * spraying.quantity                -> ml substancji
---   * bottled_wine.quantity            -> liczba butelek
---   * sugarLevel, acidity              -> g/l
---   * alcohol_content                  -> % obj.
---   * ingredient (wartosci odzywcze)   -> na 100 g
--- =====================================================================
-
--- ---------------------------------------------------------------------
--- Typy wyliczeniowe
--- ---------------------------------------------------------------------
 CREATE TYPE membership_status AS ENUM ('NONE', 'PENDING', 'MEMBER');
 CREATE TYPE user_role_type    AS ENUM ('OWNER', 'WORKER', 'OENOLOGIST');
 CREATE TYPE batch_stage       AS ENUM ('MUST', 'FERMENTING', 'AGED', 'BLENDED');
 
--- ---------------------------------------------------------------------
--- Organizacje i uzytkownicy
--- ---------------------------------------------------------------------
 CREATE TABLE "organisation" (
 	"id"         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	"name"       VARCHAR(255) NOT NULL,
@@ -239,7 +220,7 @@ CREATE TABLE "task" (
 	"equipmentId"    UUID REFERENCES "equipment"("id"),
 	"fieldId"        UUID REFERENCES "field"("id"),
 	"batchId"        UUID REFERENCES "batch"("id"),
-	"bottledWineId"  UUID REFERENCES "bottled_wine"("id"),
+	"bottlingId"  UUID REFERENCES "bottling"("id"),
 	"recordId"       UUID REFERENCES "record"("id"),
 	"harvestId"      UUID REFERENCES "harvest"("id"),
 	"startedAt"      DATE,
@@ -272,8 +253,6 @@ CREATE INDEX ON "batch_ingredient"("ingredientId");
 
 CREATE INDEX ON "bottling"("organisationId");
 CREATE INDEX ON "bottling"("batchId");
-CREATE INDEX ON "bottled_wine"("organisationId");
-CREATE INDEX ON "bottled_wine"("bottlingId");
 CREATE INDEX ON "offering"("organisationId");
 CREATE INDEX ON "offering"("wineId");
 
@@ -287,7 +266,7 @@ CREATE INDEX ON "task"("taskTypeId");
 CREATE INDEX ON "task"("batchId");
 CREATE INDEX ON "task"("fieldId");
 CREATE INDEX ON "task"("equipmentId");
-CREATE INDEX ON "task"("bottledWineId");
+CREATE INDEX ON "task"("bottlingId");
 CREATE INDEX ON "task"("recordId");
 CREATE INDEX ON "task"("harvestId");
 
