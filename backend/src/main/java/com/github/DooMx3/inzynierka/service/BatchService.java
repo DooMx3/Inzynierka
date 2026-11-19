@@ -28,7 +28,9 @@ import com.github.DooMx3.inzynierka.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -54,10 +56,35 @@ public class BatchService {
   @Transactional
   public BatchResponse createFromHarvest(BatchFromHarvestRequest request, User user) {
     Organisation organisation = getActiveOrganisationForWriting(user);
+    Map<UUID, BigDecimal> quantitiesByHarvestId = new HashMap<>();
+    Map<UUID, Harvest> harvestsById = new HashMap<>();
+    List<HarvestBatch> sources = new ArrayList<>(request.harvests().size());
     BigDecimal total =
         request.harvests().stream()
             .map(HarvestBatchRequest::quantity)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+    for (HarvestBatchRequest sourceRequest : request.harvests()) {
+      UUID harvestId = sourceRequest.harvestId();
+      Harvest harvest =
+          harvestsById.computeIfAbsent(
+              harvestId,
+              id ->
+                  harvestRepository
+                      .findByIdAndOrganisation(id, organisation)
+                      .orElseThrow(() -> new ResourceNotFoundException("Harvest not found")));
+      validateHarvestSource(harvest, sourceRequest.quantity());
+      BigDecimal combinedQuantity =
+          quantitiesByHarvestId.merge(harvestId, sourceRequest.quantity(), BigDecimal::add);
+      if (combinedQuantity.compareTo(BigDecimal.valueOf(harvest.getAmountKg())) > 0) {
+        throw new ResourceConflictException("Batch quantity cannot exceed the harvest quantity");
+      }
+      HarvestBatch source = new HarvestBatch();
+      source.setOrganisation(organisation);
+      source.setHarvest(harvest);
+      source.setQuantity(sourceRequest.quantity());
+      sources.add(source);
+    }
 
     Batch batch = new Batch();
     batch.setOrganisation(organisation);
@@ -65,24 +92,10 @@ public class BatchService {
     batch.setStage(BatchStage.MUST);
     batch.setQuantity(total);
     batch.setSpoiled(false);
-    batch = batchRepository.save(batch);
-
-    List<HarvestBatch> sources = new ArrayList<>(request.harvests().size());
-    for (HarvestBatchRequest sourceRequest : request.harvests()) {
-      Harvest harvest =
-          harvestRepository
-              .findByIdAndOrganisation(sourceRequest.harvestId(), organisation)
-              .orElseThrow(() -> new ResourceNotFoundException("Harvest not found"));
-      validateHarvestSource(harvest, sourceRequest.quantity());
-      HarvestBatch source = new HarvestBatch();
-      source.setOrganisation(organisation);
-      source.setHarvest(harvest);
-      source.setBatch(batch);
-      source.setQuantity(sourceRequest.quantity());
-      sources.add(source);
-    }
+    Batch savedBatch = batchRepository.save(batch);
+    sources.forEach(source -> source.setBatch(savedBatch));
     harvestBatchRepository.saveAll(sources);
-    return BatchResponse.from(batch);
+    return BatchResponse.from(savedBatch);
   }
 
   @Transactional
@@ -178,6 +191,7 @@ public class BatchService {
     if (!organisation.getId().equals(source.getOrganisation().getId())) {
       throw new ResourceNotFoundException("Harvest batch source not found");
     }
+    getActiveBatch(source.getBatch().getId(), organisation);
     Harvest harvest =
         harvestRepository
             .findByIdAndOrganisation(request.harvestId(), organisation)
