@@ -97,6 +97,9 @@
     <changeSet author="karolsol (generated)" id="1795019544135-20">
         <dropColumn columnName="id" tableName="field_harvest"/>
     </changeSet>
+    <changeSet author="karolsol (generated)" id="1795019544135-21">
+        <addUniqueConstraint columnNames="field_id, harvest_id" constraintName="uq_field_harvest" tableName="field_harvest"/>
+    </changeSet>
     <changeSet author="karolsol (generated)" id="1795019544135-1">
         <dropDefaultValue columnDataType="boolean" columnName="active" tableName="field"/>
     </changeSet>
