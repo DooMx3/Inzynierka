@@ -127,7 +127,7 @@ class TaskControllerTest {
 
   @Test
   void shouldReturnTaskTypeRelationRequirements() throws Exception {
-    when(taskService.getTaskTypes())
+    when(taskService.getTaskTypes(user))
         .thenReturn(
             List.of(
                 new TaskTypeOption(
