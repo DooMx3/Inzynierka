@@ -209,28 +209,28 @@ CREATE TABLE "record" (
 
 CREATE TABLE "task" (
 	"id"             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	"organisation_id" UUID NOT NULL REFERENCES "organisation"("id"),
-	"created_by_id"  UUID NOT NULL REFERENCES "user"("id"),
-	"creator_role_at_creation" user_role_type NOT NULL,
-	"assigned_to_id" UUID NOT NULL REFERENCES "user"("id"),
-	"task_type"      VARCHAR(32) NOT NULL CHECK ("task_type" IN
+	"organisationId" UUID NOT NULL REFERENCES "organisation"("id"),
+	"createdById"  UUID NOT NULL REFERENCES "user"("id"),
+	"creatorRoleAtCreation" user_role_type NOT NULL,
+	"assignedToId" UUID NOT NULL REFERENCES "user"("id"),
+	"taskType"      VARCHAR(32) NOT NULL CHECK ("taskType" IN
 		('GENERAL', 'SPRAYING', 'HARVEST', 'FIELD_WORK', 'EQUIPMENT_MAINTENANCE')),
 	"name"           VARCHAR(255) NOT NULL,
 	"description"    VARCHAR(2000),
-	"field_id"       UUID REFERENCES "field"("id"),
-	"equipment_id"   UUID REFERENCES "equipment"("id"),
-	"substance_id"   UUID REFERENCES "substance"("id"),
-	"started_at"     DATE,
-	"completed_at"   DATE,
-	"due_date"       DATE,
+	"fieldId"       UUID REFERENCES "field"("id"),
+	"equipmentId"   UUID REFERENCES "equipment"("id"),
+	"substanceId"   UUID REFERENCES "substance"("id"),
+	"startedAt"     DATE,
+	"completedAt"   DATE,
+	"dueDate"       DATE,
 	"active"         BOOLEAN NOT NULL DEFAULT true,
 	CHECK (
-		("task_type" = 'GENERAL')
-		OR ("task_type" = 'SPRAYING' AND "field_id" IS NOT NULL AND "substance_id" IS NOT NULL)
-		OR ("task_type" IN ('HARVEST', 'FIELD_WORK')
-			AND "field_id" IS NOT NULL AND "substance_id" IS NULL)
-		OR ("task_type" = 'EQUIPMENT_MAINTENANCE'
-			AND "field_id" IS NULL AND "equipment_id" IS NOT NULL AND "substance_id" IS NULL)
+		("taskType" = 'GENERAL')
+		OR ("taskType" = 'SPRAYING' AND "fieldId" IS NOT NULL AND "substanceId" IS NOT NULL)
+		OR ("taskType" IN ('HARVEST', 'FIELD_WORK')
+			AND "fieldId" IS NOT NULL AND "substanceId" IS NULL)
+		OR ("taskType" = 'EQUIPMENT_MAINTENANCE'
+			AND "fieldId" IS NULL AND "equipmentId" IS NOT NULL AND "substanceId" IS NULL)
 	)
 );
 
@@ -265,7 +265,7 @@ CREATE INDEX ON "record"("organisationId");
 CREATE INDEX ON "record"("record_typeId");
 CREATE INDEX ON "record"("batchId");
 
-CREATE INDEX ON "task"("organisation_id", "due_date");
-CREATE INDEX ON "task"("assigned_to_id");
-CREATE INDEX ON "task"("created_by_id");
+CREATE INDEX ON "task"("organisationId", "dueDate");
+CREATE INDEX ON "task"("assignedToId");
+CREATE INDEX ON "task"("createdById");
 
