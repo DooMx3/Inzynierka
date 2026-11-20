@@ -135,7 +135,9 @@ public class TaskService {
     taskRepository.save(task);
   }
 
-  public List<TaskTypeOption> getTaskTypes() {
+  public List<TaskTypeOption> getTaskTypes(User user) {
+    User authenticatedUser = getAuthenticatedUser(user);
+    getActiveOrganisation(authenticatedUser);
     return Arrays.stream(TaskType.values()).map(TaskTypeOption::from).toList();
   }
 
@@ -253,11 +255,11 @@ public class TaskService {
     if (actor.getRoles().contains(RoleName.OWNER)) {
       return;
     }
-    if (actor.getRoles().contains(task.getCreatorRoleAtCreation())) {
+    if (task.getCreatedBy().getId().equals(actor.getId())) {
       return;
     }
     throw new InsufficientPermissionException(
-        "Only an owner or a user with the task creator's role can modify this task");
+        "Only the owner or task creator can modify this task");
   }
 
   private void requireStatusPermission(Task task, User actor) {
@@ -286,6 +288,9 @@ public class TaskService {
     if (!authenticatedUser.isActive()) {
       throw new InsufficientPermissionException("Inactive users cannot access tasks");
     }
+    if (authenticatedUser.getMembershipStatus() != MembershipStatus.MEMBER) {
+      throw new InsufficientPermissionException("Only members of an organisation can access tasks");
+    }
     getTaskRole(authenticatedUser);
     return authenticatedUser;
   }
@@ -305,6 +310,9 @@ public class TaskService {
   }
 
   private Organisation getActiveOrganisation(User user) {
+    if (user.getMembershipStatus() != MembershipStatus.MEMBER) {
+      throw new InsufficientPermissionException("Only members of an organisation can access tasks");
+    }
     Organisation organisation = user.getOrganisation();
     if (organisation == null) {
       throw new InsufficientPermissionException("User is not a member of an organisation");
