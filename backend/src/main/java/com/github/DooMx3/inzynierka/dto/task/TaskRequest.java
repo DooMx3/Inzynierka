@@ -15,5 +15,8 @@ public record TaskRequest(
     UUID fieldId,
     UUID equipmentId,
     UUID substanceId,
+    UUID batchId,
+    UUID bottlingId,
+    UUID recordId,
     LocalDate startedAt,
     LocalDate dueDate) {}

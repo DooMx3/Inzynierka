@@ -3,9 +3,12 @@ package com.github.DooMx3.inzynierka.service;
 import com.github.DooMx3.inzynierka.dto.task.TaskRequest;
 import com.github.DooMx3.inzynierka.dto.task.TaskResponse;
 import com.github.DooMx3.inzynierka.dto.task.TaskTypeOption;
+import com.github.DooMx3.inzynierka.entities.Batch;
+import com.github.DooMx3.inzynierka.entities.Bottling;
 import com.github.DooMx3.inzynierka.entities.Equipment;
 import com.github.DooMx3.inzynierka.entities.Field;
 import com.github.DooMx3.inzynierka.entities.Organisation;
+import com.github.DooMx3.inzynierka.entities.Record;
 import com.github.DooMx3.inzynierka.entities.Substance;
 import com.github.DooMx3.inzynierka.entities.Task;
 import com.github.DooMx3.inzynierka.entities.User;
@@ -19,8 +22,11 @@ import com.github.DooMx3.inzynierka.exceptions.InsufficientPermissionException;
 import com.github.DooMx3.inzynierka.exceptions.InvalidTaskRequestException;
 import com.github.DooMx3.inzynierka.exceptions.ResourceNotFoundException;
 import com.github.DooMx3.inzynierka.exceptions.UnauthorizedException;
+import com.github.DooMx3.inzynierka.repositories.BatchRepository;
+import com.github.DooMx3.inzynierka.repositories.BottlingRepository;
 import com.github.DooMx3.inzynierka.repositories.EquipmentRepository;
 import com.github.DooMx3.inzynierka.repositories.FieldRepository;
+import com.github.DooMx3.inzynierka.repositories.RecordRepository;
 import com.github.DooMx3.inzynierka.repositories.SubstanceRepository;
 import com.github.DooMx3.inzynierka.repositories.TaskRepository;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
@@ -41,6 +47,9 @@ public class TaskService {
   private final FieldRepository fieldRepository;
   private final EquipmentRepository equipmentRepository;
   private final SubstanceRepository substanceRepository;
+  private final BatchRepository batchRepository;
+  private final BottlingRepository bottlingRepository;
+  private final RecordRepository recordRepository;
 
   @Transactional
   public TaskResponse create(TaskRequest request, User user) {
@@ -62,6 +71,9 @@ public class TaskService {
       LocalDate dueBefore,
       UUID assignedUserId,
       UUID fieldId,
+      UUID batchId,
+      UUID bottlingId,
+      UUID recordId,
       TaskType type,
       User user) {
     User authenticatedUser = getAuthenticatedUser(user);
@@ -80,6 +92,19 @@ public class TaskService {
             task ->
                 fieldId == null
                     || (task.getField() != null && fieldId.equals(task.getField().getId())))
+        .filter(
+            task ->
+                batchId == null
+                    || (task.getBatch() != null && batchId.equals(task.getBatch().getId())))
+        .filter(
+            task ->
+                bottlingId == null
+                    || (task.getBottling() != null
+                        && bottlingId.equals(task.getBottling().getId())))
+        .filter(
+            task ->
+                recordId == null
+                    || (task.getRecord() != null && recordId.equals(task.getRecord().getId())))
         .filter(task -> type == null || type == task.getType())
         .map(TaskResponse::from)
         .toList();
@@ -156,6 +181,9 @@ public class TaskService {
     task.setField(resolveField(request.fieldId(), organisation));
     task.setEquipment(resolveEquipment(request.equipmentId(), organisation));
     task.setSubstance(resolveSubstance(request.substanceId(), organisation));
+    task.setBatch(resolveBatch(request.batchId(), organisation));
+    task.setBottling(resolveBottling(request.bottlingId(), organisation));
+    task.setRecord(resolveRecord(request.recordId(), organisation));
     task.setAssignedTo(
         resolveAssignee(request.assignedUserId(), actor, organisation, task, creating));
   }
@@ -164,6 +192,9 @@ public class TaskService {
     validateRelation("fieldId", request.fieldId(), request.type().fieldRequirement());
     validateRelation("equipmentId", request.equipmentId(), request.type().equipmentRequirement());
     validateRelation("substanceId", request.substanceId(), request.type().substanceRequirement());
+    validateRelation("batchId", request.batchId(), request.type().batchRequirement());
+    validateRelation("bottlingId", request.bottlingId(), request.type().bottlingRequirement());
+    validateRelation("recordId", request.recordId(), request.type().recordRequirement());
   }
 
   private void validateRelation(String fieldName, UUID value, RelationRequirement requirement) {
@@ -243,6 +274,48 @@ public class TaskService {
       throw new InactiveResourceException("Cannot use an inactive substance");
     }
     return substance;
+  }
+
+  private Batch resolveBatch(UUID id, Organisation organisation) {
+    if (id == null) {
+      return null;
+    }
+    Batch batch =
+        batchRepository
+            .findByIdAndOrganisation(id, organisation)
+            .orElseThrow(() -> new ResourceNotFoundException("Batch not found"));
+    if (batch.isDeleted()) {
+      throw new InactiveResourceException("Cannot use a deleted batch");
+    }
+    return batch;
+  }
+
+  private Bottling resolveBottling(UUID id, Organisation organisation) {
+    if (id == null) {
+      return null;
+    }
+    Bottling bottling =
+        bottlingRepository
+            .findByIdAndOrganisation(id, organisation)
+            .orElseThrow(() -> new ResourceNotFoundException("Bottling not found"));
+    if (!bottling.isActive()) {
+      throw new InactiveResourceException("Cannot use an inactive bottling");
+    }
+    return bottling;
+  }
+
+  private Record resolveRecord(UUID id, Organisation organisation) {
+    if (id == null) {
+      return null;
+    }
+    Record record =
+        recordRepository
+            .findByIdAndOrganisation(id, organisation)
+            .orElseThrow(() -> new ResourceNotFoundException("Record not found"));
+    if (!record.isActive()) {
+      throw new InactiveResourceException("Cannot use an inactive record");
+    }
+    return record;
   }
 
   private Task getTask(UUID id, Organisation organisation) {

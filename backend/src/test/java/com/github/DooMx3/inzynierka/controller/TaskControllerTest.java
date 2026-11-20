@@ -64,13 +64,16 @@ class TaskControllerTest {
             null,
             null,
             null,
+            null,
+            null,
+            null,
             false);
   }
 
   @Test
   void shouldCreateListAndGetTasks() throws Exception {
     when(taskService.create(any(), eq(user))).thenReturn(response);
-    when(taskService.getAll(TaskStatus.PLANNED, null, null, null, null, user))
+    when(taskService.getAll(TaskStatus.PLANNED, null, null, null, null, null, null, null, user))
         .thenReturn(List.of(response));
     when(taskService.getById(taskId, user)).thenReturn(response);
 
@@ -94,7 +97,9 @@ class TaskControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.name").value("Task"));
 
-    verify(taskService).getAll(any(), isNull(), isNull(), isNull(), isNull(), eq(user));
+    verify(taskService)
+        .getAll(
+            any(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), eq(user));
   }
 
   @Test
@@ -134,7 +139,10 @@ class TaskControllerTest {
                     TaskType.SPRAYING,
                     RelationRequirement.REQUIRED,
                     RelationRequirement.OPTIONAL,
-                    RelationRequirement.REQUIRED)));
+                    RelationRequirement.REQUIRED,
+                    RelationRequirement.FORBIDDEN,
+                    RelationRequirement.FORBIDDEN,
+                    RelationRequirement.FORBIDDEN)));
 
     mockMvc
         .perform(get("/api/task-types").with(authentication(authWith("OWNER"))))

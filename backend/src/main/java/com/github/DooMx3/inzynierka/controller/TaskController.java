@@ -38,10 +38,14 @@ public class TaskController {
       @RequestParam(required = false) LocalDate dueBefore,
       @RequestParam(required = false) UUID assignedUserId,
       @RequestParam(required = false) UUID fieldId,
+      @RequestParam(required = false) UUID batchId,
+      @RequestParam(required = false) UUID bottlingId,
+      @RequestParam(required = false) UUID recordId,
       @RequestParam(required = false) TaskType type,
       @Parameter(hidden = true) @AuthenticationPrincipal User user) {
     return ResponseEntity.ok(
-        taskService.getAll(status, dueBefore, assignedUserId, fieldId, type, user));
+        taskService.getAll(
+            status, dueBefore, assignedUserId, fieldId, batchId, bottlingId, recordId, type, user));
   }
 
   @GetMapping("/{id}")

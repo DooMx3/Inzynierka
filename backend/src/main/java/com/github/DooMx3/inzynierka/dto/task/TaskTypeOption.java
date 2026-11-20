@@ -7,10 +7,19 @@ public record TaskTypeOption(
     TaskType type,
     RelationRequirement field,
     RelationRequirement equipment,
-    RelationRequirement substance) {
+    RelationRequirement substance,
+    RelationRequirement batch,
+    RelationRequirement bottling,
+    RelationRequirement record) {
 
   public static TaskTypeOption from(TaskType type) {
     return new TaskTypeOption(
-        type, type.fieldRequirement(), type.equipmentRequirement(), type.substanceRequirement());
+        type,
+        type.fieldRequirement(),
+        type.equipmentRequirement(),
+        type.substanceRequirement(),
+        type.batchRequirement(),
+        type.bottlingRequirement(),
+        type.recordRequirement());
   }
 }
