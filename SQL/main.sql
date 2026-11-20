@@ -52,11 +52,6 @@ CREATE TABLE "equipment_type" (
 	"name" VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE "task_type" (
-	"id"   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	"name" VARCHAR(255)
-);
-
 CREATE TABLE "record_type" (
 	"id"   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	"type" VARCHAR(255) NOT NULL
@@ -183,12 +178,13 @@ CREATE TABLE "batch_ingredient" (
 -- ---------------------------------------------------------------------
 CREATE TABLE "bottling" (
 	"id"             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	"organisationId" UUID NOT NULL REFERENCES "organisation"("id"),
-	"batchId"        UUID NOT NULL REFERENCES "batch"("id"),
+	"organisation_id" UUID NOT NULL REFERENCES "organisation"("id"),
+	"batch_id"        UUID NOT NULL REFERENCES "batch"("id"),
 	"name"             VARCHAR(255) NOT NULL,
 	"description"      TEXT,
 	"quantity"       NUMERIC(10,2) NOT NULL,  -- litry
-	"bottledAt"      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+	"bottled_at"      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	"active"         BOOLEAN NOT NULL DEFAULT true
 );
 
 CREATE TABLE "offering" (
@@ -203,30 +199,48 @@ CREATE TABLE "offering" (
 -- ---------------------------------------------------------------------
 CREATE TABLE "record" (
 	"id"              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	"organisationId"  UUID NOT NULL REFERENCES "organisation"("id"),
+	"organisation_id"  UUID NOT NULL REFERENCES "organisation"("id"),
 	"record_typeId"   UUID NOT NULL REFERENCES "record_type"("id"),
-	"batchId"         UUID REFERENCES "batch"("id"),
-	"sugarLevel"      NUMERIC(6,2),  -- g/l
+	"batch_id"         UUID REFERENCES "batch"("id"),
+	"sugar_level"      NUMERIC(6,2),  -- g/l
 	"acidity"         NUMERIC(5,2),  -- g/l
-	"PH"              NUMERIC(4,2),
-	"alcohol_content" NUMERIC(4,2)   -- % obj.
+	"ph"              NUMERIC(4,2),
+	"alcohol_content" NUMERIC(4,2),   -- % obj.
+	"active"          BOOLEAN NOT NULL DEFAULT true
 );
 
 CREATE TABLE "task" (
 	"id"             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	"taskTypeId"     UUID NOT NULL REFERENCES "task_type"("id"),
-	"organisationId" UUID NOT NULL REFERENCES "organisation"("id"),
-	"userId"         UUID NOT NULL REFERENCES "user"("id"),
-	"equipmentId"    UUID REFERENCES "equipment"("id"),
-	"fieldId"        UUID REFERENCES "field"("id"),
-	"batchId"        UUID REFERENCES "batch"("id"),
-	"bottlingId"  UUID REFERENCES "bottling"("id"),
-	"recordId"       UUID REFERENCES "record"("id"),
-	"harvestId"      UUID REFERENCES "harvest"("id"),
-	"startedAt"      DATE,
-	"completedAt"    DATE,
-	"description"    TEXT NOT NULL,
-	"due"            DATE
+	"organisation_id" UUID NOT NULL REFERENCES "organisation"("id"),
+	"created_by_id"  UUID NOT NULL REFERENCES "user"("id"),
+	"creator_role_at_creation" user_role_type NOT NULL,
+	"assigned_to_id" UUID NOT NULL REFERENCES "user"("id"),
+	"task_type"      VARCHAR(32) NOT NULL CHECK ("task_type" IN
+		('GENERAL', 'SPRAYING', 'HARVEST', 'FIELD_WORK', 'EQUIPMENT_MAINTENANCE')),
+	"name"           VARCHAR(255) NOT NULL,
+	"description"    VARCHAR(2000),
+	"field_id"       UUID REFERENCES "field"("id"),
+	"equipment_id"   UUID REFERENCES "equipment"("id"),
+	"substance_id"   UUID REFERENCES "substance"("id"),
+	"batch_id"       UUID REFERENCES "batch"("id"),
+	"bottling_id"    UUID REFERENCES "bottling"("id"),
+	"record_id"      UUID REFERENCES "record"("id"),
+	"started_at"     DATE,
+	"completed_at"   DATE,
+	"due_date"       DATE,
+	"active"         BOOLEAN NOT NULL DEFAULT true,
+	CHECK (
+		("task_type" = 'GENERAL')
+		OR ("task_type" = 'SPRAYING'
+			AND "field_id" IS NOT NULL AND "substance_id" IS NOT NULL
+			AND "batch_id" IS NULL AND "bottling_id" IS NULL AND "record_id" IS NULL)
+		OR ("task_type" IN ('HARVEST', 'FIELD_WORK')
+			AND "field_id" IS NOT NULL AND "substance_id" IS NULL
+			AND "batch_id" IS NULL AND "bottling_id" IS NULL AND "record_id" IS NULL)
+		OR ("task_type" = 'EQUIPMENT_MAINTENANCE'
+			AND "field_id" IS NULL AND "equipment_id" IS NOT NULL AND "substance_id" IS NULL
+			AND "batch_id" IS NULL AND "bottling_id" IS NULL AND "record_id" IS NULL)
+	)
 );
 
 CREATE INDEX ON "user"("organisationId");
@@ -251,22 +265,19 @@ CREATE INDEX ON "harvest_batch"("batchId");
 CREATE INDEX ON "batch_ingredient"("batchId");
 CREATE INDEX ON "batch_ingredient"("ingredientId");
 
-CREATE INDEX ON "bottling"("organisationId");
-CREATE INDEX ON "bottling"("batchId");
+CREATE INDEX ON "bottling"("organisation_id");
+CREATE INDEX ON "bottling"("batch_id");
 CREATE INDEX ON "offering"("organisationId");
 CREATE INDEX ON "offering"("wineId");
 
-CREATE INDEX ON "record"("organisationId");
+CREATE INDEX ON "record"("organisation_id");
 CREATE INDEX ON "record"("record_typeId");
-CREATE INDEX ON "record"("batchId");
+CREATE INDEX ON "record"("batch_id");
 
-CREATE INDEX ON "task"("organisationId");
-CREATE INDEX ON "task"("userId");
-CREATE INDEX ON "task"("taskTypeId");
-CREATE INDEX ON "task"("batchId");
-CREATE INDEX ON "task"("fieldId");
-CREATE INDEX ON "task"("equipmentId");
-CREATE INDEX ON "task"("bottlingId");
-CREATE INDEX ON "task"("recordId");
-CREATE INDEX ON "task"("harvestId");
+CREATE INDEX ON "task"("organisation_id", "due_date");
+CREATE INDEX ON "task"("assigned_to_id");
+CREATE INDEX ON "task"("created_by_id");
+CREATE INDEX ON "task"("batch_id");
+CREATE INDEX ON "task"("bottling_id");
+CREATE INDEX ON "task"("record_id");
 
