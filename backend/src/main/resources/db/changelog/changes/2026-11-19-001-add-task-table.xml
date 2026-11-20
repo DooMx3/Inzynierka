@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="DooMx3" id="2026-11-19-001-add-task-table">
+        <createTable tableName="task">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="taskPK"/>
+            </column>
+            <column name="organisation_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="creator_role_at_creation" type="VARCHAR(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="assigned_to_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="task_type" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(2000)"/>
+            <column name="field_id" type="UUID"/>
+            <column name="equipment_id" type="UUID"/>
+            <column name="substance_id" type="UUID"/>
+            <column name="started_at" type="DATE"/>
+            <column name="completed_at" type="DATE"/>
+            <column name="due_date" type="DATE"/>
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+            baseTableName="task"
+            baseColumnNames="organisation_id"
+            referencedTableName="organisation"
+            referencedColumnNames="id"
+            constraintName="fk_task_organisation"/>
+        <addForeignKeyConstraint
+            baseTableName="task"
+            baseColumnNames="created_by_id"
+            referencedTableName="_user"
+            referencedColumnNames="id"
+            constraintName="fk_task_created_by"/>
+        <addForeignKeyConstraint
+            baseTableName="task"
+            baseColumnNames="assigned_to_id"
+            referencedTableName="_user"
+            referencedColumnNames="id"
+            constraintName="fk_task_assigned_to"/>
+        <addForeignKeyConstraint
+            baseTableName="task"
+            baseColumnNames="field_id"
+            referencedTableName="field"
+            referencedColumnNames="id"
+            constraintName="fk_task_field"/>
+        <addForeignKeyConstraint
+            baseTableName="task"
+            baseColumnNames="equipment_id"
+            referencedTableName="equipment"
+            referencedColumnNames="id"
+            constraintName="fk_task_equipment"/>
+        <addForeignKeyConstraint
+            baseTableName="task"
+            baseColumnNames="substance_id"
+            referencedTableName="substance"
+            referencedColumnNames="id"
+            constraintName="fk_task_substance"/>
+        <addCheckConstraint
+            tableName="task"
+            constraintName="chk_task_type"
+            checkConstraint="task_type IN ('GENERAL', 'SPRAYING', 'HARVEST', 'FIELD_WORK', 'EQUIPMENT_MAINTENANCE')"/>
+        <addCheckConstraint
+            tableName="task"
+            constraintName="chk_task_type_relations"
+            checkConstraint="(task_type = 'GENERAL') OR (task_type = 'SPRAYING' AND field_id IS NOT NULL AND substance_id IS NOT NULL) OR (task_type IN ('HARVEST', 'FIELD_WORK') AND field_id IS NOT NULL AND substance_id IS NULL) OR (task_type = 'EQUIPMENT_MAINTENANCE' AND field_id IS NULL AND equipment_id IS NOT NULL AND substance_id IS NULL)"/>
+        <createIndex tableName="task" indexName="idx_task_organisation_due">
+            <column name="organisation_id"/>
+            <column name="due_date"/>
+        </createIndex>
+        <createIndex tableName="task" indexName="idx_task_assigned_to">
+            <column name="assigned_to_id"/>
+        </createIndex>
+        <createIndex tableName="task" indexName="idx_task_created_by">
+            <column name="created_by_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

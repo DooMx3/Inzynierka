@@ -71,11 +71,6 @@ CREATE TABLE "equipment_type" (
 	"name" VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE "task_type" (
-	"id"   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	"name" VARCHAR(255)
-);
-
 CREATE TABLE "record_type" (
 	"id"   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	"type" VARCHAR(255) NOT NULL
@@ -233,19 +228,29 @@ CREATE TABLE "record" (
 
 CREATE TABLE "task" (
 	"id"             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	"taskTypeId"     UUID NOT NULL REFERENCES "task_type"("id"),
-	"organisationId" UUID NOT NULL REFERENCES "organisation"("id"),
-	"userId"         UUID NOT NULL REFERENCES "user"("id"),
-	"equipmentId"    UUID REFERENCES "equipment"("id"),
-	"fieldId"        UUID REFERENCES "field"("id"),
-	"batchId"        UUID REFERENCES "batch"("id"),
-	"bottledWineId"  UUID REFERENCES "bottled_wine"("id"),
-	"recordId"       UUID REFERENCES "record"("id"),
-	"harvestId"      UUID REFERENCES "harvest"("id"),
-	"startedAt"      DATE,
-	"completedAt"    DATE,
-	"description"    TEXT NOT NULL,
-	"due"            DATE
+	"organisation_id" UUID NOT NULL REFERENCES "organisation"("id"),
+	"created_by_id"  UUID NOT NULL REFERENCES "user"("id"),
+	"creator_role_at_creation" user_role_type NOT NULL,
+	"assigned_to_id" UUID NOT NULL REFERENCES "user"("id"),
+	"task_type"      VARCHAR(32) NOT NULL CHECK ("task_type" IN
+		('GENERAL', 'SPRAYING', 'HARVEST', 'FIELD_WORK', 'EQUIPMENT_MAINTENANCE')),
+	"name"           VARCHAR(255) NOT NULL,
+	"description"    VARCHAR(2000),
+	"field_id"       UUID REFERENCES "field"("id"),
+	"equipment_id"   UUID REFERENCES "equipment"("id"),
+	"substance_id"   UUID REFERENCES "substance"("id"),
+	"started_at"     DATE,
+	"completed_at"   DATE,
+	"due_date"       DATE,
+	"active"         BOOLEAN NOT NULL DEFAULT true,
+	CHECK (
+		("task_type" = 'GENERAL')
+		OR ("task_type" = 'SPRAYING' AND "field_id" IS NOT NULL AND "substance_id" IS NOT NULL)
+		OR ("task_type" IN ('HARVEST', 'FIELD_WORK')
+			AND "field_id" IS NOT NULL AND "substance_id" IS NULL)
+		OR ("task_type" = 'EQUIPMENT_MAINTENANCE'
+			AND "field_id" IS NULL AND "equipment_id" IS NOT NULL AND "substance_id" IS NULL)
+	)
 );
 
 CREATE INDEX ON "user"("organisationId");
@@ -281,13 +286,7 @@ CREATE INDEX ON "record"("organisationId");
 CREATE INDEX ON "record"("record_typeId");
 CREATE INDEX ON "record"("batchId");
 
-CREATE INDEX ON "task"("organisationId");
-CREATE INDEX ON "task"("userId");
-CREATE INDEX ON "task"("taskTypeId");
-CREATE INDEX ON "task"("batchId");
-CREATE INDEX ON "task"("fieldId");
-CREATE INDEX ON "task"("equipmentId");
-CREATE INDEX ON "task"("bottledWineId");
-CREATE INDEX ON "task"("recordId");
-CREATE INDEX ON "task"("harvestId");
+CREATE INDEX ON "task"("organisation_id", "due_date");
+CREATE INDEX ON "task"("assigned_to_id");
+CREATE INDEX ON "task"("created_by_id");
 
