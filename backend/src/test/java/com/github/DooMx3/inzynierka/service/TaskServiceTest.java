@@ -6,9 +6,12 @@ import static org.mockito.Mockito.*;
 
 import com.github.DooMx3.inzynierka.dto.task.TaskRequest;
 import com.github.DooMx3.inzynierka.dto.task.TaskResponse;
+import com.github.DooMx3.inzynierka.entities.Batch;
+import com.github.DooMx3.inzynierka.entities.Bottling;
 import com.github.DooMx3.inzynierka.entities.Equipment;
 import com.github.DooMx3.inzynierka.entities.Field;
 import com.github.DooMx3.inzynierka.entities.Organisation;
+import com.github.DooMx3.inzynierka.entities.Record;
 import com.github.DooMx3.inzynierka.entities.Substance;
 import com.github.DooMx3.inzynierka.entities.Task;
 import com.github.DooMx3.inzynierka.entities.User;
@@ -18,8 +21,11 @@ import com.github.DooMx3.inzynierka.enums.TaskType;
 import com.github.DooMx3.inzynierka.enums.TaskType.RelationRequirement;
 import com.github.DooMx3.inzynierka.exceptions.InsufficientPermissionException;
 import com.github.DooMx3.inzynierka.exceptions.InvalidTaskRequestException;
+import com.github.DooMx3.inzynierka.repositories.BatchRepository;
+import com.github.DooMx3.inzynierka.repositories.BottlingRepository;
 import com.github.DooMx3.inzynierka.repositories.EquipmentRepository;
 import com.github.DooMx3.inzynierka.repositories.FieldRepository;
+import com.github.DooMx3.inzynierka.repositories.RecordRepository;
 import com.github.DooMx3.inzynierka.repositories.SubstanceRepository;
 import com.github.DooMx3.inzynierka.repositories.TaskRepository;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
@@ -42,6 +48,9 @@ class TaskServiceTest {
   @Mock private FieldRepository fieldRepository;
   @Mock private EquipmentRepository equipmentRepository;
   @Mock private SubstanceRepository substanceRepository;
+  @Mock private BatchRepository batchRepository;
+  @Mock private BottlingRepository bottlingRepository;
+  @Mock private RecordRepository recordRepository;
   @InjectMocks private TaskService service;
 
   private Organisation organisation;
@@ -108,7 +117,71 @@ class TaskServiceTest {
         () ->
             service.create(
                 request(TaskType.HARVEST, field.getId(), null, substance.getId(), null), worker));
+    assertThrows(
+        InvalidTaskRequestException.class,
+        () ->
+            service.create(
+                new TaskRequest(
+                    TaskType.SPRAYING,
+                    "Spraying",
+                    null,
+                    worker.getId(),
+                    field.getId(),
+                    null,
+                    substance.getId(),
+                    UUID.randomUUID(),
+                    null,
+                    null,
+                    null,
+                    null),
+                worker));
     verify(taskRepository, never()).save(any());
+  }
+
+  @Test
+  void shouldCreateGeneralTaskWithBatchBottlingAndRecord() {
+    Batch batch = new Batch();
+    batch.setId(UUID.randomUUID());
+    batch.setOrganisation(organisation);
+    batch.setDeleted(false);
+
+    Bottling bottling = new Bottling();
+    bottling.setId(UUID.randomUUID());
+    bottling.setOrganisation(organisation);
+    bottling.setActive(true);
+
+    Record record = new Record();
+    record.setId(UUID.randomUUID());
+    record.setOrganisation(organisation);
+    record.setActive(true);
+
+    when(batchRepository.findByIdAndOrganisation(batch.getId(), organisation))
+        .thenReturn(Optional.of(batch));
+    when(bottlingRepository.findByIdAndOrganisation(bottling.getId(), organisation))
+        .thenReturn(Optional.of(bottling));
+    when(recordRepository.findByIdAndOrganisation(record.getId(), organisation))
+        .thenReturn(Optional.of(record));
+
+    TaskResponse response =
+        service.create(
+            new TaskRequest(
+                TaskType.GENERAL,
+                "Batch task",
+                null,
+                worker.getId(),
+                null,
+                null,
+                null,
+                batch.getId(),
+                bottling.getId(),
+                record.getId(),
+                null,
+                null),
+            worker);
+
+    assertEquals(batch.getId(), response.batchId());
+    assertEquals(bottling.getId(), response.bottlingId());
+    assertEquals(record.getId(), response.recordId());
   }
 
   @Test
@@ -190,7 +263,7 @@ class TaskServiceTest {
 
     assertThrows(
         InsufficientPermissionException.class,
-        () -> service.getAll(null, null, null, null, null, pendingWorker));
+        () -> service.getAll(null, null, null, null, null, null, null, null, pendingWorker));
     assertThrows(
         InsufficientPermissionException.class,
         () -> service.getById(UUID.randomUUID(), pendingWorker));
@@ -307,6 +380,9 @@ class TaskServiceTest {
         fieldId,
         equipmentId,
         substanceId,
+        null,
+        null,
+        null,
         LocalDate.of(2026, 11, 20),
         LocalDate.of(2026, 11, 21));
   }

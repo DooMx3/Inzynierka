@@ -24,7 +24,7 @@ public class Batch {
 
   @NotNull
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "organisationId", nullable = false)
+  @JoinColumn(name = "organisation_id", nullable = false)
   private Organisation organisation;
 
   @Size(max = 255)

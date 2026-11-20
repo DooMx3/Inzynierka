@@ -18,23 +18,23 @@ public class Task {
   private UUID id;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "organisationId", nullable = false)
+  @JoinColumn(name = "organisation_id", nullable = false)
   private Organisation organisation;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "createdById", nullable = false)
+  @JoinColumn(name = "created_by_id", nullable = false)
   private User createdBy;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "creatorRoleAtCreation", nullable = false, length = 16)
+  @Column(name = "creator_role_at_creation", nullable = false, length = 16)
   private RoleName creatorRoleAtCreation;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "assignedToId", nullable = false)
+  @JoinColumn(name = "assigned_to_id", nullable = false)
   private User assignedTo;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "taskType", nullable = false, length = 32)
+  @Column(name = "task_type", nullable = false, length = 32)
   private TaskType type;
 
   @Column(nullable = false, length = 255)
@@ -44,24 +44,36 @@ public class Task {
   private String description;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "fieldId")
+  @JoinColumn(name = "field_id")
   private Field field;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "equipmentId")
+  @JoinColumn(name = "equipment_id")
   private Equipment equipment;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "substanceId")
+  @JoinColumn(name = "substance_id")
   private Substance substance;
 
-  @Column(name = "startedAt")
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "batch_id")
+  private Batch batch;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "bottling_id")
+  private Bottling bottling;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "record_id")
+  private Record record;
+
+  @Column(name = "started_at")
   private LocalDate startedAt;
 
-  @Column(name = "completedAt")
+  @Column(name = "completed_at")
   private LocalDate completedAt;
 
-  @Column(name = "dueDate")
+  @Column(name = "due_date")
   private LocalDate dueDate;
 
   @Column(nullable = false)
