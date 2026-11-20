@@ -229,7 +229,6 @@ class SubstanceServiceTest {
             .roles(new HashSet<>(Set.of(RoleName.OENOLOGIST)))
             .build();
     when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-
     assertThrows(InsufficientPermissionException.class, () -> service.getAll(user));
     verifyNoInteractions(substanceRepository);
   }
