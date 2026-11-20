@@ -178,12 +178,13 @@ CREATE TABLE "batch_ingredient" (
 -- ---------------------------------------------------------------------
 CREATE TABLE "bottling" (
 	"id"             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	"organisationId" UUID NOT NULL REFERENCES "organisation"("id"),
-	"batchId"        UUID NOT NULL REFERENCES "batch"("id"),
+	"organisation_id" UUID NOT NULL REFERENCES "organisation"("id"),
+	"batch_id"        UUID NOT NULL REFERENCES "batch"("id"),
 	"name"             VARCHAR(255) NOT NULL,
 	"description"      TEXT,
 	"quantity"       NUMERIC(10,2) NOT NULL,  -- litry
-	"bottledAt"      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+	"bottled_at"      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	"active"         BOOLEAN NOT NULL DEFAULT true
 );
 
 CREATE TABLE "offering" (
@@ -198,14 +199,15 @@ CREATE TABLE "offering" (
 -- ---------------------------------------------------------------------
 CREATE TABLE "record" (
 	"id"              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	"organisationId"  UUID NOT NULL REFERENCES "organisation"("id"),
+	"organisation_id"  UUID NOT NULL REFERENCES "organisation"("id"),
 	"record_typeId"   UUID NOT NULL REFERENCES "record_type"("id"),
-	"batchId"         UUID REFERENCES "batch"("id"),
-	"sugarLevel"      NUMERIC(6,2),  -- g/l
+	"batch_id"         UUID REFERENCES "batch"("id"),
+	"sugar_level"      NUMERIC(6,2),  -- g/l
 	"acidity"         NUMERIC(5,2),  -- g/l
-	"PH"              NUMERIC(4,2),
-	"temperature"     NUMERIC(5,2),  -- deg C
-	"alcohol_content" NUMERIC(4,2)   -- % obj.
+	"ph"              NUMERIC(4,2),
+    "temperature"     NUMERIC(5,2),  -- deg C
+	"alcohol_content" NUMERIC(4,2),   -- % obj
+	"active"          BOOLEAN NOT NULL DEFAULT true
 );
 
 CREATE TABLE "task" (
@@ -221,17 +223,24 @@ CREATE TABLE "task" (
 	"field_id"       UUID REFERENCES "field"("id"),
 	"equipment_id"   UUID REFERENCES "equipment"("id"),
 	"substance_id"   UUID REFERENCES "substance"("id"),
+	"batch_id"       UUID REFERENCES "batch"("id"),
+	"bottling_id"    UUID REFERENCES "bottling"("id"),
+	"record_id"      UUID REFERENCES "record"("id"),
 	"started_at"     DATE,
 	"completed_at"   DATE,
 	"due_date"       DATE,
 	"active"         BOOLEAN NOT NULL DEFAULT true,
 	CHECK (
 		("task_type" = 'GENERAL')
-		OR ("task_type" = 'SPRAYING' AND "field_id" IS NOT NULL AND "substance_id" IS NOT NULL)
+		OR ("task_type" = 'SPRAYING'
+			AND "field_id" IS NOT NULL AND "substance_id" IS NOT NULL
+			AND "batch_id" IS NULL AND "bottling_id" IS NULL AND "record_id" IS NULL)
 		OR ("task_type" IN ('HARVEST', 'FIELD_WORK')
-			AND "field_id" IS NOT NULL AND "substance_id" IS NULL)
+			AND "field_id" IS NOT NULL AND "substance_id" IS NULL
+			AND "batch_id" IS NULL AND "bottling_id" IS NULL AND "record_id" IS NULL)
 		OR ("task_type" = 'EQUIPMENT_MAINTENANCE'
-			AND "field_id" IS NULL AND "equipment_id" IS NOT NULL AND "substance_id" IS NULL)
+			AND "field_id" IS NULL AND "equipment_id" IS NOT NULL AND "substance_id" IS NULL
+			AND "batch_id" IS NULL AND "bottling_id" IS NULL AND "record_id" IS NULL)
 	)
 );
 
@@ -257,16 +266,19 @@ CREATE INDEX ON "harvest_batch"("batchId");
 CREATE INDEX ON "batch_ingredient"("batchId");
 CREATE INDEX ON "batch_ingredient"("ingredientId");
 
-CREATE INDEX ON "bottling"("organisationId");
-CREATE INDEX ON "bottling"("batchId");
+CREATE INDEX ON "bottling"("organisation_id");
+CREATE INDEX ON "bottling"("batch_id");
 CREATE INDEX ON "offering"("organisationId");
 CREATE INDEX ON "offering"("wineId");
 
-CREATE INDEX ON "record"("organisationId");
+CREATE INDEX ON "record"("organisation_id");
 CREATE INDEX ON "record"("record_typeId");
-CREATE INDEX ON "record"("batchId");
+CREATE INDEX ON "record"("batch_id");
 
-CREATE INDEX ON "task"("organisation_id");
-CREATE INDEX ON "task"("field_id");
-CREATE INDEX ON "task"("equipment_id");
+CREATE INDEX ON "task"("organisation_id", "due_date");
+CREATE INDEX ON "task"("assigned_to_id");
+CREATE INDEX ON "task"("created_by_id");
+CREATE INDEX ON "task"("batch_id");
+CREATE INDEX ON "task"("bottling_id");
+CREATE INDEX ON "task"("record_id");
 
