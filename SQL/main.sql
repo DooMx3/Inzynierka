@@ -52,11 +52,6 @@ CREATE TABLE "equipment_type" (
 	"name" VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE "task_type" (
-	"id"   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	"name" VARCHAR(255)
-);
-
 CREATE TABLE "record_type" (
 	"id"   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	"type" VARCHAR(255) NOT NULL
@@ -215,17 +210,17 @@ CREATE TABLE "record" (
 
 CREATE TABLE "task" (
 	"id"             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	"taskTypeId"     UUID NOT NULL REFERENCES "task_type"("id"),
-	"organisationId" UUID NOT NULL REFERENCES "organisation"("id"),
-	"userId"         UUID NOT NULL REFERENCES "user"("id"),
-	"equipmentId"    UUID REFERENCES "equipment"("id"),
-	"fieldId"        UUID REFERENCES "field"("id"),
-	"batchId"        UUID REFERENCES "batch"("id"),
-	"bottlingId"  UUID REFERENCES "bottling"("id"),
-	"recordId"       UUID REFERENCES "record"("id"),
-	"harvestId"      UUID REFERENCES "harvest"("id"),
-	"startedAt"      DATE,
-	"completedAt"    DATE,
+	"taskType_id"     UUID NOT NULL REFERENCES "task_type"("id"),
+	"organisation_id" UUID NOT NULL REFERENCES "organisation"("id"),
+	"user_id"         UUID NOT NULL REFERENCES "user"("id"),
+	"equipment_id"    UUID REFERENCES "equipment"("id"),
+	"field_id"        UUID REFERENCES "field"("id"),
+	"batch_id"        UUID REFERENCES "batch"("id"),
+	"bottled_wine_id"  UUID REFERENCES "bottled_wine"("id"),
+	"record_id"       UUID REFERENCES "record"("id"),
+	"harvest_id"      UUID REFERENCES "harvest"("id"),
+	"started_at"      DATE,
+	"completed_at"    DATE,
 	"description"    TEXT NOT NULL,
 	"due"            DATE
 );
@@ -261,13 +256,12 @@ CREATE INDEX ON "record"("organisationId");
 CREATE INDEX ON "record"("record_typeId");
 CREATE INDEX ON "record"("batchId");
 
-CREATE INDEX ON "task"("organisationId");
-CREATE INDEX ON "task"("userId");
-CREATE INDEX ON "task"("taskTypeId");
-CREATE INDEX ON "task"("batchId");
-CREATE INDEX ON "task"("fieldId");
-CREATE INDEX ON "task"("equipmentId");
-CREATE INDEX ON "task"("bottlingId");
-CREATE INDEX ON "task"("recordId");
-CREATE INDEX ON "task"("harvestId");
+CREATE INDEX ON "task"("organisation_id");
+CREATE INDEX ON "task"("user_id");
+CREATE INDEX ON "task"("batch_id");
+CREATE INDEX ON "task"("field_id");
+CREATE INDEX ON "task"("equipment_id");
+CREATE INDEX ON "task"("bottled_wine_id");
+CREATE INDEX ON "task"("record_id");
+CREATE INDEX ON "task"("harvest_id");
 
