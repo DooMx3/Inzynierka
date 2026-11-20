@@ -1,26 +1,7 @@
--- =========================`============================================
--- Schemat bazy winnicy (PostgreSQL 13+)
--- Skrypt dla pustej bazy. Wykonywany w jednej transakcji.
--- Konwencje jednostek:
---   * ilosci partii (batch, bottling)  -> litry
---   * field.area                       -> m2
---   * spraying.quantity                -> ml substancji
---   * bottled_wine.quantity            -> liczba butelek
---   * sugarLevel, acidity              -> g/l
---   * alcohol_content                  -> % obj.
---   * ingredient (wartosci odzywcze)   -> na 100 g
--- =====================================================================
-
--- ---------------------------------------------------------------------
--- Typy wyliczeniowe
--- ---------------------------------------------------------------------
 CREATE TYPE membership_status AS ENUM ('NONE', 'PENDING', 'MEMBER');
 CREATE TYPE user_role_type    AS ENUM ('OWNER', 'WORKER', 'OENOLOGIST');
 CREATE TYPE batch_stage       AS ENUM ('MUST', 'FERMENTING', 'AGED', 'BLENDED');
 
--- ---------------------------------------------------------------------
--- Organizacje i uzytkownicy
--- ---------------------------------------------------------------------
 CREATE TABLE "organisation" (
 	"id"         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	"name"       VARCHAR(255) NOT NULL,
@@ -277,8 +258,6 @@ CREATE INDEX ON "batch_ingredient"("ingredientId");
 
 CREATE INDEX ON "bottling"("organisationId");
 CREATE INDEX ON "bottling"("batchId");
-CREATE INDEX ON "bottled_wine"("organisationId");
-CREATE INDEX ON "bottled_wine"("bottlingId");
 CREATE INDEX ON "offering"("organisationId");
 CREATE INDEX ON "offering"("wineId");
 
