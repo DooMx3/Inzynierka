@@ -18,23 +18,23 @@ public class Task {
   private UUID id;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "organisation_id", nullable = false)
+  @JoinColumn(name = "organisationId", nullable = false)
   private Organisation organisation;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "created_by_id", nullable = false)
+  @JoinColumn(name = "createdById", nullable = false)
   private User createdBy;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "creator_role_at_creation", nullable = false, length = 16)
+  @Column(name = "creatorRoleAtCreation", nullable = false, length = 16)
   private RoleName creatorRoleAtCreation;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "assigned_to_id", nullable = false)
+  @JoinColumn(name = "assignedToId", nullable = false)
   private User assignedTo;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "task_type", nullable = false, length = 32)
+  @Column(name = "taskType", nullable = false, length = 32)
   private TaskType type;
 
   @Column(nullable = false, length = 255)
@@ -44,24 +44,24 @@ public class Task {
   private String description;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "field_id")
+  @JoinColumn(name = "fieldId")
   private Field field;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "equipment_id")
+  @JoinColumn(name = "equipmentId")
   private Equipment equipment;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "substance_id")
+  @JoinColumn(name = "substanceId")
   private Substance substance;
 
-  @Column(name = "started_at")
+  @Column(name = "startedAt")
   private LocalDate startedAt;
 
-  @Column(name = "completed_at")
+  @Column(name = "completedAt")
   private LocalDate completedAt;
 
-  @Column(name = "due_date")
+  @Column(name = "dueDate")
   private LocalDate dueDate;
 
   @Column(nullable = false)
