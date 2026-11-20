@@ -145,6 +145,69 @@ class TaskServiceTest {
   }
 
   @Test
+  void shouldAllowTaskCreatorToUpdateAndDeleteAndRejectAnotherWorker() {
+    Task task = task(worker, RoleName.WORKER);
+    when(taskRepository.findByIdAndOrganisationAndActiveTrue(task.getId(), organisation))
+        .thenReturn(Optional.of(task));
+
+    TaskResponse updated =
+        service.update(task.getId(), request(TaskType.GENERAL, null, null, null, null), worker);
+    assertEquals(task.getId(), updated.id());
+
+    service.delete(task.getId(), worker);
+    assertFalse(task.isActive());
+
+    Task recreated = task(worker, RoleName.WORKER);
+    recreated.setActive(true);
+    when(taskRepository.findByIdAndOrganisationAndActiveTrue(recreated.getId(), organisation))
+        .thenReturn(Optional.of(recreated));
+    User anotherWorker = user(RoleName.WORKER);
+    when(userRepository.findById(anotherWorker.getId())).thenReturn(Optional.of(anotherWorker));
+
+    assertThrows(
+        InsufficientPermissionException.class,
+        () ->
+            service.update(
+                recreated.getId(),
+                request(TaskType.GENERAL, null, null, null, null),
+                anotherWorker));
+    assertThrows(
+        InsufficientPermissionException.class,
+        () -> service.delete(recreated.getId(), anotherWorker));
+  }
+
+  @Test
+  void shouldRejectPendingMembershipForTaskOperations() {
+    User pendingWorker =
+        User.builder()
+            .id(UUID.randomUUID())
+            .organisation(organisation)
+            .membershipStatus(MembershipStatus.PENDING)
+            .roles(EnumSet.of(RoleName.WORKER))
+            .active(true)
+            .build();
+    when(userRepository.findById(pendingWorker.getId())).thenReturn(Optional.of(pendingWorker));
+
+    assertThrows(
+        InsufficientPermissionException.class,
+        () -> service.getAll(null, null, null, null, null, pendingWorker));
+    assertThrows(
+        InsufficientPermissionException.class,
+        () -> service.getById(UUID.randomUUID(), pendingWorker));
+    assertThrows(
+        InsufficientPermissionException.class,
+        () ->
+            service.update(
+                UUID.randomUUID(),
+                request(TaskType.GENERAL, null, null, null, null),
+                pendingWorker));
+    assertThrows(
+        InsufficientPermissionException.class,
+        () -> service.delete(UUID.randomUUID(), pendingWorker));
+    verifyNoInteractions(taskRepository);
+  }
+
+  @Test
   void shouldCompleteAndReopenTaskWithoutLosingItsStartDate() {
     Task task = task(worker, RoleName.WORKER);
     when(taskRepository.findByIdAndOrganisationAndActiveTrue(task.getId(), organisation))
@@ -183,7 +246,7 @@ class TaskServiceTest {
 
   @Test
   void shouldExposeRelationRulesForEveryTaskType() {
-    var options = service.getTaskTypes();
+    var options = service.getTaskTypes(worker);
 
     assertEquals(5, options.size());
     assertEquals(
