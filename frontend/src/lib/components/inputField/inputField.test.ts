@@ -175,4 +175,20 @@ describe('Input field', () => {
         await fireEvent.keyDown(input, { key: 'Enter' });
         expect(key).toBe('Enter');
     });
+
+    it('supports number, date, min/step, and disabled props', () => {
+        render(InputField, {
+            label: 'Quantity',
+            type: 'number',
+            min: 0.01,
+            step: 0.01,
+            disabled: true,
+        });
+
+        const input = screen.getByLabelText('Quantity');
+        expect(input).toHaveAttribute('type', 'number');
+        expect(input).toHaveAttribute('min', '0.01');
+        expect(input).toHaveAttribute('step', '0.01');
+        expect(input).toBeDisabled();
+    });
 });

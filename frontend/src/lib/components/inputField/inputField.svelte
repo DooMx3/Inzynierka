@@ -4,7 +4,7 @@
     const uid = $props.id();
 
     let {
-        value = $bindable(""),
+        value = $bindable<string | number | null>(""),
         type = "text",
         placeholder = "",
         class: className = "",
@@ -12,18 +12,26 @@
         label = "",
         labelPosition = "top",
         invalid = false,
+        disabled = false,
+        min,
+        max,
+        step,
         autocomplete,
         oninput,
         onkeydown,
     }: {
-        value?: string;
-        type?: "text" | "password" | "email" | "search";
+        value?: string | number | null;
+        type?: "text" | "password" | "email" | "search" | "number" | "date" | "datetime-local";
         placeholder?: string;
         class?: string;
         svg?: string;
         label?: string;
         labelPosition?: "top" | "left";
         invalid?: boolean;
+        disabled?: boolean;
+        min?: string | number;
+        max?: string | number;
+        step?: string | number;
         autocomplete?: HTMLInputElement["autocomplete"];
         oninput?: () => void;
         onkeydown?: (event: KeyboardEvent) => void;
@@ -51,6 +59,7 @@
     <div
         class={[
             "flex items-center gap-2 h-12 w-full min-w-0 px-4 rounded-full border bg-white transition-colors duration-200",
+            disabled && "opacity-60 cursor-not-allowed bg-[#fbf7f2]",
             invalid
                 ? "border-red-500 text-red-700/80 fill-red-700/70 stroke-red-700/70 focus-within:border-red-600"
                 : "border-[#c4b6a6] text-zinc-700 fill-zinc-500 stroke-zinc-500 focus-within:border-[#8c735c]",
@@ -64,6 +73,10 @@
             type={inputType}
             {placeholder}
             {autocomplete}
+            {disabled}
+            {min}
+            {max}
+            {step}
             bind:value
             oninput={() => oninput?.()}
             onkeydown={(event) => onkeydown?.(event)}

@@ -10,7 +10,7 @@
     }: {
         rows: T[];
         head: Snippet;
-        row: Snippet<[T]>;
+        row: Snippet<[T, number]>;
         pageSize?: number;
         emptyLabel?: string;
     } = $props();
@@ -77,8 +77,8 @@
                         <td class="px-4 py-8 text-center text-zinc-500" colspan="99">{emptyLabel}</td>
                     </tr>
                 {:else}
-                    {#each visible as item (item.id)}
-                        {@render row(item)}
+                    {#each visible as item, index (item.id)}
+                        {@render row(item, index)}
                     {/each}
                 {/if}
             </tbody>

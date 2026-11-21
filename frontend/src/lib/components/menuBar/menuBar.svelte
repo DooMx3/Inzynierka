@@ -5,6 +5,7 @@
     import packedIcon from "../../assets/box.svg?raw";
     import raportIcon from "../../assets/raport.svg?raw";
     import workersIcon from "../../assets/workers.svg?raw";
+    import controlIcon from "../../assets/control.svg?raw";
     import openIcon from "../../assets/open_menu.svg?raw";
 
     import { menu, toggleMenu } from "$lib/stores/menu.svelte";
@@ -41,7 +42,7 @@
             name: "Field work",
             icon: agriIcon,
             goTo: "/agriculture",
-            roles: ["WORKER", "OENOLOGIST", "OWNER"],
+            roles: ["WORKER", "OWNER"],
         },
         {
             name: "Vinery",
@@ -54,6 +55,12 @@
             icon: packedIcon,
             goTo: "/packed-products",
             roles: ["OENOLOGIST", "OWNER"],
+        },
+        {
+            name: "Management",
+            icon: controlIcon,
+            goTo: "/management",
+            roles: ["OWNER"],
         },
         {
             name: "Raports",

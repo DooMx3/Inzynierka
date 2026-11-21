@@ -16,6 +16,7 @@ const menuItems = [
     { name: 'Field work', path: '/agriculture' },
     { name: 'Vinery', path: '/vinery' },
     { name: 'Packed products', path: '/packed-products' },
+    { name: 'Management', path: '/management' },
     { name: 'Raports', path: '/raports' },
     { name: 'Workers', path: '/workers' },
 ];
@@ -178,17 +179,19 @@ describe('Menu bar', () => {
         expect(screen.getByRole('button', { name: 'Field work' })).toBeInTheDocument();
         expect(screen.queryByRole('button', { name: 'Vinery' })).not.toBeInTheDocument();
         expect(screen.queryByRole('button', { name: 'Packed products' })).not.toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Management' })).not.toBeInTheDocument();
         expect(screen.queryByRole('button', { name: 'Raports' })).not.toBeInTheDocument();
         expect(screen.queryByRole('button', { name: 'Workers' })).not.toBeInTheDocument();
     });
 
-    it('shows winery tools to an oenologist and hides owner tools', () => {
+    it('shows winery tools to an oenologist and hides worker and owner tools', () => {
         setUser({ ...owner, roles: ['OENOLOGIST'] });
         render(MenuBar);
 
-        expect(screen.getByRole('button', { name: 'Field work' })).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Field work' })).not.toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Vinery' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Packed products' })).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Management' })).not.toBeInTheDocument();
         expect(screen.queryByRole('button', { name: 'Raports' })).not.toBeInTheDocument();
         expect(screen.queryByRole('button', { name: 'Workers' })).not.toBeInTheDocument();
     });
