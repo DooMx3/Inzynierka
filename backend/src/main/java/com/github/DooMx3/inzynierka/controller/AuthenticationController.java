@@ -2,6 +2,7 @@ package com.github.DooMx3.inzynierka.controller;
 
 import com.github.DooMx3.inzynierka.dto.user.AuthenticationRequest;
 import com.github.DooMx3.inzynierka.dto.user.RegisterRequest;
+import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.service.AuthenticationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -15,6 +16,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -65,6 +67,24 @@ public class AuthenticationController {
       @RequestBody AuthenticationRequest request,
       @Parameter(hidden = true) HttpServletResponse response) {
     service.authenticate(request, response);
+    return ResponseEntity.ok("");
+  }
+
+  @Operation(
+      summary = "Refresh JWT cookie",
+      description = "Generates a new JWT for the authenticated user and replaces the jwt cookie.")
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = "200",
+        description = "Token refreshed and cookie set",
+        headers = @Header(name = "Set-Cookie", description = "jwt=...; HttpOnly; Path=/")),
+    @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content)
+  })
+  @PostMapping("/refresh")
+  public ResponseEntity<String> refresh(
+      @Parameter(hidden = true) @AuthenticationPrincipal User user,
+      @Parameter(hidden = true) HttpServletResponse response) {
+    service.refresh(user, response);
     return ResponseEntity.ok("");
   }
 

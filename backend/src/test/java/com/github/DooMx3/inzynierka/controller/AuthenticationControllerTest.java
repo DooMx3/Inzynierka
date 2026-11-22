@@ -2,9 +2,12 @@ package com.github.DooMx3.inzynierka.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
@@ -13,8 +16,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.github.DooMx3.inzynierka.config.TestSecurityConfig;
 import com.github.DooMx3.inzynierka.dto.user.AuthenticationRequest;
 import com.github.DooMx3.inzynierka.dto.user.RegisterRequest;
+import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.exceptions.InvalidCredentialsException;
 import com.github.DooMx3.inzynierka.exceptions.ResourceAlreadyExistsException;
+import com.github.DooMx3.inzynierka.exceptions.UnauthorizedException;
 import com.github.DooMx3.inzynierka.service.AuthenticationService;
 import com.github.DooMx3.inzynierka.service.JwtService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -306,6 +312,47 @@ class AuthenticationControllerTest {
           .andExpect(status().isBadRequest());
 
       verifyNoInteractions(authenticationService);
+    }
+  }
+
+  @Nested
+  class Refresh {
+
+    @Test
+    void shouldReturn200AndEmptyBodyForAuthenticatedUser() throws Exception {
+      User user = User.builder().email("jan.kowalski@example.com").active(true).build();
+      UsernamePasswordAuthenticationToken principal =
+          new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+
+      mockMvc
+          .perform(post(BASE_URL + "/refresh").with(authentication(principal)))
+          .andExpect(status().isOk())
+          .andExpect(content().string(""));
+
+      verify(authenticationService).refresh(eq(user), any(HttpServletResponse.class));
+    }
+
+    @Test
+    void shouldReturn401WhenUserIsNotAuthenticated() throws Exception {
+      doThrow(new UnauthorizedException("Authenticated user is required"))
+          .when(authenticationService)
+          .refresh(isNull(), any(HttpServletResponse.class));
+
+      mockMvc.perform(post(BASE_URL + "/refresh")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void shouldReturn401WhenServiceRejectsRefresh() throws Exception {
+      User user = User.builder().email("jan.kowalski@example.com").active(true).build();
+      UsernamePasswordAuthenticationToken principal =
+          new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+      doThrow(new UnauthorizedException("Authenticated user is required"))
+          .when(authenticationService)
+          .refresh(eq(user), any(HttpServletResponse.class));
+
+      mockMvc
+          .perform(post(BASE_URL + "/refresh").with(authentication(principal)))
+          .andExpect(status().isUnauthorized());
     }
   }
 
