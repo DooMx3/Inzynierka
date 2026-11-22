@@ -44,6 +44,8 @@ services:
       SPRING_MAIL_HOST: mailpit
       SPRING_MAIL_PORT: "1025"
       APP_RESET_PASSWORD_URL: http://localhost:3000/reset-password
+      # Set APP_COOKIE_SECURE=false in .env only when running without HTTPS locally.
+      APP_COOKIE_SECURE: ${APP_COOKIE_SECURE:-true}
     ports:
       - "8080:8080"
     depends_on:

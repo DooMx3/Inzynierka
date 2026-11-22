@@ -11,6 +11,7 @@ import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,6 +20,9 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
+  @Value("${app.cookie.secure:true}")
+  private boolean secureCookies = true;
+
   private final UserRepository repository;
   private final PasswordEncoder passwordEncoder;
   private final JwtService jwtService;
@@ -106,7 +110,7 @@ public class AuthenticationService {
       HttpServletResponse response, String name, String token, int maxAgeSeconds) {
     Cookie cookie = new Cookie(name, token);
     cookie.setHttpOnly(true);
-    cookie.setSecure(false);
+    cookie.setSecure(secureCookies);
     cookie.setPath("/");
     cookie.setMaxAge(maxAgeSeconds);
     response.addCookie(cookie);
@@ -125,6 +129,7 @@ public class AuthenticationService {
   private void expireCookie(HttpServletResponse response, String name) {
     Cookie cookie = new Cookie(name, null);
     cookie.setHttpOnly(true);
+    cookie.setSecure(secureCookies);
     cookie.setPath("/");
     cookie.setMaxAge(0);
     response.addCookie(cookie);

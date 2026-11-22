@@ -370,10 +370,12 @@ class AuthenticationControllerTest {
           .andExpect(cookie().exists(JwtService.ACCESS_TOKEN_COOKIE))
           .andExpect(cookie().maxAge(JwtService.ACCESS_TOKEN_COOKIE, 0))
           .andExpect(cookie().httpOnly(JwtService.ACCESS_TOKEN_COOKIE, true))
+          .andExpect(cookie().secure(JwtService.ACCESS_TOKEN_COOKIE, true))
           .andExpect(cookie().path(JwtService.ACCESS_TOKEN_COOKIE, "/"))
           .andExpect(cookie().exists(JwtService.REFRESH_TOKEN_COOKIE))
           .andExpect(cookie().maxAge(JwtService.REFRESH_TOKEN_COOKIE, 0))
           .andExpect(cookie().httpOnly(JwtService.REFRESH_TOKEN_COOKIE, true))
+          .andExpect(cookie().secure(JwtService.REFRESH_TOKEN_COOKIE, true))
           .andExpect(cookie().path(JwtService.REFRESH_TOKEN_COOKIE, "/"));
     }
 

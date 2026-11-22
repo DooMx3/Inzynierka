@@ -15,6 +15,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +32,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthenticationController {
 
   private final AuthenticationService service;
+
+  @Value("${app.cookie.secure:true}")
+  private boolean secureCookies = true;
 
   @Operation(
       summary = "Register new user and set HttpOnly token cookies.",
@@ -112,6 +116,7 @@ public class AuthenticationController {
   private void expireCookie(HttpServletResponse response, String name) {
     Cookie cookie = new Cookie(name, null);
     cookie.setHttpOnly(true);
+    cookie.setSecure(secureCookies);
     cookie.setPath("/");
     cookie.setMaxAge(0);
     response.addCookie(cookie);
