@@ -27,6 +27,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private final UserDetailsService userDetailsService;
 
   @Override
+  protected boolean shouldNotFilter(HttpServletRequest request) {
+    return "/api/auth/refresh".equals(request.getServletPath());
+  }
+
+  @Override
   protected void doFilterInternal(
       @NonNull HttpServletRequest request,
       @NonNull HttpServletResponse response,
@@ -38,7 +43,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     if (request.getCookies() != null) {
       for (Cookie cookie : request.getCookies()) {
-        if ("jwt".equals(cookie.getName())) {
+        if (JwtService.ACCESS_TOKEN_COOKIE.equals(cookie.getName())) {
           jwt = cookie.getValue();
           break;
         }
@@ -56,27 +61,42 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
         UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
-        if (jwtService.isTokenValid(jwt, userDetails)) {
+        if (userDetails.isEnabled() && jwtService.isAccessTokenValid(jwt, userDetails)) {
           UsernamePasswordAuthenticationToken authToken =
               new UsernamePasswordAuthenticationToken(
                   userDetails, null, userDetails.getAuthorities());
           authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
           SecurityContextHolder.getContext().setAuthentication(authToken);
+        } else if (!userDetails.isEnabled()) {
+          SecurityContextHolder.clearContext();
+          expireAuthCookies(response);
         } else {
-          expireJwtCookie(response);
+          expireAccessTokenCookie(response);
         }
       } else if (userEmail == null) {
-        expireJwtCookie(response);
+        expireAccessTokenCookie(response);
       }
-    } catch (UsernameNotFoundException | JwtException | IllegalArgumentException exception) {
+    } catch (UsernameNotFoundException exception) {
       SecurityContextHolder.clearContext();
-      expireJwtCookie(response);
+      expireAuthCookies(response);
+    } catch (JwtException | IllegalArgumentException exception) {
+      SecurityContextHolder.clearContext();
+      expireAccessTokenCookie(response);
     }
     filterChain.doFilter(request, response);
   }
 
-  private void expireJwtCookie(HttpServletResponse response) {
-    Cookie cookie = new Cookie("jwt", null);
+  private void expireAuthCookies(HttpServletResponse response) {
+    expireCookie(response, JwtService.ACCESS_TOKEN_COOKIE);
+    expireCookie(response, JwtService.REFRESH_TOKEN_COOKIE);
+  }
+
+  private void expireAccessTokenCookie(HttpServletResponse response) {
+    expireCookie(response, JwtService.ACCESS_TOKEN_COOKIE);
+  }
+
+  private void expireCookie(HttpServletResponse response, String name) {
+    Cookie cookie = new Cookie(name, null);
     cookie.setHttpOnly(true);
     cookie.setPath("/");
     cookie.setMaxAge(0);

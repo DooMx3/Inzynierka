@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
@@ -16,12 +15,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.github.DooMx3.inzynierka.config.TestSecurityConfig;
 import com.github.DooMx3.inzynierka.dto.user.AuthenticationRequest;
 import com.github.DooMx3.inzynierka.dto.user.RegisterRequest;
-import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.exceptions.InvalidCredentialsException;
 import com.github.DooMx3.inzynierka.exceptions.ResourceAlreadyExistsException;
 import com.github.DooMx3.inzynierka.exceptions.UnauthorizedException;
 import com.github.DooMx3.inzynierka.service.AuthenticationService;
 import com.github.DooMx3.inzynierka.service.JwtService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -30,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -319,22 +317,20 @@ class AuthenticationControllerTest {
   class Refresh {
 
     @Test
-    void shouldReturn200AndEmptyBodyForAuthenticatedUser() throws Exception {
-      User user = User.builder().email("jan.kowalski@example.com").active(true).build();
-      UsernamePasswordAuthenticationToken principal =
-          new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-
+    void shouldPassRefreshCookieToService() throws Exception {
       mockMvc
-          .perform(post(BASE_URL + "/refresh").with(authentication(principal)))
+          .perform(
+              post(BASE_URL + "/refresh")
+                  .cookie(new Cookie(JwtService.REFRESH_TOKEN_COOKIE, "refresh-token")))
           .andExpect(status().isOk())
           .andExpect(content().string(""));
 
-      verify(authenticationService).refresh(eq(user), any(HttpServletResponse.class));
+      verify(authenticationService).refresh(eq("refresh-token"), any(HttpServletResponse.class));
     }
 
     @Test
-    void shouldReturn401WhenUserIsNotAuthenticated() throws Exception {
-      doThrow(new UnauthorizedException("Authenticated user is required"))
+    void shouldReturn401WhenRefreshCookieIsMissing() throws Exception {
+      doThrow(new UnauthorizedException("Refresh token is invalid or expired"))
           .when(authenticationService)
           .refresh(isNull(), any(HttpServletResponse.class));
 
@@ -342,16 +338,15 @@ class AuthenticationControllerTest {
     }
 
     @Test
-    void shouldReturn401WhenServiceRejectsRefresh() throws Exception {
-      User user = User.builder().email("jan.kowalski@example.com").active(true).build();
-      UsernamePasswordAuthenticationToken principal =
-          new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-      doThrow(new UnauthorizedException("Authenticated user is required"))
+    void shouldReturn401WhenRefreshTokenIsInvalid() throws Exception {
+      doThrow(new UnauthorizedException("Refresh token is invalid or expired"))
           .when(authenticationService)
-          .refresh(eq(user), any(HttpServletResponse.class));
+          .refresh(eq("invalid-token"), any(HttpServletResponse.class));
 
       mockMvc
-          .perform(post(BASE_URL + "/refresh").with(authentication(principal)))
+          .perform(
+              post(BASE_URL + "/refresh")
+                  .cookie(new Cookie(JwtService.REFRESH_TOKEN_COOKIE, "invalid-token")))
           .andExpect(status().isUnauthorized());
     }
   }
@@ -368,14 +363,18 @@ class AuthenticationControllerTest {
     }
 
     @Test
-    void shouldExpireJwtCookie() throws Exception {
+    void shouldExpireBothTokenCookies() throws Exception {
       mockMvc
           .perform(post(BASE_URL + "/logout"))
           .andExpect(status().isOk())
-          .andExpect(cookie().exists("jwt"))
-          .andExpect(cookie().maxAge("jwt", 0))
-          .andExpect(cookie().httpOnly("jwt", true))
-          .andExpect(cookie().path("jwt", "/"));
+          .andExpect(cookie().exists(JwtService.ACCESS_TOKEN_COOKIE))
+          .andExpect(cookie().maxAge(JwtService.ACCESS_TOKEN_COOKIE, 0))
+          .andExpect(cookie().httpOnly(JwtService.ACCESS_TOKEN_COOKIE, true))
+          .andExpect(cookie().path(JwtService.ACCESS_TOKEN_COOKIE, "/"))
+          .andExpect(cookie().exists(JwtService.REFRESH_TOKEN_COOKIE))
+          .andExpect(cookie().maxAge(JwtService.REFRESH_TOKEN_COOKIE, 0))
+          .andExpect(cookie().httpOnly(JwtService.REFRESH_TOKEN_COOKIE, true))
+          .andExpect(cookie().path(JwtService.REFRESH_TOKEN_COOKIE, "/"));
     }
 
     @Test

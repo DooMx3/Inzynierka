@@ -2,6 +2,7 @@ package com.github.DooMx3.inzynierka.controller;
 
 import com.github.DooMx3.inzynierka.dto.user.*;
 import com.github.DooMx3.inzynierka.entities.User;
+import com.github.DooMx3.inzynierka.service.JwtService;
 import com.github.DooMx3.inzynierka.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -73,11 +74,8 @@ public class UserController {
       @Parameter(hidden = true) HttpServletResponse response) {
     service.patchUser(request, user.getEmail());
     if (request.email() != null) {
-      Cookie cookie = new Cookie("jwt", null);
-      cookie.setHttpOnly(true);
-      cookie.setPath("/");
-      cookie.setMaxAge(0);
-      response.addCookie(cookie);
+      expireCookie(response, JwtService.ACCESS_TOKEN_COOKIE);
+      expireCookie(response, JwtService.REFRESH_TOKEN_COOKIE);
     }
     return ResponseEntity.ok("User patched successfully");
   }
@@ -107,6 +105,14 @@ public class UserController {
   public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
     service.sendPasswordResetEmail(request.email());
     return ResponseEntity.ok("If an account with that email exists, a reset link has been sent.");
+  }
+
+  private void expireCookie(HttpServletResponse response, String name) {
+    Cookie cookie = new Cookie(name, null);
+    cookie.setHttpOnly(true);
+    cookie.setPath("/");
+    cookie.setMaxAge(0);
+    response.addCookie(cookie);
   }
 
   @Operation(

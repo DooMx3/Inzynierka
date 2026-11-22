@@ -1,5 +1,6 @@
 package com.github.DooMx3.inzynierka.configuration;
 
+import com.github.DooMx3.inzynierka.service.JwtService;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -25,6 +26,6 @@ public class OpenApiConfig {
                     new SecurityScheme()
                         .type(SecurityScheme.Type.APIKEY)
                         .in(SecurityScheme.In.COOKIE)
-                        .name("jwt")));
+                        .name(JwtService.ACCESS_TOKEN_COOKIE)));
   }
 }
