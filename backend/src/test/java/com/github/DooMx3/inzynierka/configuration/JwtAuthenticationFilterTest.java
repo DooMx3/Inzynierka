@@ -1,7 +1,6 @@
 package com.github.DooMx3.inzynierka.configuration;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,6 +48,7 @@ class JwtAuthenticationFilterTest {
     Cookie expiredCookie = response.getCookie(JwtService.ACCESS_TOKEN_COOKIE);
     assertEquals(0, expiredCookie.getMaxAge());
     assertEquals("/", expiredCookie.getPath());
+    assertTrue(expiredCookie.getSecure());
     assertEquals(request, filterChain.getRequest());
   }
 
@@ -66,6 +66,7 @@ class JwtAuthenticationFilterTest {
     filter.doFilter(request, response, filterChain);
 
     assertEquals(0, response.getCookie(JwtService.ACCESS_TOKEN_COOKIE).getMaxAge());
+    assertTrue(response.getCookie(JwtService.ACCESS_TOKEN_COOKIE).getSecure());
   }
 
   @Test
@@ -89,6 +90,8 @@ class JwtAuthenticationFilterTest {
     assertNull(SecurityContextHolder.getContext().getAuthentication());
     assertEquals(0, response.getCookie(JwtService.ACCESS_TOKEN_COOKIE).getMaxAge());
     assertEquals(0, response.getCookie(JwtService.REFRESH_TOKEN_COOKIE).getMaxAge());
+    assertTrue(response.getCookie(JwtService.ACCESS_TOKEN_COOKIE).getSecure());
+    assertTrue(response.getCookie(JwtService.REFRESH_TOKEN_COOKIE).getSecure());
     verify(jwtService, never()).isAccessTokenValid("valid-token", disabledUser);
   }
 

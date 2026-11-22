@@ -16,6 +16,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +29,9 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
   private final UserService service;
+
+  @Value("${app.cookie.secure:true}")
+  private boolean secureCookies = true;
 
   @Operation(
       summary = "Get current user",
@@ -110,6 +114,7 @@ public class UserController {
   private void expireCookie(HttpServletResponse response, String name) {
     Cookie cookie = new Cookie(name, null);
     cookie.setHttpOnly(true);
+    cookie.setSecure(secureCookies);
     cookie.setPath("/");
     cookie.setMaxAge(0);
     response.addCookie(cookie);

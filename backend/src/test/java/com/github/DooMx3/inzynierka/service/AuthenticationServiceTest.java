@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class AuthenticationServiceTest {
@@ -52,6 +53,24 @@ class AuthenticationServiceTest {
     assertEquals(JwtService.REFRESH_TOKEN_MAX_AGE_SECONDS, refreshCookie.getMaxAge());
     assertEquals(true, accessCookie.isHttpOnly());
     assertEquals(true, refreshCookie.isHttpOnly());
+    assertTrue(accessCookie.getSecure());
+    assertTrue(refreshCookie.getSecure());
+  }
+
+  @Test
+  void shouldAllowSecureFlagToBeDisabledForLocalHttp() {
+    MockHttpServletResponse response = new MockHttpServletResponse();
+    ReflectionTestUtils.setField(service, "secureCookies", false);
+    when(passwordEncoder.encode(PASSWORD)).thenReturn("hashed-password");
+    when(jwtService.generateAccessToken(org.mockito.ArgumentMatchers.any(User.class)))
+        .thenReturn("access-token");
+    when(jwtService.generateRefreshToken(org.mockito.ArgumentMatchers.any(User.class)))
+        .thenReturn("refresh-token");
+
+    service.register(new RegisterRequest("Jan", "Kowalski", "jan@example.com", PASSWORD), response);
+
+    assertFalse(response.getCookie(JwtService.ACCESS_TOKEN_COOKIE).getSecure());
+    assertFalse(response.getCookie(JwtService.REFRESH_TOKEN_COOKIE).getSecure());
   }
 
   @Test
@@ -71,6 +90,7 @@ class AuthenticationServiceTest {
     assertEquals(JwtService.ACCESS_TOKEN_MAX_AGE_SECONDS, cookie.getMaxAge());
     assertEquals("/", cookie.getPath());
     assertEquals(true, cookie.isHttpOnly());
+    assertTrue(cookie.getSecure());
     assertNull(response.getCookie(JwtService.REFRESH_TOKEN_COOKIE));
   }
 
@@ -113,9 +133,10 @@ class AuthenticationServiceTest {
 
   private void assertExpiredCookie(MockHttpServletResponse response, String name) {
     Cookie cookie = response.getCookie(name);
-      assert cookie != null;
-      assertEquals(0, cookie.getMaxAge());
+    assert cookie != null;
+    assertEquals(0, cookie.getMaxAge());
     assertEquals("/", cookie.getPath());
     assertTrue(cookie.isHttpOnly());
+    assertTrue(cookie.getSecure());
   }
 }
