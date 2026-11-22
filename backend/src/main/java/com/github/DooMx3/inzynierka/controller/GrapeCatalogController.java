@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@PreAuthorize("hasAuthority('OWNER')")
+@PreAuthorize("hasAuthority('OWNER') or hasAuthority('WORKER') or hasAuthority('OENOLOGIST')")
 public class GrapeCatalogController {
 
   @GetMapping("/api/grape-types")

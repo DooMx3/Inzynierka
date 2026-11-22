@@ -37,12 +37,13 @@ public class SubstanceService {
 
   @Transactional
   public List<Substance> getAll(User user) {
-    return substanceRepository.findByOrganisationAndActiveTrue(getActiveOwnedOrganisation(user));
+    return substanceRepository.findByOrganisationAndActiveTrue(
+        getActiveOrganisationForReading(user));
   }
 
   @Transactional
   public Substance getById(UUID id, User user) {
-    return getActiveSubstance(id, getActiveOwnedOrganisation(user));
+    return getActiveSubstance(id, getActiveOrganisationForReading(user));
   }
 
   @Transactional
@@ -80,19 +81,40 @@ public class SubstanceService {
   }
 
   private Organisation getActiveOwnedOrganisation(User user) {
+    User authenticatedUser = getAuthenticatedUser(user);
+    Organisation organisation = getActiveOrganisation(authenticatedUser);
+    if (!authenticatedUser.getRoles().contains(RoleName.OWNER)) {
+      throw new InsufficientPermissionException(
+          "Only the organisation owner can manage substances");
+    }
+    return organisation;
+  }
+
+  private Organisation getActiveOrganisationForReading(User user) {
+    User authenticatedUser = getAuthenticatedUser(user);
+    Organisation organisation = getActiveOrganisation(authenticatedUser);
+    if (!authenticatedUser.getRoles().contains(RoleName.OWNER)
+        && !authenticatedUser.getRoles().contains(RoleName.WORKER)) {
+      throw new InsufficientPermissionException(
+          "Only the organisation owner or worker can access substances");
+    }
+    return organisation;
+  }
+
+  private User getAuthenticatedUser(User user) {
     if (user == null || user.getId() == null) {
       throw new UnauthorizedException("Authenticated user is required");
     }
 
-    User authenticatedUser =
-        userRepository
-            .findById(user.getId())
-            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    return userRepository
+        .findById(user.getId())
+        .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+  }
 
+  private Organisation getActiveOrganisation(User authenticatedUser) {
     Organisation organisation = authenticatedUser.getOrganisation();
-    if (organisation == null || !authenticatedUser.getRoles().contains(RoleName.OWNER)) {
-      throw new InsufficientPermissionException(
-          "Only the organisation owner can access substances");
+    if (organisation == null) {
+      throw new InsufficientPermissionException("User is not a member of an organisation");
     }
     if (!organisation.isActive()) {
       throw new InactiveResourceException("Cannot access substances of an inactive organisation");

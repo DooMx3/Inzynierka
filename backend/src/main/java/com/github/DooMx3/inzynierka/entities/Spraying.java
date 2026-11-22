@@ -27,7 +27,6 @@ public class Spraying {
   @JoinColumn(name = "equipment_id", nullable = false)
   private Equipment equipment;
 
-  @Column(nullable = false)
   private Instant sprayingDate;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -37,6 +36,5 @@ public class Spraying {
   @Column(nullable = false)
   private int quantity;
 
-  @Column(nullable = false)
   private Instant due;
 }

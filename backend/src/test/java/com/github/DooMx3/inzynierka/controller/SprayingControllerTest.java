@@ -1,5 +1,7 @@
 package com.github.DooMx3.inzynierka.controller;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
@@ -7,6 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.github.DooMx3.inzynierka.config.TestSecurityConfig;
+import com.github.DooMx3.inzynierka.dto.spraying.SprayingRequest;
 import com.github.DooMx3.inzynierka.dto.spraying.SprayingResponse;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.service.JwtService;
@@ -17,6 +20,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -71,6 +75,64 @@ class SprayingControllerTest {
         .andExpect(jsonPath("$.quantity").value(25));
 
     verify(sprayingService).create(any(), eq(user));
+  }
+
+  @Test
+  void shouldCreatePlannedSprayingWithoutSprayingDate() throws Exception {
+    when(sprayingService.create(any(), eq(user))).thenReturn(spraying);
+    String requestWithNoSprayingDate =
+        requestJson().replace("\"sprayingDate\":\"2026-11-12T08:00:00Z\"", "\"sprayingDate\":null");
+
+    mockMvc
+        .perform(
+            post(BASE_URL)
+                .with(authentication(owner()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestWithNoSprayingDate))
+        .andExpect(status().isOk());
+
+    ArgumentCaptor<SprayingRequest> requestCaptor = ArgumentCaptor.forClass(SprayingRequest.class);
+    verify(sprayingService).create(requestCaptor.capture(), eq(user));
+    assertNull(requestCaptor.getValue().sprayingDate());
+    assertNotNull(requestCaptor.getValue().due());
+  }
+
+  @Test
+  void shouldAllowSprayingWithoutDueDateWhenSprayingDateIsProvided() throws Exception {
+    when(sprayingService.create(any(), eq(user))).thenReturn(spraying);
+    String requestWithoutDue =
+        requestJson().replace("\"due\":\"2026-11-19T08:00:00Z\"", "\"due\":null");
+
+    mockMvc
+        .perform(
+            post(BASE_URL)
+                .with(authentication(owner()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestWithoutDue))
+        .andExpect(status().isOk());
+
+    ArgumentCaptor<SprayingRequest> requestCaptor = ArgumentCaptor.forClass(SprayingRequest.class);
+    verify(sprayingService).create(requestCaptor.capture(), eq(user));
+    assertNotNull(requestCaptor.getValue().sprayingDate());
+    assertNull(requestCaptor.getValue().due());
+  }
+
+  @Test
+  void shouldRejectPlannedSprayingWithoutDueDate() throws Exception {
+    String requestWithoutSprayingDateOrDue =
+        requestJson()
+            .replace("\"sprayingDate\":\"2026-11-12T08:00:00Z\"", "\"sprayingDate\":null")
+            .replace("\"due\":\"2026-11-19T08:00:00Z\"", "\"due\":null");
+
+    mockMvc
+        .perform(
+            post(BASE_URL)
+                .with(authentication(owner()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestWithoutSprayingDateOrDue))
+        .andExpect(status().isBadRequest());
+
+    verifyNoInteractions(sprayingService);
   }
 
   @Test

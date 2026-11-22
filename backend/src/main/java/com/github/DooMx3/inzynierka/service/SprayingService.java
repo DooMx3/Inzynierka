@@ -139,10 +139,9 @@ public class SprayingService {
     User authenticatedUser = getAuthenticatedUser(user);
     Organisation organisation = getActiveOrganisation(authenticatedUser);
     if (!authenticatedUser.getRoles().contains(RoleName.OWNER)
-        && !authenticatedUser.getRoles().contains(RoleName.WORKER)
-        && !authenticatedUser.getRoles().contains(RoleName.OENOLOGIST)) {
+        && !authenticatedUser.getRoles().contains(RoleName.WORKER)) {
       throw new InsufficientPermissionException(
-          "Only the organisation owner, worker or oenologist can access spraying");
+          "Only the organisation owner or worker can access spraying");
     }
     return organisation;
   }

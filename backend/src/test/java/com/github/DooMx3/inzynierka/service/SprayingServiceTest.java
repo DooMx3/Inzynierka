@@ -94,6 +94,32 @@ class SprayingServiceTest {
   }
 
   @Test
+  void shouldCreatePlannedSprayingWithoutSprayingDate() {
+    stubActiveResources();
+    when(sprayingRepository.save(any(Spraying.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+    SprayingRequest plannedRequest =
+        new SprayingRequest(
+            field.getId(),
+            equipment.getId(),
+            substance.getId(),
+            null,
+            25,
+            Instant.parse("2026-11-19T08:00:00Z"));
+
+    SprayingResponse result = service.create(plannedRequest, owner);
+
+    assertNull(result.sprayingDate());
+    assertEquals(plannedRequest.due(), result.due());
+    verify(sprayingRepository)
+        .save(
+            argThat(
+                savedSpraying ->
+                    savedSpraying.getSprayingDate() == null
+                        && savedSpraying.getDue().equals(plannedRequest.due())));
+  }
+
+  @Test
   void shouldListSprayingForOwnersOrganisation() {
     Spraying spraying = spraying(UUID.randomUUID());
     when(sprayingRepository.findByOrganisationOrderBySprayingDateDesc(organisation))
@@ -165,6 +191,21 @@ class SprayingServiceTest {
     when(userRepository.findById(oenologist.getId())).thenReturn(Optional.of(oenologist));
 
     assertThrows(InsufficientPermissionException.class, () -> service.create(request, oenologist));
+    verifyNoInteractions(sprayingRepository);
+  }
+
+  @Test
+  void shouldRejectOenologistTryingToReadSpraying() {
+    User oenologist =
+        User.builder()
+            .id(UUID.randomUUID())
+            .organisation(organisation)
+            .roles(new HashSet<>(Set.of(RoleName.OENOLOGIST)))
+            .build();
+    when(userRepository.findById(oenologist.getId())).thenReturn(Optional.of(oenologist));
+
+    assertThrows(InsufficientPermissionException.class, () -> service.getAll(oenologist));
+
     verifyNoInteractions(sprayingRepository);
   }
 
