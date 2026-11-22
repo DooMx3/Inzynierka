@@ -7,6 +7,7 @@ import com.github.DooMx3.inzynierka.enums.MembershipStatus;
 import com.github.DooMx3.inzynierka.exceptions.ResourceAlreadyExistsException;
 import com.github.DooMx3.inzynierka.exceptions.UnauthorizedException;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -39,8 +40,7 @@ public class AuthenticationService {
             .build();
     repository.save(user);
 
-    String jwtToken = jwtService.generateToken(user);
-    addJwtCookie(response, jwtToken);
+    addAuthCookies(response, user);
   }
 
   public void authenticate(AuthenticationRequest request, HttpServletResponse response) {
@@ -48,26 +48,85 @@ public class AuthenticationService {
         new UsernamePasswordAuthenticationToken(request.email(), request.password()));
     var user = repository.findByEmail(request.email()).orElseThrow();
 
-    String jwtToken = jwtService.generateToken(user);
-    addJwtCookie(response, jwtToken);
+    addAuthCookies(response, user);
   }
 
-  public void refresh(User user, HttpServletResponse response) {
-    if (user == null) {
-      throw new UnauthorizedException("Authenticated user is required");
+  public void refresh(String refreshToken, HttpServletResponse response) {
+    if (refreshToken == null || refreshToken.isBlank()) {
+      rejectRefresh(response);
     }
 
-    String jwtToken = jwtService.generateToken(user);
-    addJwtCookie(response, jwtToken);
+    String email;
+    try {
+      email = jwtService.extractUsername(refreshToken);
+    } catch (JwtException | IllegalArgumentException exception) {
+      rejectRefresh(response);
+      return;
+    }
+
+    if (email == null || email.isBlank()) {
+      rejectRefresh(response);
+    }
+
+    User user = repository.findByEmail(email).orElse(null);
+    if (user == null || !user.isEnabled()) {
+      rejectRefresh(response);
+    }
+
+    try {
+      if (!jwtService.isRefreshTokenValid(refreshToken, user)) {
+        rejectRefresh(response);
+      }
+    } catch (JwtException | IllegalArgumentException exception) {
+      rejectRefresh(response);
+      return;
+    }
+
+    addCookie(
+        response,
+        JwtService.ACCESS_TOKEN_COOKIE,
+        jwtService.generateAccessToken(user),
+        JwtService.ACCESS_TOKEN_MAX_AGE_SECONDS);
   }
 
-  private void addJwtCookie(HttpServletResponse response, String token) {
-    Cookie cookie = new Cookie("jwt", token);
+  private void addAuthCookies(HttpServletResponse response, User user) {
+    addCookie(
+        response,
+        JwtService.ACCESS_TOKEN_COOKIE,
+        jwtService.generateAccessToken(user),
+        JwtService.ACCESS_TOKEN_MAX_AGE_SECONDS);
+    addCookie(
+        response,
+        JwtService.REFRESH_TOKEN_COOKIE,
+        jwtService.generateRefreshToken(user),
+        JwtService.REFRESH_TOKEN_MAX_AGE_SECONDS);
+  }
+
+  private void addCookie(
+      HttpServletResponse response, String name, String token, int maxAgeSeconds) {
+    Cookie cookie = new Cookie(name, token);
     cookie.setHttpOnly(true);
     cookie.setSecure(false);
     cookie.setPath("/");
-    cookie.setMaxAge(86400);
+    cookie.setMaxAge(maxAgeSeconds);
+    response.addCookie(cookie);
+  }
 
+  private void rejectRefresh(HttpServletResponse response) {
+    expireAuthCookies(response);
+    throw new UnauthorizedException("Refresh token is invalid or expired");
+  }
+
+  private void expireAuthCookies(HttpServletResponse response) {
+    expireCookie(response, JwtService.ACCESS_TOKEN_COOKIE);
+    expireCookie(response, JwtService.REFRESH_TOKEN_COOKIE);
+  }
+
+  private void expireCookie(HttpServletResponse response, String name) {
+    Cookie cookie = new Cookie(name, null);
+    cookie.setHttpOnly(true);
+    cookie.setPath("/");
+    cookie.setMaxAge(0);
     response.addCookie(cookie);
   }
 }
