@@ -209,6 +209,7 @@ CREATE TABLE "record" (
 	"sugarLevel"      NUMERIC(6,2),  -- g/l
 	"acidity"         NUMERIC(5,2),  -- g/l
 	"PH"              NUMERIC(4,2),
+	"temperature"     NUMERIC(5,2),  -- deg C
 	"alcohol_content" NUMERIC(4,2)   -- % obj.
 );
 

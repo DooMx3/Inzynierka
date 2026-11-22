@@ -73,6 +73,23 @@ class SubstanceServiceTest {
   }
 
   @Test
+  void shouldReturnActiveSubstancesForWorker() {
+    User worker =
+        User.builder()
+            .id(UUID.randomUUID())
+            .organisation(organisation)
+            .roles(new HashSet<>(Set.of(RoleName.WORKER)))
+            .build();
+    List<Substance> substances = List.of(new Substance());
+    when(userRepository.findById(worker.getId())).thenReturn(Optional.of(worker));
+    when(substanceRepository.findByOrganisationAndActiveTrue(organisation)).thenReturn(substances);
+
+    assertSame(substances, service.getAll(worker));
+
+    verify(substanceRepository).findByOrganisationAndActiveTrue(organisation);
+  }
+
+  @Test
   void shouldGetActiveSubstanceBelongingToOwnersOrganisation() {
     UUID id = UUID.randomUUID();
     Substance substance = substance(id, true, "Merlot");
@@ -80,6 +97,23 @@ class SubstanceServiceTest {
         .thenReturn(Optional.of(substance));
 
     assertSame(substance, service.getById(id, owner));
+  }
+
+  @Test
+  void shouldGetActiveSubstanceForWorker() {
+    User worker =
+        User.builder()
+            .id(UUID.randomUUID())
+            .organisation(organisation)
+            .roles(new HashSet<>(Set.of(RoleName.WORKER)))
+            .build();
+    UUID id = UUID.randomUUID();
+    Substance substance = substance(id, true, "Merlot");
+    when(userRepository.findById(worker.getId())).thenReturn(Optional.of(worker));
+    when(substanceRepository.findByIdAndOrganisation(id, organisation))
+        .thenReturn(Optional.of(substance));
+
+    assertSame(substance, service.getById(id, worker));
   }
 
   @Test
@@ -187,12 +221,12 @@ class SubstanceServiceTest {
   }
 
   @Test
-  void shouldRejectUserWithoutOwnerRole() {
+  void shouldRejectUserWithoutReadRole() {
     User user =
         User.builder()
             .id(UUID.randomUUID())
             .organisation(organisation)
-            .roles(new HashSet<>(Set.of(RoleName.WORKER)))
+            .roles(new HashSet<>(Set.of(RoleName.OENOLOGIST)))
             .build();
     when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 

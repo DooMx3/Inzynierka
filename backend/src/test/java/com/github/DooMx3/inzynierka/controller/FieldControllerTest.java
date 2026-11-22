@@ -140,18 +140,20 @@ class FieldControllerTest {
   }
 
   @Test
-  void shouldReturnPredefinedGrapeTypesAndColors() throws Exception {
-    mockMvc
-        .perform(get("/api/grape-types").with(authentication(owner())))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].value").value("SOLARIS"))
-        .andExpect(jsonPath("$[12].requiresCustomName").value(true));
+  void shouldAllowAllOrganisationRolesToReadGrapeCatalogs() throws Exception {
+    for (String role : List.of("OWNER", "WORKER", "OENOLOGIST")) {
+      mockMvc
+          .perform(get("/api/grape-types").with(authentication(authWith(role))))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$[0].value").value("SOLARIS"))
+          .andExpect(jsonPath("$[12].requiresCustomName").value(true));
 
-    mockMvc
-        .perform(get("/api/grape-colors").with(authentication(owner())))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0]").value("RED"))
-        .andExpect(jsonPath("$[1]").value("WHITE"));
+      mockMvc
+          .perform(get("/api/grape-colors").with(authentication(authWith(role))))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$[0]").value("RED"))
+          .andExpect(jsonPath("$[1]").value("WHITE"));
+    }
   }
 
   @Test
