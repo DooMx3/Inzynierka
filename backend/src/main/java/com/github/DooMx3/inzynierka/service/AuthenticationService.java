@@ -5,6 +5,7 @@ import com.github.DooMx3.inzynierka.dto.user.RegisterRequest;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.enums.MembershipStatus;
 import com.github.DooMx3.inzynierka.exceptions.ResourceAlreadyExistsException;
+import com.github.DooMx3.inzynierka.exceptions.UnauthorizedException;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -46,6 +47,15 @@ public class AuthenticationService {
     authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(request.email(), request.password()));
     var user = repository.findByEmail(request.email()).orElseThrow();
+
+    String jwtToken = jwtService.generateToken(user);
+    addJwtCookie(response, jwtToken);
+  }
+
+  public void refresh(User user, HttpServletResponse response) {
+    if (user == null) {
+      throw new UnauthorizedException("Authenticated user is required");
+    }
 
     String jwtToken = jwtService.generateToken(user);
     addJwtCookie(response, jwtToken);
