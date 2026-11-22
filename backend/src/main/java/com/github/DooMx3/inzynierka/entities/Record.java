@@ -2,6 +2,7 @@ package com.github.DooMx3.inzynierka.entities;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.Data;
 import org.hibernate.annotations.UuidGenerator;
@@ -32,8 +33,14 @@ public class Record {
   @Column(name = "ph", precision = 4, scale = 2)
   private BigDecimal ph;
 
+  @Column(precision = 5, scale = 2)
+  private BigDecimal temperature;
+
   @Column(name = "alcohol_content", precision = 4, scale = 2)
   private BigDecimal alcoholContent;
+
+  @Column(name = "recorded_at", nullable = false)
+  private Instant recordedAt;
 
   @Column(nullable = false)
   private boolean active = true;
