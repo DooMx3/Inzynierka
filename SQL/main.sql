@@ -142,6 +142,7 @@ CREATE TABLE "batch" (
 	"stage"          batch_stage NOT NULL,
 	"quantity"       NUMERIC(10,2) NOT NULL,  -- litry
 	"isSpoiled"      BOOLEAN NOT NULL DEFAULT false,
+	"organisationId" UUID NOT NULL REFERENCES "organisation"("id"),
 	"deleted"        BOOLEAN NOT NULL DEFAULT false,
 	"createdAt"      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -151,6 +152,7 @@ CREATE TABLE "batch_source" (
 	"id"            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	"sourceBatchId" UUID NOT NULL REFERENCES "batch"("id"),
 	"targetBatchId" UUID NOT NULL REFERENCES "batch"("id"),
+	"organisationId" UUID NOT NULL REFERENCES "organisation"("id"),
 	"quantity"      NUMERIC(10,2) NOT NULL,
 	CHECK ("sourceBatchId" <> "targetBatchId"),
 	UNIQUE ("sourceBatchId", "targetBatchId")
@@ -162,6 +164,7 @@ CREATE TABLE "harvest_batch" (
 	"harvestId" UUID NOT NULL REFERENCES "harvest"("id"),
 	"batchId"   UUID NOT NULL REFERENCES "batch"("id"),
 	"quantity"  NUMERIC(10,2) NOT NULL,  -- litry moszczu
+	"organisationId" UUID NOT NULL REFERENCES "organisation"("id"),
 	UNIQUE ("harvestId", "batchId")
 );
 
@@ -171,6 +174,7 @@ CREATE TABLE "batch_ingredient" (
 	"batchId"      UUID NOT NULL REFERENCES "batch"("id"),
 	"ingredientId" UUID NOT NULL REFERENCES "ingredient"("id"),
 	"quantity"     NUMERIC(10,2) NOT NULL  -- gramy
+	"organisationId" UUID NOT NULL REFERENCES "organisation"("id"),
 );
 
 -- ---------------------------------------------------------------------
@@ -262,9 +266,11 @@ CREATE INDEX ON "field_harvest"("harvestId");
 
 CREATE INDEX ON "batch"("organisationId", "stage") WHERE NOT "deleted";
 CREATE INDEX ON "batch_source"("targetBatchId");
+CREATE INDEX ON "batch_source"("organisationId");
 CREATE INDEX ON "harvest_batch"("batchId");
 CREATE INDEX ON "batch_ingredient"("batchId");
 CREATE INDEX ON "batch_ingredient"("ingredientId");
+CREATE INDEX ON "batch_ingredient"("organisationId");
 
 CREATE INDEX ON "bottling"("organisation_id");
 CREATE INDEX ON "bottling"("batch_id");
