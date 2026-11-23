@@ -90,10 +90,17 @@ public class ReportService {
 
     long averageHarvestToBottlingDays = 0;
     int durationCount = 0;
+    List<Bottling> activeBottlings =
+        bottlingRepository.findByOrganisationAndActiveTrue(organisation);
+    Map<UUID, List<Bottling>> bottlingsByBatch =
+        activeBottlings.stream()
+            .filter(bottling -> bottling.getBatch() != null)
+            .collect(
+                java.util.stream.Collectors.groupingBy(bottling -> bottling.getBatch().getId()));
     for (Batch batch : batches) {
       List<HarvestBatch> sources = harvestBatchRepository.findByBatch(batch);
-      for (Bottling bottling : bottlingRepository.findByOrganisationAndActiveTrue(organisation)) {
-        if (!bottling.getBatch().getId().equals(batch.getId())) continue;
+      for (Bottling bottling :
+          bottlingsByBatch.getOrDefault(batch.getId(), Collections.emptyList())) {
         for (HarvestBatch source : sources) {
           LocalDate harvestDate = source.getHarvest().getHarvestDate();
           durationCount++;
@@ -141,6 +148,8 @@ public class ReportService {
             .toList();
     Map<String, BigDecimal> areaByVariety = new TreeMap<>();
     Map<String, Integer> productionByVariety = new TreeMap<>();
+    Map<UUID, Harvest> harvestsById = new LinkedHashMap<>();
+    Map<UUID, Set<String>> varietiesByHarvest = new HashMap<>();
     for (Field field : fields) {
       String variety = field.getGrapeVariety().getDisplayName();
       if (field.getGrapeVariety().name().equals("OTHER") && field.getOtherGrapeVariety() != null) {
@@ -150,19 +159,30 @@ public class ReportService {
           variety,
           field.getAreaAre() == null ? BigDecimal.ZERO : field.getAreaAre(),
           BigDecimal::add);
-
-      int amount =
+      for (Harvest harvest :
           harvestRepository
               .findDistinctByOrganisationAndFields_IdAndActiveTrueOrderByHarvestDateDescIdAsc(
-                  organisation, field.getId())
-              .stream()
-              .filter(
-                  harvest ->
-                      inPeriod(
-                          LocalDateTime.of(harvest.getHarvestDate(), LocalTime.MIDNIGHT), request))
-              .mapToInt(Harvest::getAmountKg)
-              .sum();
-      productionByVariety.merge(variety, amount, Integer::sum);
+                  organisation, field.getId())) {
+        if (!inPeriod(LocalDateTime.of(harvest.getHarvestDate(), LocalTime.MIDNIGHT), request))
+          continue;
+        harvestsById.putIfAbsent(harvest.getId(), harvest);
+        varietiesByHarvest
+            .computeIfAbsent(harvest.getId(), ignored -> new HashSet<>())
+            .add(variety);
+      }
+    }
+    // Allocate a multi-variety harvest equally by variety. Any remainder is assigned
+    // deterministically to the first varieties in name order.
+    for (Harvest harvest : harvestsById.values()) {
+      List<String> varieties =
+          varietiesByHarvest.getOrDefault(harvest.getId(), Set.of()).stream().sorted().toList();
+      if (varieties.isEmpty()) continue;
+      int baseShare = harvest.getAmountKg() / varieties.size();
+      int remainder = harvest.getAmountKg() % varieties.size();
+      for (int i = 0; i < varieties.size(); i++) {
+        int share = baseShare + (i < remainder ? 1 : 0);
+        productionByVariety.merge(varieties.get(i), share, Integer::sum);
+      }
     }
     int totalProduction = productionByVariety.values().stream().mapToInt(Integer::intValue).sum();
     List<List<Object>> rows =
@@ -225,6 +245,7 @@ public class ReportService {
     }
     for (Task task :
         taskRepository.findByOrganisationAndActiveTrueOrderByDueDateAscIdAsc(organisation)) {
+      if (task.getCompletedAt() == null) continue;
       if (!inPeriod(task.getCompletedAt(), task.getDueDate(), request)) continue;
       if (!request.operationIds().isEmpty() && !request.operationIds().contains(task.getId()))
         continue;
