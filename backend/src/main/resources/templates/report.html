@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        body { font-family: sans-serif; margin: 24px; color: #1f2933; }
+        h1 { color: #2f5d50; }
+        .meta { color: #52616b; margin-bottom: 20px; }
+        .kpis { display: table; width: 100%; margin-bottom: 20px; }
+        .kpi { display: table-cell; width: 33%; border: 1px solid #d8e0dc; padding: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #e8f0ec; text-align: left; }
+        th, td { border: 1px solid #d8e0dc; padding: 7px; }
+    </style>
+</head>
+<body>
+<h1 th:text="${title}">Report</h1>
+<div class="meta" th:text="${period}">Period</div>
+
+<div class="kpis" th:if="${kpis != null}">
+    <div class="kpi" th:each="kpi : ${kpis}">
+        <strong th:text="${kpi.label}">KPI</strong><br/>
+        <span th:text="${kpi.value}">Value</span>
+    </div>
+</div>
+
+<div th:if="${sections != null}" th:each="section : ${sections}">
+    <h2 th:text="${section.title}">Section</h2>
+    <table th:if="${section.rows != null and !section.rows.isEmpty()}">
+        <thead>
+        <tr><th th:each="header : ${section.headers}" th:text="${header}">Header</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="row : ${section.rows}">
+            <td th:each="value : ${row}" th:text="${value}">Value</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
