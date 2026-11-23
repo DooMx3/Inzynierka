@@ -1,0 +1,25 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="karolsol (generated)" id="1795434611881-7">
+        <createTable tableName="offering">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="offeringPK"/>
+            </column>
+            <column name="price" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organisation_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="wine_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1795434611881-8">
+        <addForeignKeyConstraint baseColumnNames="wine_id" baseTableName="offering" constraintName="FKi4t7cwl0sr8ghb2v6r08kkaby" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="bottling" validate="true"/>
+    </changeSet>
+    <changeSet author="karolsol (generated)" id="1795434611881-9">
+        <addForeignKeyConstraint baseColumnNames="organisation_id" baseTableName="offering" constraintName="FKkdohpjvom15sco11p3lrxm2bj" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organisation" validate="true"/>
+    </changeSet>
+</databaseChangeLog>
