@@ -28,7 +28,7 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<div class="relative flex h-screen bg-[#eae0d5]">
+<div class="relative flex h-dvh min-h-screen bg-[#eae0d5]">
     {#if session.user && showMenuBar}
         <div class="pointer-events-none fixed inset-0 z-40">
             <GlassBlur active={!menu.folded} />
@@ -44,7 +44,7 @@
             ]}
             onclick={toggleMenu}
         ></button>
-        <div class="relative z-50 h-full w-16 shrink-0 overflow-visible">
+        <div class="relative z-50 h-full w-14 sm:w-16 shrink-0 overflow-visible">
             <MenuBar />
         </div>
     {/if}
@@ -53,16 +53,16 @@
         {#if session.user}
             <div
                 class={[
-                    "relative m-3 flex min-h-0 min-w-0 flex-1 overflow-hidden bg-[#eae0d5]",
+                    "relative m-1.5 sm:m-3 flex min-h-0 min-w-0 flex-1 overflow-hidden bg-[#eae0d5]",
                     showMenuBar && "ml-2",
                 ]}
             >
                 <main class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-                    <header class="flex shrink-0 flex-col items-start gap-1 px-4 pt-4">
+                    <header class="flex shrink-0 flex-col items-start gap-1 px-2.5 pt-2.5 sm:px-4 sm:pt-4">
                         <Breadcrumbs />
                         <SubpageTitle />
                     </header>
-                    <div class="min-h-0 flex-1 overflow-auto px-4 pb-4">
+                    <div class="min-h-0 flex-1 overflow-auto px-2.5 pb-3 sm:px-4 sm:pb-4">
                         {@render children()}
                     </div>
                 </main>

@@ -15,6 +15,16 @@
             description: "Maintain the approved list of vineyard protection substances for field work.",
             href: "/management/substances",
         },
+        {
+            title: "Wine Offerings",
+            description: "Manage public wine offerings, prices, and customer bottle provenance pages.",
+            href: "/management/offerings",
+        },
+        {
+            title: "QR Code Generator",
+            description: "Generate printable QR codes for winery equipment and bottled wine offerings.",
+            href: "/management/qr-codes",
+        },
     ];
 </script>
 

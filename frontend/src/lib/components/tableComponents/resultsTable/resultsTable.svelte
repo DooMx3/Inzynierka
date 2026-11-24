@@ -7,15 +7,21 @@
         row,
         pageSize = 8,
         emptyLabel = "No results",
+        highlightedId,
     }: {
         rows: T[];
         head: Snippet;
         row: Snippet<[T, number]>;
         pageSize?: number;
         emptyLabel?: string;
+        highlightedId?: string;
     } = $props();
 
-    let page = $state(1);
+    let page = $derived.by(() => {
+        if (!highlightedId) return 1;
+        const idx = rows.findIndex((r) => r.id === highlightedId);
+        return idx >= 0 ? Math.floor(idx / pageSize) + 1 : 1;
+    });
 
     const pageCount = $derived(Math.max(1, Math.ceil(rows.length / pageSize)));
     const currentPage = $derived(Math.min(page, pageCount));

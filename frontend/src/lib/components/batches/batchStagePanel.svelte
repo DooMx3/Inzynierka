@@ -13,6 +13,7 @@
     import FormWindow from "$lib/components/formWindow/formWindow.svelte";
     import InputField from "$lib/components/inputField/inputField.svelte";
     import NutrientsTableModal from "$lib/components/nutrients/nutrientsTableModal.svelte";
+    import QrCodeModal from "$lib/components/qr/qrCodeModal.svelte";
     import StatusBadge from "$lib/components/statusBadge/statusBadge.svelte";
     import ResultsTable from "$lib/components/tableComponents/resultsTable/resultsTable.svelte";
     import ResultsToolbar from "$lib/components/tableComponents/resultsToolbar/resultsToolbar.svelte";
@@ -53,6 +54,7 @@
         YEAST_STRAINS,
         type NutrientProfile,
     } from "$lib/functions/calculators";
+    import { buildBottleQrUrl } from "$lib/functions/qrRouting";
     import { session } from "$lib/stores/session.svelte";
 
     let {
@@ -108,12 +110,17 @@
     let potassiumModalBatch = $state<ProductionBatch | null>(null);
     let alcoholModalBatch = $state<ProductionBatch | null>(null);
     let nutrientsModalBatch = $state<ProductionBatch | null>(null);
+    let bottleQrBatch = $state<ProductionBatch | null>(null);
+    let expandedOverrides = $state<Record<string, boolean>>({});
+    let hasAutoOpenedCreate = false;
 
     const canAccess = $derived(
         Boolean(session.user?.roles.some((role) => role === "OENOLOGIST" || role === "OWNER")),
     );
     const stageTitle = $derived(STAGE_LABELS[stage]);
     const qrEquipmentId = $derived(page.url.searchParams.get("equipmentId") ?? "");
+    const highlightBatchId = $derived(page.url.searchParams.get("highlightBatchId") ?? "");
+    const autoCreate = $derived(page.url.searchParams.get("create") === "1");
 
     const load = async () => {
         loading = true;
@@ -153,7 +160,12 @@
             loading = false;
             return;
         }
-        void load();
+        void load().then(() => {
+            if (autoCreate && qrEquipmentId && !hasAutoOpenedCreate && !formOpen) {
+                hasAutoOpenedCreate = true;
+                openCreate(qrEquipmentId);
+            }
+        });
     });
 
     const stageBatches = $derived(allBatches.filter((b) => b.stage === stage));
@@ -243,20 +255,31 @@
             }));
     });
 
-    const equipmentOptions = $derived(
-        equipmentList.length > 0
-            ? equipmentList.map((e) => ({
-                  value: e.id,
-                  label: `${e.name} (${e.type})`,
-              }))
-            : [
-                  { value: "local-press-1", label: "Press #1 (Press)" },
-                  { value: "local-ferm-1", label: "Fermentor #1 (Fermentor)" },
-                  { value: "local-barrel-1", label: "Oak Barrel #1 (Barrel)" },
-                  { value: "local-mixer-1", label: "Mixer #1 (Mixer)" },
-                  { value: "local-bottle-1", label: "Bottling Line #1 (Bottling line)" },
-              ],
-    );
+    const equipmentOptions = $derived.by(() => {
+        const base =
+            equipmentList.length > 0
+                ? equipmentList.map((e) => ({
+                      value: e.id,
+                      label: `${e.name} (${e.type})`,
+                  }))
+                : [
+                      { value: "local-press-1", label: "Press #1 (Press)" },
+                      { value: "local-ferm-1", label: "Fermentor #1 (Fermentor)" },
+                      { value: "local-barrel-1", label: "Oak Barrel #1 (Barrel)" },
+                      { value: "local-mixer-1", label: "Mixer #1 (Mixer)" },
+                      { value: "local-bottle-1", label: "Bottling Line #1 (Bottling line)" },
+                  ];
+        if (qrEquipmentId && !base.some((opt) => opt.value === qrEquipmentId)) {
+            return [{ value: qrEquipmentId, label: `Scanned equipment (${qrEquipmentId})` }, ...base];
+        }
+        return base;
+    });
+
+    const qrEquipmentLabel = $derived.by(() => {
+        if (!qrEquipmentId) return "";
+        const found = equipmentList.find((e) => e.id === qrEquipmentId);
+        return found ? `${found.name} (${found.type})` : qrEquipmentId;
+    });
 
     const visibleBatches = $derived.by(() => {
         const needle = query.trim().toLowerCase();
@@ -532,16 +555,24 @@
                 class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#6b4f3a] bg-[#fbf7f2] px-4 py-3 text-sm text-[#3f2e22]"
             >
                 <span>
-                    Filtered for scanned equipment: <strong>{qrEquipmentId}</strong>
+                    Filtered for scanned equipment: <strong>{qrEquipmentLabel}</strong>
                 </span>
-                {#if visibleBatches.length === 0}
-                    <div class="w-60">
-                        <AddButton
-                            text="Create batch here"
-                            onClick={() => openCreate(qrEquipmentId)}
-                        />
-                    </div>
-                {/if}
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <a
+                        href={page.url.pathname}
+                        class="rounded-lg border border-[#6b4f3a] bg-white px-3 py-2 text-xs font-semibold text-[#3f2e22] transition-colors hover:bg-[#e4d8cb]"
+                    >
+                        Show all
+                    </a>
+                    {#if visibleBatches.length === 0}
+                        <div class="w-60">
+                            <AddButton
+                                text="Create batch here"
+                                onClick={() => openCreate(qrEquipmentId)}
+                            />
+                        </div>
+                    {/if}
+                </div>
             </div>
         {/if}
 
@@ -581,6 +612,7 @@
             {#key `${stage}|${query}|${sort}|${filter}|${qrEquipmentId}`}
                 <ResultsTable
                     rows={visibleBatches}
+                    highlightedId={highlightBatchId || visibleBatches.find((b) => Boolean(qrEquipmentId && b.equipmentId === qrEquipmentId))?.id}
                     emptyLabel={`No ${stageTitle.toLowerCase()} batches found.`}
                 >
                     {#snippet head()}
@@ -598,7 +630,15 @@
                         {@const batchParams = paramsByBatchId[batch.id] ?? []}
                         <TableRow
                             {index}
-                            highlighted={Boolean(qrEquipmentId && batch.equipmentId === qrEquipmentId)}
+                            rowId={`batch-row-${batch.id}`}
+                            highlighted={batch.id === highlightBatchId || Boolean(qrEquipmentId && batch.equipmentId === qrEquipmentId)}
+                            autoScrollWhenHighlighted={true}
+                            bind:expanded={
+                                () => expandedOverrides[batch.id] ?? batch.id === highlightBatchId,
+                                (next) => {
+                                    expandedOverrides[batch.id] = next;
+                                }
+                            }
                             expandLabel={`Expand details for ${batch.name}`}
                         >
                             {#snippet cells()}
@@ -674,6 +714,13 @@
                                         SO2 calc.
                                     </button>
                                     {#if stage === "BOTTLED"}
+                                        <button
+                                            type="button"
+                                            class="cursor-pointer rounded-lg border border-[#6b4f3a] bg-[#fbf7f2] px-3 py-2 text-xs font-semibold text-[#3f2e22] hover:bg-[#e4d8cb]"
+                                            onclick={() => (bottleQrBatch = batch)}
+                                        >
+                                            Bottle QR
+                                        </button>
                                         <button
                                             type="button"
                                             class="cursor-pointer rounded-lg bg-[#3f2e22] px-3 py-2 text-xs font-medium text-white hover:bg-[#6b4f3a]"
@@ -1030,5 +1077,15 @@
         editable={true}
         onClose={() => (nutrientsModalBatch = null)}
         onSave={handleSaveNutrients}
+    />
+{/if}
+
+{#if bottleQrBatch}
+    <QrCodeModal
+        title="Bottle QR code"
+        subtitle={`${bottleQrBatch.batchNumber} · ${bottleQrBatch.name}`}
+        targetUrl={buildBottleQrUrl(window.location.origin, bottleQrBatch.id)}
+        downloadFilename={`qr-bottle-${bottleQrBatch.batchNumber.toLowerCase()}.svg`}
+        onClose={() => (bottleQrBatch = null)}
     />
 {/if}

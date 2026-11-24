@@ -10,6 +10,8 @@
         { label: "Equipment", href: "/management/equipment" },
         { label: "Fields", href: "/management/fields" },
         { label: "Substances", href: "/management/substances" },
+        { label: "Offerings", href: "/management/offerings" },
+        { label: "QR Codes", href: "/management/qr-codes" },
     ];
 
     const isOwner = $derived(session.user?.roles.includes("OWNER") ?? false);

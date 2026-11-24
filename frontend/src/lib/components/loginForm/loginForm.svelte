@@ -30,6 +30,23 @@
         authFailed = false;
     };
 
+    const getSafeRedirectTarget = (): string => {
+        try {
+            const redirectTo = new URL(window.location.href, "http://localhost").searchParams.get("redirectTo");
+            if (
+                redirectTo &&
+                redirectTo.startsWith("/") &&
+                !redirectTo.startsWith("//") &&
+                !redirectTo.startsWith("/auth")
+            ) {
+                return redirectTo;
+            }
+        } catch {
+            // Fall back to home when window.location.href cannot be parsed
+        }
+        return "/";
+    };
+
     const submit = async (event: SubmitEvent) => {
         event.preventDefault();
         if (pending) {
@@ -48,7 +65,7 @@
         try {
             const user = await login(email.trim(), password);
             setUser(user);
-            window.location.href = "/";
+            window.location.href = getSafeRedirectTarget();
         } catch (error) {
             authFailed = true;
             alert(error instanceof Error ? error.message : "Login failed");

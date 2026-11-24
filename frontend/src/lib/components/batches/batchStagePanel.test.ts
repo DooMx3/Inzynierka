@@ -38,6 +38,7 @@ describe('BatchStagePanel', () => {
 
     afterEach(() => {
         globalThis.fetch = originalFetch;
+        window.location.href = 'http://localhost/';
         localStorage.clear();
         setUser(null);
     });
@@ -102,5 +103,69 @@ describe('BatchStagePanel', () => {
         expect(
             screen.getByRole('table', { name: 'Table of nutrients' }),
         ).toBeInTheDocument();
+    });
+
+    it('supports QR highlight/auto-expand, Show all banner link, auto-create on empty vessel scan, and Bottle QR modal', async () => {
+        localStorage.setItem(
+            'wms_production_batches_v1',
+            JSON.stringify([
+                {
+                    id: 'batch-qr-1',
+                    batchNumber: 'BATCH-1055',
+                    name: 'Riesling Reserve',
+                    stage: 'BOTTLED',
+                    quantity: 300,
+                    equipmentId: 'eq-1',
+                    equipmentLabel: 'Bottling Line #1 (Bottling line)',
+                    createdAt: '2026-10-15T10:00:00.000Z',
+                    isSpoiled: false,
+                    yeastId: 'EC1118',
+                    description: 'Estate bottled crisp white.',
+                    sources: [],
+                    ingredients: [],
+                    nutrientsOverride: null,
+                },
+            ]),
+        );
+        window.location.href =
+            'http://localhost/packed-products?equipmentId=eq-1&highlightBatchId=batch-qr-1';
+
+        const view = render(BatchStagePanel, { stage: 'BOTTLED' });
+
+        await waitFor(() => {
+            expect(screen.getByText('Bottling Line #1 (Bottling line)', { selector: 'strong' })).toBeInTheDocument();
+        });
+
+        expect(screen.getByRole('link', { name: 'Show all' })).toHaveAttribute(
+            'href',
+            '/packed-products',
+        );
+
+        const row = document.getElementById('batch-row-batch-qr-1');
+        expect(row).not.toBeNull();
+        expect(row).toHaveAttribute('data-highlighted', 'true');
+        // Expanded automatically because highlightBatchId matches
+        expect(screen.getByText('Estate bottled crisp white.')).toBeInTheDocument();
+
+        // Bottle QR button opens QrCodeModal with /offerings/{batch.id}
+        await fireEvent.click(screen.getByRole('button', { name: 'Bottle QR' }));
+        expect(screen.getByText('Bottle QR code')).toBeInTheDocument();
+        expect(
+            screen.getByText('http://localhost/offerings/batch-qr-1'),
+        ).toBeInTheDocument();
+
+        view.unmount();
+
+        // Verify empty equipment scan (?equipmentId=eq-1&create=1) auto-opens stage creator modal
+        localStorage.clear();
+        window.location.href = 'http://localhost/packed-products?equipmentId=eq-1&create=1';
+        render(BatchStagePanel, { stage: 'BOTTLED' });
+
+        await waitFor(() => {
+            expect(screen.getByText('Create new bottled wine batch')).toBeInTheDocument();
+        });
+        expect(screen.getByLabelText('Location (winery equipment)')).toHaveTextContent(
+            'Bottling Line #1 (Bottling line)',
+        );
     });
 });

@@ -5,10 +5,18 @@ import { setUser } from '$lib/stores/session.svelte';
 
 describe('Title bar', () => {
     beforeEach(() => {
-        setUser({ id: '1', firstname: 'Henryk', email: 'henryk@example.com' });
+        window.location.href = 'http://localhost/';
+        setUser({
+            id: '1',
+            firstname: 'Henryk',
+            lastname: 'Kowalski',
+            email: 'henryk@example.com',
+            roles: ['OWNER'],
+        });
     });
 
     afterEach(() => {
+        window.location.href = 'http://localhost/';
         setUser(null);
     });
 
@@ -107,6 +115,41 @@ describe('Title bar', () => {
 
         const btn = screen.getByRole('button', { name: 'Profile Dropdown' });
         expect(btn).toHaveTextContent('Henryk');
+    });
+
+    it('renders Tasks button to the left of Profile Dropdown and navigates to /tasks', async () => {
+        const { container } = render(TitleBar);
+
+        const right = container.firstElementChild?.children[2];
+        const tasksBtn = screen.getByRole('button', { name: 'Tasks' });
+        const profileBtn = screen.getByRole('button', { name: 'Profile Dropdown' });
+
+        expect(right).toContainElement(tasksBtn);
+        expect(Boolean(tasksBtn.compareDocumentPosition(profileBtn) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
+
+        await fireEvent.click(tasksBtn);
+        expect(window.location.pathname).toBe('/tasks');
+    });
+
+    it('highlights Tasks button when active on /tasks route', () => {
+        window.location.href = 'http://localhost/tasks';
+        render(TitleBar);
+
+        const tasksBtn = screen.getByRole('button', { name: 'Tasks' });
+        expect(tasksBtn).toHaveClass('bg-[#6b4f3a]', 'text-white');
+    });
+
+    it('renders Offerings link for both signed-in and signed-out users', () => {
+        const { unmount } = render(TitleBar);
+        const signedInOfferings = screen.getByRole('link', { name: 'Offerings' });
+        expect(signedInOfferings).toHaveAttribute('href', '/offerings');
+        unmount();
+
+        setUser(null);
+        render(TitleBar);
+        const signedOutOfferings = screen.getByRole('link', { name: 'Offerings' });
+        expect(signedOutOfferings).toHaveAttribute('href', '/offerings');
+        expect(screen.queryByRole('button', { name: 'Tasks' })).not.toBeInTheDocument();
     });
 
     it('hides the profile dropdown until someone signs in', () => {

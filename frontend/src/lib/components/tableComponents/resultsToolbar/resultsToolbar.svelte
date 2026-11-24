@@ -39,11 +39,11 @@
 </script>
 
 <div
-    class="flex flex-wrap items-end gap-4 rounded-xl border border-[#d9cbbd] bg-[#fbf7f2] p-4 shadow-sm"
+    class="flex flex-wrap items-end gap-3 sm:gap-4 rounded-xl border border-[#d9cbbd] bg-[#fbf7f2] p-3 sm:p-4 shadow-sm"
     role="search"
     aria-label="Results toolbar"
 >
-    <div class="min-w-64 flex-1">
+    <div class="min-w-0 w-full sm:min-w-64 sm:w-auto flex-1">
         <SearchBar
             label={searchLabel}
             placeholder={searchPlaceholder}
@@ -53,7 +53,7 @@
     </div>
     <SortBy options={sortOptions} placeholder="Sort" bind:value={sort} />
     <FilterBy options={filterOptions} placeholder="Filter" bind:value={filter} />
-    <div class="ml-auto w-40">
+    <div class="w-full sm:ml-auto sm:w-40">
         <SearchButton onClick={onSearch} />
     </div>
 </div>

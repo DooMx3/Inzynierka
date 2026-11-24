@@ -1,6 +1,6 @@
 import { redirect, type ServerLoad } from '@sveltejs/kit';
 
-const guestPaths = new Set(['/auth', '/forgot-password', '/reset-password']);
+const exactGuestPaths = new Set(['/auth', '/forgot-password', '/reset-password', '/offerings']);
 
 const normalizePath = (pathname: string) => {
     if (pathname.length > 1 && pathname.endsWith('/')) {
@@ -9,7 +9,24 @@ const normalizePath = (pathname: string) => {
     return pathname;
 };
 
-export const isGuestPath = (pathname: string) => guestPaths.has(normalizePath(pathname));
+export const isGuestPath = (pathname: string) => {
+    const normalized = normalizePath(pathname);
+    if (exactGuestPaths.has(normalized)) {
+        return true;
+    }
+    return normalized.startsWith('/offerings/');
+};
+
+export const sanitizeRedirectTarget = (target: string | null | undefined): string => {
+    if (!target) {
+        return '/';
+    }
+    const trimmed = target.trim();
+    if (!trimmed.startsWith('/') || trimmed.startsWith('//') || trimmed.startsWith('/auth')) {
+        return '/';
+    }
+    return trimmed;
+};
 
 const currentUser = async (fetch: typeof globalThis.fetch): Promise<Response | null> => {
     try {
@@ -26,9 +43,16 @@ export const redirectIfSignedIn = async (fetch: typeof globalThis.fetch): Promis
     }
 };
 
-export const redirectIfSignedOut = async (fetch: typeof globalThis.fetch): Promise<void> => {
+export const redirectIfSignedOut = async (
+    fetch: typeof globalThis.fetch,
+    targetPath?: string,
+): Promise<void> => {
     const response = await currentUser(fetch);
     if (!response?.ok) {
+        const safeTarget = sanitizeRedirectTarget(targetPath);
+        if (safeTarget !== '/') {
+            redirect(303, `/auth?redirectTo=${encodeURIComponent(safeTarget)}`);
+        }
         redirect(303, '/auth');
     }
 };
@@ -39,5 +63,5 @@ export const load: ServerLoad = ({ fetch, url }) => {
     if (isGuestPath(url.pathname)) {
         return;
     }
-    return redirectIfSignedOut(fetch);
+    return redirectIfSignedOut(fetch, `${url.pathname}${url.search}`);
 };

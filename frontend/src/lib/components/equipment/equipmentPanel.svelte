@@ -8,6 +8,7 @@
     import DropdownInput from "$lib/components/dropdownInput/dropdownInput.svelte";
     import FormWindow from "$lib/components/formWindow/formWindow.svelte";
     import InputField from "$lib/components/inputField/inputField.svelte";
+    import QrCodeModal from "$lib/components/qr/qrCodeModal.svelte";
     import StatusBadge from "$lib/components/statusBadge/statusBadge.svelte";
     import ResultsTable from "$lib/components/tableComponents/resultsTable/resultsTable.svelte";
     import ResultsToolbar from "$lib/components/tableComponents/resultsToolbar/resultsToolbar.svelte";
@@ -21,6 +22,7 @@
         updateEquipment,
         type Equipment,
     } from "$lib/api/equipment";
+    import { buildEquipmentQrUrl, isWineryEquipmentType } from "$lib/functions/qrRouting";
     import { session } from "$lib/stores/session.svelte";
 
     let items = $state<Equipment[]>([]);
@@ -45,6 +47,7 @@
     let deletingItem = $state<Equipment | null>(null);
     let deleteError = $state("");
     let deletePending = $state(false);
+    let qrModalItem = $state<Equipment | null>(null);
 
     const isOwner = $derived(session.user?.roles.includes("OWNER") ?? false);
 
@@ -262,6 +265,17 @@
                                 </td>
                             {/snippet}
                             {#snippet actions()}
+                                {#if isWineryEquipmentType(item.type)}
+                                    <div class="w-32">
+                                        <Button
+                                            text="QR code"
+                                            isFolded={false}
+                                            gentle={true}
+                                            class="border border-[#6b4f3a] bg-[#fbf7f2] text-[#3f2e22] justify-center font-medium"
+                                            onClick={() => (qrModalItem = item)}
+                                        />
+                                    </div>
+                                {/if}
                                 <div class="w-28">
                                     <Button
                                         svg={editIcon}
@@ -352,5 +366,15 @@
         onClose={() => (deletingItem = null)}
         onCancel={() => (deletingItem = null)}
         onAccept={() => void confirmDelete()}
+    />
+{/if}
+
+{#if qrModalItem}
+    <QrCodeModal
+        title="Equipment QR code"
+        subtitle={`${qrModalItem.name} (${qrModalItem.type})`}
+        targetUrl={buildEquipmentQrUrl(window.location.origin, qrModalItem.id)}
+        downloadFilename={`qr-equipment-${qrModalItem.id}.svg`}
+        onClose={() => (qrModalItem = null)}
     />
 {/if}

@@ -3,10 +3,18 @@
 
     type Item = { id: string; name: string };
 
-    let { rows, pageSize = 8 }: { rows: Item[]; pageSize?: number } = $props();
+    let {
+        rows,
+        pageSize = 8,
+        highlightedId,
+    }: {
+        rows: Item[];
+        pageSize?: number;
+        highlightedId?: string;
+    } = $props();
 </script>
 
-<ResultsTable {rows} {pageSize}>
+<ResultsTable {rows} {pageSize} {highlightedId}>
     {#snippet head()}
         <th class="px-4 py-3">Name</th>
     {/snippet}
