@@ -15,6 +15,9 @@
     const desktop = new MediaQuery("min-width: 768px");
 
     const goTo = (path: string) => {
+        if (!desktop.current) {
+            menu.folded = true;
+        }
         window.location.href = path;
     };
 
@@ -100,6 +103,7 @@
                 class={["shrink-0", !menu.folded && "is-open"]}
                 onclick={toggleMenu}
             >
+                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                 {@html openIcon}
             </button>
             <span

@@ -1,4 +1,4 @@
-import { toApiError } from '$lib/api/auth';
+import { apiFetch, toApiError } from '$lib/api/auth';
 
 const jsonHeaders = {
     'Content-Type': 'application/json',
@@ -81,7 +81,7 @@ const organisationBody = (draft: OrganisationDraft) =>
     });
 
 export const getUserInvitations = async (): Promise<OrganisationInvitation | null> => {
-    const response = await fetch('/api/user/invitations', {
+    const response = await apiFetch('/api/user/invitations', {
         method: 'GET',
         credentials: 'include',
     });
@@ -106,7 +106,7 @@ export const getUserInvitations = async (): Promise<OrganisationInvitation | nul
 };
 
 export const acceptInvitation = async () => {
-    const response = await fetch('/api/user/invitations/accept', {
+    const response = await apiFetch('/api/user/invitations/accept', {
         method: 'POST',
         credentials: 'include',
     });
@@ -114,7 +114,7 @@ export const acceptInvitation = async () => {
 };
 
 export const getOrganisation = async (): Promise<Organisation> => {
-    const response = await fetch('/api/organisations', {
+    const response = await apiFetch('/api/organisations', {
         method: 'GET',
         credentials: 'include',
     });
@@ -123,7 +123,7 @@ export const getOrganisation = async (): Promise<Organisation> => {
 };
 
 export const createOrganisation = async (draft: OrganisationDraft): Promise<Organisation> => {
-    const response = await fetch('/api/organisations', {
+    const response = await apiFetch('/api/organisations', {
         method: 'POST',
         credentials: 'include',
         headers: jsonHeaders,
@@ -134,7 +134,7 @@ export const createOrganisation = async (draft: OrganisationDraft): Promise<Orga
 };
 
 export const updateOrganisation = async (draft: OrganisationDraft): Promise<Organisation> => {
-    const response = await fetch('/api/organisations', {
+    const response = await apiFetch('/api/organisations', {
         method: 'PUT',
         credentials: 'include',
         headers: jsonHeaders,
@@ -145,7 +145,7 @@ export const updateOrganisation = async (draft: OrganisationDraft): Promise<Orga
 };
 
 export const deleteOrganisation = async (password: string) => {
-    const response = await fetch('/api/organisations', {
+    const response = await apiFetch('/api/organisations', {
         method: 'DELETE',
         credentials: 'include',
         headers: jsonHeaders,
@@ -155,7 +155,7 @@ export const deleteOrganisation = async (password: string) => {
 };
 
 export const leaveOrganisation = async (): Promise<void> => {
-    const response = await fetch('/api/organisations/leave', {
+    const response = await apiFetch('/api/organisations/leave', {
         method: 'DELETE',
         credentials: 'include',
     });
@@ -163,7 +163,7 @@ export const leaveOrganisation = async (): Promise<void> => {
 };
 
 export const getOrganisationMembers = async (): Promise<OrganisationMember[]> => {
-    const response = await fetch('/api/organisations/members', {
+    const response = await apiFetch('/api/organisations/members', {
         method: 'GET',
         credentials: 'include',
     });
@@ -199,7 +199,7 @@ export const getOrganisationMembers = async (): Promise<OrganisationMember[]> =>
 };
 
 export const getPendingInvitations = async (): Promise<PendingInvitation[]> => {
-    const response = await fetch('/api/organisations/invitations', {
+    const response = await apiFetch('/api/organisations/invitations', {
         method: 'GET',
         credentials: 'include',
     });
@@ -229,7 +229,7 @@ export const getPendingInvitations = async (): Promise<PendingInvitation[]> => {
 };
 
 export const inviteEmployee = async (email: string) => {
-    const response = await fetch('/api/organisations/invitations', {
+    const response = await apiFetch('/api/organisations/invitations', {
         method: 'POST',
         credentials: 'include',
         headers: jsonHeaders,
@@ -239,7 +239,7 @@ export const inviteEmployee = async (email: string) => {
 };
 
 export const cancelInvitation = async (userId: string) => {
-    const response = await fetch(`/api/organisations/invitations/${userId}`, {
+    const response = await apiFetch(`/api/organisations/invitations/${userId}`, {
         method: 'DELETE',
         credentials: 'include',
     });
@@ -247,7 +247,7 @@ export const cancelInvitation = async (userId: string) => {
 };
 
 export const removeUserFromOrganisation = async (userId: string): Promise<void> => {
-    const response = await fetch(`/api/organisations/users/${userId}`, {
+    const response = await apiFetch(`/api/organisations/users/${userId}`, {
         method: 'DELETE',
         credentials: 'include',
     });
@@ -255,7 +255,7 @@ export const removeUserFromOrganisation = async (userId: string): Promise<void> 
 };
 
 export const addOrganisationRole = async (userId: string, role: OrganisationRole) => {
-    const response = await fetch(
+    const response = await apiFetch(
         `/api/organisations/users/${userId}/roles?role=${encodeURIComponent(role)}`,
         {
             method: 'POST',
@@ -266,7 +266,7 @@ export const addOrganisationRole = async (userId: string, role: OrganisationRole
 };
 
 export const removeOrganisationRole = async (userId: string, role: OrganisationRole) => {
-    const response = await fetch(
+    const response = await apiFetch(
         `/api/organisations/users/${userId}/roles?role=${encodeURIComponent(role)}`,
         {
             method: 'DELETE',
@@ -279,7 +279,7 @@ export const removeOrganisationRole = async (userId: string, role: OrganisationR
 export const uploadOrganisationLogo = async (file: File): Promise<void> => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await fetch('/api/organisations/logo', {
+    const response = await apiFetch('/api/organisations/logo', {
         method: 'PUT',
         credentials: 'include',
         body: formData,
@@ -288,7 +288,7 @@ export const uploadOrganisationLogo = async (file: File): Promise<void> => {
 };
 
 export const deleteOrganisationLogo = async (): Promise<void> => {
-    const response = await fetch('/api/organisations/logo', {
+    const response = await apiFetch('/api/organisations/logo', {
         method: 'DELETE',
         credentials: 'include',
     });

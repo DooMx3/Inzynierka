@@ -125,6 +125,7 @@
             type: reportType,
             startDate: normalizedStart,
             endDate: normalizedEnd,
+            aggregation,
             ...(reportType === "PRODUCTION_EFFICIENCY" && batchFilterId
                 ? { batchFilterId }
                 : {}),
@@ -132,7 +133,6 @@
                 ? { fieldFilterId }
                 : {}),
             ...(reportType === "VINEYARD_OPERATIONS" ? { operationFilter } : {}),
-            ...(reportType === "HISTORICAL_TRENDS" ? { aggregation } : {}),
         };
 
         await onGenerate(params);

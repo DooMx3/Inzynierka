@@ -1,4 +1,4 @@
-import { toApiError } from '$lib/api/auth';
+import { apiFetch, toApiError } from '$lib/api/auth';
 
 const jsonHeaders = {
     'Content-Type': 'application/json',
@@ -99,7 +99,7 @@ const serializeDraft = (draft: FieldDraft) =>
     });
 
 export const getFields = async (): Promise<VineyardField[]> => {
-    const response = await fetch('/api/fields', {
+    const response = await apiFetch('/api/fields', {
         method: 'GET',
         credentials: 'include',
     });
@@ -112,7 +112,7 @@ export const getFields = async (): Promise<VineyardField[]> => {
 };
 
 export const createField = async (draft: FieldDraft): Promise<VineyardField> => {
-    const response = await fetch('/api/fields', {
+    const response = await apiFetch('/api/fields', {
         method: 'POST',
         credentials: 'include',
         headers: jsonHeaders,
@@ -123,7 +123,7 @@ export const createField = async (draft: FieldDraft): Promise<VineyardField> => 
 };
 
 export const updateField = async (id: string, draft: FieldDraft): Promise<VineyardField> => {
-    const response = await fetch(`/api/fields/${encodeURIComponent(id)}`, {
+    const response = await apiFetch(`/api/fields/${encodeURIComponent(id)}`, {
         method: 'PUT',
         credentials: 'include',
         headers: jsonHeaders,
@@ -134,7 +134,7 @@ export const updateField = async (id: string, draft: FieldDraft): Promise<Vineya
 };
 
 export const deleteField = async (id: string): Promise<void> => {
-    const response = await fetch(`/api/fields/${encodeURIComponent(id)}`, {
+    const response = await apiFetch(`/api/fields/${encodeURIComponent(id)}`, {
         method: 'DELETE',
         credentials: 'include',
     });
@@ -143,7 +143,7 @@ export const deleteField = async (id: string): Promise<void> => {
 
 export const getGrapeTypes = async (): Promise<GrapeVarietyOption[]> => {
     try {
-        const response = await fetch('/api/grape-types', {
+        const response = await apiFetch('/api/grape-types', {
             method: 'GET',
             credentials: 'include',
         });
@@ -177,7 +177,7 @@ export const getGrapeTypes = async (): Promise<GrapeVarietyOption[]> => {
 
 export const getGrapeColors = async (): Promise<GrapeColor[]> => {
     try {
-        const response = await fetch('/api/grape-colors', {
+        const response = await apiFetch('/api/grape-colors', {
             method: 'GET',
             credentials: 'include',
         });

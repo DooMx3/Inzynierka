@@ -20,6 +20,72 @@ const jsonHeaders = {
     'Content-Type': 'application/json',
 };
 
+let refreshPromise: Promise<boolean> | null = null;
+
+const isAuthBypassUrl = (url: string): boolean =>
+    url.startsWith('/api/auth/') ||
+    url === '/api/user/forgot-password' ||
+    url === '/api/user/reset-password';
+
+export const refreshAccessToken = async (
+    customFetch: typeof globalThis.fetch = globalThis.fetch,
+): Promise<boolean> => {
+    if (customFetch !== globalThis.fetch) {
+        try {
+            const res = await customFetch('/api/auth/refresh', {
+                method: 'POST',
+                credentials: 'include',
+            });
+            return res.ok;
+        } catch {
+            return false;
+        }
+    }
+
+    if (refreshPromise) {
+        return refreshPromise;
+    }
+
+    refreshPromise = (async () => {
+        try {
+            const response = await fetch('/api/auth/refresh', {
+                method: 'POST',
+                credentials: 'include',
+            });
+            return response.ok;
+        } catch {
+            return false;
+        } finally {
+            refreshPromise = null;
+        }
+    })();
+
+    return refreshPromise;
+};
+
+export const apiFetch = async (
+    input: RequestInfo | URL,
+    init?: RequestInit,
+): Promise<Response> => {
+    const mergedInit: RequestInit = {
+        credentials: 'include',
+        ...init,
+    };
+    const response = await fetch(input, mergedInit);
+    const url = typeof input === 'string' ? input : input instanceof URL ? input.pathname : input.url;
+
+    if (response.status !== 401 || isAuthBypassUrl(url)) {
+        return response;
+    }
+
+    const refreshed = await refreshAccessToken();
+    if (!refreshed) {
+        return response;
+    }
+
+    return fetch(input, mergedInit);
+};
+
 export const toApiError = async (response: Response): Promise<ApiError> => {
     const fallback =
         response.status === 401 ? 'Invalid credentials' : `Request failed (${response.status})`;
@@ -72,7 +138,7 @@ const readUser = async (response: Response): Promise<SessionUser> => {
 };
 
 export const fetchCurrentUser = async (): Promise<SessionUser | null> => {
-    const response = await fetch('/api/user/info', { credentials: 'include' });
+    const response = await apiFetch('/api/user/info', { credentials: 'include' });
 
     if (response.status === 401 || response.status === 403) {
         return null;

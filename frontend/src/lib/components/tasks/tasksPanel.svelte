@@ -506,7 +506,7 @@
                                     </div>
                                 </div>
 
-                                {#if task.fieldId || task.equipmentId || task.substanceId || task.batchId}
+                                {#if task.fieldId || task.equipmentId || task.substanceId || task.batchId || task.bottlingId || task.recordId}
                                     <div class="grid gap-3 border-t border-[#e4d8cb] pt-2 sm:grid-cols-4">
                                         {#if task.fieldId}
                                             <div>
@@ -545,6 +545,26 @@
                                                 </span>
                                                 <span class="font-medium text-[#3f2e22]">
                                                     {batchLabel(task.batchId)}
+                                                </span>
+                                            </div>
+                                        {/if}
+                                        {#if task.bottlingId}
+                                            <div>
+                                                <span class="block text-xs font-semibold uppercase text-zinc-500">
+                                                    Bottling
+                                                </span>
+                                                <span class="font-medium text-[#3f2e22]">
+                                                    {task.bottlingId}
+                                                </span>
+                                            </div>
+                                        {/if}
+                                        {#if task.recordId}
+                                            <div>
+                                                <span class="block text-xs font-semibold uppercase text-zinc-500">
+                                                    Record
+                                                </span>
+                                                <span class="font-medium text-[#3f2e22]">
+                                                    {task.recordId}
                                                 </span>
                                             </div>
                                         {/if}

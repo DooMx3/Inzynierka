@@ -65,6 +65,7 @@
 
     type SourceRowDraft = {
         id: string;
+        linkId?: string;
         sourceId: string;
         quantityStr: string | number | null;
     };
@@ -122,15 +123,19 @@
     const highlightBatchId = $derived(page.url.searchParams.get("highlightBatchId") ?? "");
     const autoCreate = $derived(page.url.searchParams.get("create") === "1");
 
-    const load = async () => {
-        loading = true;
+    const load = async (showSpinner = allBatches.length === 0) => {
+        if (showSpinner) {
+            loading = true;
+        }
         loadError = "";
         try {
-            const [loadedBatches, loadedIngredients, loadedParams] = await Promise.all([
+            const [loadedBatches, loadedIngredients] = await Promise.all([
                 getBatches(),
-                getIngredients(),
-                getAllParameters(),
+                getIngredients().catch(() => []),
             ]);
+            const loadedParams = await getAllParameters(
+                loadedBatches.map((batch) => batch.id),
+            );
             allBatches = loadedBatches;
             catalogue = loadedIngredients;
             allParameters = loadedParams;
@@ -187,7 +192,13 @@
         let grams = 0;
         for (const item of batch.ingredients) {
             const cat = catalogue.find((c) => c.id === item.ingredientId);
-            if ((cat && cat.sugars >= 95) || item.ingredientName.toLowerCase().includes("sucrose")) {
+            const lower = item.ingredientName.toLowerCase();
+            if (
+                (cat && cat.sugars >= 95) ||
+                lower.includes("sucrose") ||
+                lower.includes("sacharoza") ||
+                lower.includes("cukier")
+            ) {
                 grams += item.quantityGrams;
             }
         }
@@ -372,6 +383,7 @@
         formIngredients = [...batch.ingredients];
         formSources = batch.sources.map((src, idx) => ({
             id: `src-edit-${idx}`,
+            linkId: src.linkId,
             sourceId: src.sourceId,
             quantityStr: String(src.quantity),
         }));
@@ -391,7 +403,7 @@
             formError = "Quantity must be greater than 0.";
             return;
         }
-        if (!formEquipmentId) {
+        if (!formEquipmentId && !(editingBatch && !editingBatch.equipmentId)) {
             formError = "Select target equipment / location.";
             return;
         }
@@ -419,6 +431,7 @@
             const mappedSources: BatchSourceItem[] = formSources.map((row) => {
                 const opt = availableSourceOptions.find((o) => o.value === row.sourceId);
                 return {
+                    linkId: row.linkId,
                     sourceId: row.sourceId,
                     sourceType: opt?.sourceType ?? (stage === "MUST" ? "HARVEST" : "BATCH"),
                     label: opt?.label ?? row.sourceId,
@@ -431,7 +444,7 @@
                 stage,
                 quantity: Number(formQuantity),
                 equipmentId: formEquipmentId,
-                equipmentLabel: equipOpt?.label ?? formEquipmentId,
+                equipmentLabel: equipOpt?.label ?? (formEquipmentId || "Unassigned"),
                 yeastId: formYeastId,
                 description: formDescription.trim(),
                 sources: mappedSources,
@@ -476,7 +489,11 @@
             return;
         }
         if (paramModalTarget.record) {
-            await updateBatchParameter(paramModalTarget.record.id, draft);
+            await updateBatchParameter(
+                paramModalTarget.batch.id,
+                paramModalTarget.record.id,
+                draft,
+            );
         } else {
             await createBatchParameter(paramModalTarget.batch.id, draft);
         }
@@ -488,7 +505,7 @@
         if (!deletingParam) {
             return;
         }
-        await deleteBatchParameter(deletingParam.id);
+        await deleteBatchParameter(deletingParam.batchId, deletingParam.id);
         deletingParam = null;
         await load();
     };
@@ -507,8 +524,14 @@
             return;
         }
         const k2Ing =
-            catalogue.find((c) => c.name.toLowerCase().includes("metabisulfite")) ??
-            catalogue[0];
+            catalogue.find((c) => {
+                const lower = c.name.toLowerCase();
+                return (
+                    lower.includes("metabisulfite") ||
+                    lower.includes("pirosiarczyn") ||
+                    lower.includes("k2s2o5")
+                );
+            }) ?? catalogue[0];
         if (!k2Ing) {
             potassiumModalBatch = null;
             return;

@@ -1,7 +1,11 @@
 <script lang="ts">
     import FormWindow from "$lib/components/formWindow/formWindow.svelte";
     import InputField from "$lib/components/inputField/inputField.svelte";
-    import type { ChemicalParameterDraft, ChemicalParameterRecord } from "$lib/api/parameters";
+    import {
+        validateChemicalParameterDraft,
+        type ChemicalParameterDraft,
+        type ChemicalParameterRecord,
+    } from "$lib/api/parameters";
 
     let {
         batchLabel,
@@ -50,19 +54,18 @@
             alcoholContent: parseOptional(alcoholStr),
         };
 
-        if (
-            draft.sugarLevel === null &&
-            draft.acidity === null &&
-            draft.pH === null &&
-            draft.temperature === null &&
-            draft.alcoholContent === null
-        ) {
-            errorMsg = "Enter at least one chemical parameter reading.";
+        const validationError = validateChemicalParameterDraft(draft);
+        if (validationError) {
+            errorMsg = validationError;
             return;
         }
 
         errorMsg = "";
-        await onSave(draft);
+        try {
+            await onSave(draft);
+        } catch (error) {
+            errorMsg = error instanceof Error ? error.message : "Could not save chemical parameters.";
+        }
     };
 </script>
 

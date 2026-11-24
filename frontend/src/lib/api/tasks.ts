@@ -1,4 +1,4 @@
-import { toApiError } from '$lib/api/auth';
+import { apiFetch, toApiError } from '$lib/api/auth';
 
 const jsonHeaders = {
     'Content-Type': 'application/json',
@@ -219,7 +219,7 @@ export const getTasks = async (filters: TaskQueryFilters = {}): Promise<TaskItem
         }
     }
     const query = params.toString();
-    const response = await fetch(query ? `/api/tasks?${query}` : '/api/tasks', {
+    const response = await apiFetch(query ? `/api/tasks?${query}` : '/api/tasks', {
         method: 'GET',
         credentials: 'include',
     });
@@ -232,7 +232,7 @@ export const getTasks = async (filters: TaskQueryFilters = {}): Promise<TaskItem
 };
 
 export const getTaskById = async (id: string): Promise<TaskItem> => {
-    const response = await fetch(`/api/tasks/${encodeURIComponent(id)}`, {
+    const response = await apiFetch(`/api/tasks/${encodeURIComponent(id)}`, {
         method: 'GET',
         credentials: 'include',
     });
@@ -240,57 +240,74 @@ export const getTaskById = async (id: string): Promise<TaskItem> => {
     return readTask(await response.json());
 };
 
+export const TASKS_CHANGED_EVENT = 'wms:tasks-changed';
+
+const notifyTasksChanged = () => {
+    if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+        window.dispatchEvent(new CustomEvent(TASKS_CHANGED_EVENT));
+    }
+};
+
 export const createTask = async (draft: TaskDraft): Promise<TaskItem> => {
-    const response = await fetch('/api/tasks', {
+    const response = await apiFetch('/api/tasks', {
         method: 'POST',
         credentials: 'include',
         headers: jsonHeaders,
         body: serializeDraft(draft),
     });
     await ensureOk(response);
-    return readTask(await response.json());
+    const created = readTask(await response.json());
+    notifyTasksChanged();
+    return created;
 };
 
 export const updateTask = async (id: string, draft: TaskDraft): Promise<TaskItem> => {
-    const response = await fetch(`/api/tasks/${encodeURIComponent(id)}`, {
+    const response = await apiFetch(`/api/tasks/${encodeURIComponent(id)}`, {
         method: 'PUT',
         credentials: 'include',
         headers: jsonHeaders,
         body: serializeDraft(draft),
     });
     await ensureOk(response);
-    return readTask(await response.json());
+    const updated = readTask(await response.json());
+    notifyTasksChanged();
+    return updated;
 };
 
 export const completeTask = async (id: string): Promise<TaskItem> => {
-    const response = await fetch(`/api/tasks/${encodeURIComponent(id)}/complete`, {
+    const response = await apiFetch(`/api/tasks/${encodeURIComponent(id)}/complete`, {
         method: 'PATCH',
         credentials: 'include',
     });
     await ensureOk(response);
-    return readTask(await response.json());
+    const completed = readTask(await response.json());
+    notifyTasksChanged();
+    return completed;
 };
 
 export const reopenTask = async (id: string): Promise<TaskItem> => {
-    const response = await fetch(`/api/tasks/${encodeURIComponent(id)}/reopen`, {
+    const response = await apiFetch(`/api/tasks/${encodeURIComponent(id)}/reopen`, {
         method: 'PATCH',
         credentials: 'include',
     });
     await ensureOk(response);
-    return readTask(await response.json());
+    const reopened = readTask(await response.json());
+    notifyTasksChanged();
+    return reopened;
 };
 
 export const deleteTask = async (id: string): Promise<void> => {
-    const response = await fetch(`/api/tasks/${encodeURIComponent(id)}`, {
+    const response = await apiFetch(`/api/tasks/${encodeURIComponent(id)}`, {
         method: 'DELETE',
         credentials: 'include',
     });
     await ensureOk(response);
+    notifyTasksChanged();
 };
 
 export const getTaskTypes = async (): Promise<TaskTypeOption[]> => {
     try {
-        const response = await fetch('/api/task-types', {
+        const response = await apiFetch('/api/task-types', {
             method: 'GET',
             credentials: 'include',
         });

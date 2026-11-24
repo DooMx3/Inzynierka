@@ -1,4 +1,4 @@
-import { toApiError } from '$lib/api/auth';
+import { apiFetch, toApiError } from '$lib/api/auth';
 
 const jsonHeaders = {
     'Content-Type': 'application/json',
@@ -28,7 +28,7 @@ const readMessage = async (response: Response, fallback: string): Promise<string
 };
 
 export const updateUser = async (profile: UserPatch): Promise<void> => {
-    const response = await fetch('/api/user/patch', {
+    const response = await apiFetch('/api/user/patch', {
         method: 'PATCH',
         credentials: 'include',
         headers: jsonHeaders,
@@ -41,7 +41,7 @@ export const updateUser = async (profile: UserPatch): Promise<void> => {
 };
 
 export const changePassword = async (oldPassword: string, newPassword: string): Promise<string> => {
-    const response = await fetch('/api/user/change-password', {
+    const response = await apiFetch('/api/user/change-password', {
         method: 'POST',
         credentials: 'include',
         headers: jsonHeaders,
@@ -56,7 +56,7 @@ export const changePassword = async (oldPassword: string, newPassword: string): 
 };
 
 export const deactivateAccount = async (password: string): Promise<string> => {
-    const response = await fetch('/api/user/deactivate', {
+    const response = await apiFetch('/api/user/deactivate', {
         method: 'POST',
         credentials: 'include',
         headers: jsonHeaders,

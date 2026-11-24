@@ -68,4 +68,15 @@ describe('Breadcrumbs', () => {
         const { container } = render(Breadcrumbs, { additionalCrumbs: [] });
         expect(container.querySelector('span')).toHaveClass('text-zinc-900');
     });
+
+    it('sanitizes dynamic UUID routes in breadcrumbs', () => {
+        setPathname('/offerings/vineyard/550e8400-e29b-41d4-a716-446655440000');
+        const { container, unmount } = render(Breadcrumbs, { additionalCrumbs: [] });
+        expect(container.querySelector('span')).toHaveTextContent('Offerings / Vineyard');
+        unmount();
+
+        setPathname('/qr/equipment/550e8400-e29b-41d4-a716-446655440000');
+        const second = render(Breadcrumbs, { additionalCrumbs: [] });
+        expect(second.container.querySelector('span')).toHaveTextContent('QR / Equipment');
+    });
 });

@@ -1,4 +1,4 @@
-import { toApiError } from '$lib/api/auth';
+import { apiFetch, toApiError } from '$lib/api/auth';
 
 const jsonHeaders = {
     'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ const serializeDraft = (draft: EquipmentDraft) =>
     });
 
 export const getEquipmentList = async (): Promise<Equipment[]> => {
-    const response = await fetch('/api/equipment', {
+    const response = await apiFetch('/api/equipment', {
         method: 'GET',
         credentials: 'include',
     });
@@ -71,7 +71,7 @@ export const getEquipmentList = async (): Promise<Equipment[]> => {
 };
 
 export const getEquipmentById = async (id: string): Promise<Equipment> => {
-    const response = await fetch(`/api/equipment/${encodeURIComponent(id)}`, {
+    const response = await apiFetch(`/api/equipment/${encodeURIComponent(id)}`, {
         method: 'GET',
         credentials: 'include',
     });
@@ -80,7 +80,7 @@ export const getEquipmentById = async (id: string): Promise<Equipment> => {
 };
 
 export const createEquipment = async (draft: EquipmentDraft): Promise<Equipment> => {
-    const response = await fetch('/api/equipment', {
+    const response = await apiFetch('/api/equipment', {
         method: 'POST',
         credentials: 'include',
         headers: jsonHeaders,
@@ -91,7 +91,7 @@ export const createEquipment = async (draft: EquipmentDraft): Promise<Equipment>
 };
 
 export const updateEquipment = async (id: string, draft: EquipmentDraft): Promise<Equipment> => {
-    const response = await fetch(`/api/equipment/${encodeURIComponent(id)}`, {
+    const response = await apiFetch(`/api/equipment/${encodeURIComponent(id)}`, {
         method: 'PUT',
         credentials: 'include',
         headers: jsonHeaders,
@@ -102,7 +102,7 @@ export const updateEquipment = async (id: string, draft: EquipmentDraft): Promis
 };
 
 export const deleteEquipment = async (id: string): Promise<void> => {
-    const response = await fetch(`/api/equipment/${encodeURIComponent(id)}`, {
+    const response = await apiFetch(`/api/equipment/${encodeURIComponent(id)}`, {
         method: 'DELETE',
         credentials: 'include',
     });

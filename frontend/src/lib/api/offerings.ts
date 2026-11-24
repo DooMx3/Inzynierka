@@ -1,4 +1,4 @@
-import { ApiError, toApiError } from '$lib/api/auth';
+import { ApiError, apiFetch, toApiError } from '$lib/api/auth';
 import { getBatches, type ProductionBatch } from '$lib/api/batches';
 import { getIngredients } from '$lib/api/ingredients';
 import { getOrganisationLogoByIdUrl } from '$lib/api/organisation';
@@ -202,9 +202,11 @@ const enrichOfferingWithLocalBatch = (
     offering: WineOffering,
     allBatches: ProductionBatch[],
     allParams: ChemicalParameterRecord[],
+    historyBatchId?: string,
 ): WineOffering => {
     const batch =
         allBatches.find((b) => b.id === offering.wineId) ??
+        (historyBatchId ? allBatches.find((b) => b.id === historyBatchId) : undefined) ??
         allBatches.find(
             (b) =>
                 b.stage === 'BOTTLED' &&
@@ -241,7 +243,11 @@ const enrichOfferingWithLocalBatch = (
         wineStyle: offering.wineStyle ?? inferStyleFromSugar(latestParam?.sugarLevel),
         barrelInfo:
             offering.barrelInfo ??
-            (agedSource ? agedSource.equipmentLabel.replace(/\s*\(.*\)$/, '') : 'Stainless steel'),
+            (agedSource && agedSource.equipmentLabel !== 'Unassigned'
+                ? agedSource.equipmentLabel.replace(/\s*\(.*\)$/, '')
+                : agedSource
+                  ? 'Oak barrel'
+                  : 'Stainless steel'),
         grapeType: inferredGrape ?? 'Estate Cuvée',
     };
 };
@@ -266,10 +272,8 @@ export const getOfferings = async (organisationId?: string): Promise<WineOfferin
         remote = [];
     }
 
-    const [allBatches, allParams] = await Promise.all([
-        getBatches().catch(() => []),
-        getAllParameters().catch(() => []),
-    ]);
+    const allBatches = await getBatches().catch(() => []);
+    const allParams = await getAllParameters(allBatches.map((b) => b.id)).catch(() => []);
 
     const mergedMap = new Map<string, WineOffering>();
     for (const item of remote) {
@@ -290,14 +294,46 @@ export const getOfferings = async (organisationId?: string): Promise<WineOfferin
     }
 
     const scopedOrgId = organisationId?.trim() ?? '';
-    const enriched = [...mergedMap.values()].map((item) =>
-        enrichOfferingWithLocalBatch(item, allBatches, allParams),
+    const candidates = [...mergedMap.values()].filter((item) =>
+        scopedOrgId.length > 0 ? item.organisationId === scopedOrgId : true,
     );
 
-    if (scopedOrgId.length > 0) {
-        return enriched.filter((item) => item.organisationId === scopedOrgId);
+    const historyBatchByOfferingId = new Map<string, string>();
+    if (allBatches.length > 0) {
+        await Promise.all(
+            candidates.map(async (item) => {
+                if (item.localOnly || allBatches.some((b) => b.id === item.wineId)) {
+                    return;
+                }
+                try {
+                    const histRes = await fetch(
+                        `/api/offerings/${encodeURIComponent(item.id)}/history`,
+                        {
+                            method: 'GET',
+                            credentials: 'include',
+                        },
+                    );
+                    if (histRes.ok) {
+                        const payload = (await histRes.json()) as BatchHistoryApiPayload;
+                        if (payload?.batch?.id) {
+                            historyBatchByOfferingId.set(item.id, payload.batch.id);
+                        }
+                    }
+                } catch {
+                    // Ignore missing history fallback
+                }
+            }),
+        );
     }
-    return enriched;
+
+    return candidates.map((item) =>
+        enrichOfferingWithLocalBatch(
+            item,
+            allBatches,
+            allParams,
+            historyBatchByOfferingId.get(item.id),
+        ),
+    );
 };
 
 export const getOfferingsByOrganisation = async (
@@ -314,9 +350,8 @@ export const createOffering = async (draft: OfferingDraft): Promise<WineOffering
     const price = Math.max(0, Math.round(Number(draft.price) || 0));
 
     try {
-        const response = await fetch('/api/offerings', {
+        const response = await apiFetch('/api/offerings', {
             method: 'POST',
-            credentials: 'include',
             headers: jsonHeaders,
             body: JSON.stringify({
                 wineId: draft.wineId,
@@ -501,11 +536,11 @@ export const getCustomerBottleDetails = async (id: string): Promise<CustomerBott
         }
     }
 
-    const [allBatches, allParams, catalogue] = await Promise.all([
+    const [allBatches, catalogue] = await Promise.all([
         getBatches().catch(() => []),
-        getAllParameters().catch(() => []),
         getIngredients().catch(() => []),
     ]);
+    const allParams = await getAllParameters(allBatches.map((b) => b.id)).catch(() => []);
 
     const matchedBatch =
         allBatches.find((b) => b.id === (offering?.wineId ?? id)) ??
@@ -624,7 +659,10 @@ export const getCustomerBottleDetails = async (id: string): Promise<CustomerBott
             fermBatch && (agedBatch || matchedBatch)
                 ? (agedBatch?.createdAt ?? matchedBatch!.createdAt).slice(0, 10)
                 : null,
-        barrelType: agedBatch ? agedBatch.equipmentLabel : offering?.barrelInfo ?? null,
+        barrelType:
+            agedBatch && agedBatch.equipmentLabel !== 'Unassigned'
+                ? agedBatch.equipmentLabel
+                : offering?.barrelInfo ?? (agedBatch ? 'Oak barrel' : null),
         barrelDuration,
         bottledDate,
         parameters: {

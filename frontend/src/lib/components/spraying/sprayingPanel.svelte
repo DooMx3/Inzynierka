@@ -19,7 +19,6 @@
     import {
         createSpraying,
         deleteSpraying,
-        getPlannedSprayingIds,
         getSprayings,
         isPlannedSpraying,
         toDateInputValue,
@@ -39,7 +38,6 @@
     let fields = $state<VineyardField[]>([]);
     let equipmentList = $state<Equipment[]>([]);
     let substances = $state<Substance[]>([]);
-    let plannedIds = $state<Set<string>>(new Set());
 
     let loading = $state(true);
     let loadError = $state("");
@@ -71,11 +69,12 @@
     );
     const isPlannedMode = $derived(mode === "planned");
 
-    const load = async () => {
-        loading = true;
+    const load = async (showSpinner = records.length === 0) => {
+        if (showSpinner) {
+            loading = true;
+        }
         loadError = "";
         substancesWarning = "";
-        plannedIds = getPlannedSprayingIds();
 
         try {
             const [loadedSprayings, loadedFields, loadedEquipment] = await Promise.all([
@@ -147,7 +146,7 @@
         const now = new Date();
 
         const matched = records.filter((record) => {
-            const planned = isPlannedSpraying(record, plannedIds, now);
+            const planned = isPlannedSpraying(record, undefined, now);
             if (isPlannedMode !== planned) {
                 return false;
             }
@@ -250,11 +249,6 @@
             return;
         }
 
-        const effectiveDue = formDueDate || formSprayingDate;
-        const effectiveSprayDate = isPlannedMode
-            ? formSprayingDate || effectiveDue
-            : formSprayingDate;
-
         formPending = true;
         formError = "";
         try {
@@ -263,8 +257,8 @@
                 equipmentId: formEquipmentId,
                 substanceId: formSubstanceId,
                 quantity: Math.round(parsedQuantity),
-                sprayingDate: effectiveSprayDate,
-                due: effectiveDue,
+                sprayingDate: isPlannedMode ? null : formSprayingDate,
+                due: formDueDate || null,
             };
             if (editingRecord) {
                 await updateSpraying(editingRecord.id, payload, isPlannedMode);
@@ -291,7 +285,7 @@
                     substanceId: record.substanceId,
                     quantity: record.quantity,
                     sprayingDate: new Date().toISOString(),
-                    due: record.due,
+                    due: record.due || null,
                 },
                 false,
             );

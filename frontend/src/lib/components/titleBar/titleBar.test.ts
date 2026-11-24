@@ -1,11 +1,16 @@
-import { render, screen, fireEvent } from '@testing-library/svelte';
+import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
 import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
 import TitleBar from './titleBar.svelte';
+import { menu } from '$lib/stores/menu.svelte';
 import { setUser } from '$lib/stores/session.svelte';
 
 describe('Title bar', () => {
+    const originalFetch = globalThis.fetch;
+
     beforeEach(() => {
         window.location.href = 'http://localhost/';
+        menu.folded = true;
+        globalThis.fetch = (async () => new Response('[]', { status: 200 })) as unknown as typeof fetch;
         setUser({
             id: '1',
             firstname: 'Henryk',
@@ -16,7 +21,9 @@ describe('Title bar', () => {
     });
 
     afterEach(() => {
+        globalThis.fetch = originalFetch;
         window.location.href = 'http://localhost/';
+        menu.folded = true;
         setUser(null);
     });
 
@@ -37,31 +44,34 @@ describe('Title bar', () => {
         expect(src.startsWith('/') || src.startsWith('data:') || src.startsWith('blob:')).toBe(true);
     });
 
-    it('Check app name is present', () => {
+    it('Check app name is Vinery and links to /', () => {
         render(TitleBar);
 
-        expect(screen.getByText('Name goes here')).toBeInTheDocument();
+        const brandName = screen.getByText('Vinery');
+        expect(brandName).toBeInTheDocument();
+        expect(brandName.closest('a')).toHaveAttribute('href', '/');
     });
 
     it('Check logo is on the left of the app name', () => {
-        const { container } = render(TitleBar);
+        render(TitleBar);
 
-        const brand = container.firstElementChild?.children[0];
         const logo = screen.getByAltText('Logo');
-        const name = screen.getByText('Name goes here');
+        const name = screen.getByText('Vinery');
+        const brandLink = name.closest('a');
 
-        expect(brand?.firstElementChild).toBe(logo);
-        expect(brand?.lastElementChild).toBe(name);
+        expect(brandLink?.firstElementChild).toBe(logo);
+        expect(brandLink?.lastElementChild).toBe(name);
     });
 
-    it('Check layout', () => {
+    it('Check layout with responsive height', () => {
         const { container } = render(TitleBar);
 
         expect(container.firstElementChild).toHaveClass(
             'flex',
             'items-center',
             'justify-center',
-            'h-24',
+            'h-16',
+            'sm:h-24',
             'w-full',
             'bg-[#eae0d5]',
         );
@@ -77,28 +87,31 @@ describe('Title bar', () => {
         expect(columns?.[2]).toHaveClass('w-1/3', 'justify-end');
     });
 
-    it('Check search field is in the middle', () => {
-        const { container } = render(TitleBar);
-
-        const middle = container.firstElementChild?.children[1];
-        const input = screen.getByPlaceholderText('Search');
-
-        expect(middle).toContainElement(input);
-    });
-
-    it('Check search placeholder', () => {
+    it('toggles mobile navigation drawer via hamburger button', async () => {
         render(TitleBar);
 
-        expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
+        const hamburger = screen.getByRole('button', { name: 'Toggle navigation menu' });
+        expect(menu.folded).toBe(true);
+
+        await fireEvent.click(hamburger);
+        expect(menu.folded).toBe(false);
+
+        await fireEvent.click(hamburger);
+        expect(menu.folded).toBe(true);
     });
 
-    it('Check typed search value', async () => {
+    it('filters role-aware quick navigation destinations in search and navigates on Enter', async () => {
         render(TitleBar);
 
         const input = screen.getByPlaceholderText('Search');
-        await fireEvent.input(input, { target: { value: 'svelte' } });
+        await fireEvent.input(input, { target: { value: 'offerings' } });
 
-        expect(input).toHaveValue('svelte');
+        const listbox = screen.getByRole('listbox', { name: 'Quick navigation results' });
+        expect(listbox).toHaveTextContent('Offerings');
+        expect(listbox).toHaveTextContent('/management/offerings');
+
+        await fireEvent.keyDown(input, { key: 'Enter' });
+        expect(window.location.pathname).toBe('/management/offerings');
     });
 
     it('Check profile dropdown is on the right', () => {
@@ -110,15 +123,27 @@ describe('Title bar', () => {
         expect(right).toContainElement(btn);
     });
 
-    it('Check profile account name', () => {
-        render(TitleBar);
+    it('renders Tasks button with planned count badge for vineyard members and hides it for unassigned users', async () => {
+        globalThis.fetch = (async () =>
+            new Response(
+                JSON.stringify([
+                    {
+                        id: 't-1',
+                        type: 'GENERAL',
+                        name: 'Inspect barrels',
+                        completed: false,
+                    },
+                    {
+                        id: 't-2',
+                        type: 'GENERAL',
+                        name: 'Clean press',
+                        completed: false,
+                    },
+                ]),
+                { status: 200 },
+            )) as unknown as typeof fetch;
 
-        const btn = screen.getByRole('button', { name: 'Profile Dropdown' });
-        expect(btn).toHaveTextContent('Henryk');
-    });
-
-    it('renders Tasks button to the left of Profile Dropdown and navigates to /tasks', async () => {
-        const { container } = render(TitleBar);
+        const { container, unmount } = render(TitleBar);
 
         const right = container.firstElementChild?.children[2];
         const tasksBtn = screen.getByRole('button', { name: 'Tasks' });
@@ -127,8 +152,27 @@ describe('Title bar', () => {
         expect(right).toContainElement(tasksBtn);
         expect(Boolean(tasksBtn.compareDocumentPosition(profileBtn) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
 
+        await waitFor(() => {
+            expect(screen.getByTestId('tasks-planned-badge')).toHaveTextContent('2');
+        });
+
         await fireEvent.click(tasksBtn);
         expect(window.location.pathname).toBe('/tasks');
+        unmount();
+
+        // Signed-in user without a vineyard role should not see Tasks or Hamburger buttons
+        setUser({
+            id: '2',
+            firstname: 'Nowy',
+            lastname: 'Uzytkownik',
+            email: 'nowy@example.com',
+            roles: [],
+        });
+        render(TitleBar);
+        expect(screen.queryByRole('button', { name: 'Tasks' })).not.toBeInTheDocument();
+        expect(
+            screen.queryByRole('button', { name: 'Toggle navigation menu' }),
+        ).not.toBeInTheDocument();
     });
 
     it('highlights Tasks button when active on /tasks route', () => {
@@ -171,13 +215,13 @@ describe('Title bar', () => {
             removeEventListener: () => {},
             dispatchEvent: () => false,
             onchange: null,
-        })) as typeof window.matchMedia;
+        })) as unknown as typeof window.matchMedia;
 
         try {
             render(TitleBar);
 
             expect(screen.queryByRole('searchbox', { name: 'Search' })).not.toBeInTheDocument();
-            expect(screen.getByText('Name goes here')).toHaveClass('whitespace-nowrap');
+            expect(screen.getByText('Vinery')).toHaveClass('whitespace-nowrap');
             expect(screen.getByRole('button', { name: 'Profile Dropdown' })).toBeInTheDocument();
         } finally {
             window.matchMedia = original;
