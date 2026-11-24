@@ -1,7 +1,9 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.svg';
-    import "../app.css"
+    import "../app.css";
+    import "goey-toast-svelte/styles.css";
     import { onMount } from 'svelte';
+    import { GooeyToaster } from 'goey-toast-svelte';
     
     import Breadcrumbs from '$lib/components/breadcrumbs/breadcrumbs.svelte';
     import MenuBar from '$lib/components/menuBar/menuBar.svelte';
@@ -27,6 +29,12 @@
 <svelte:head>
 	<link rel="icon" href={favicon} />
 </svelte:head>
+
+<GooeyToaster
+    position="bottom-right"
+    closeButton="top-right"
+    showProgress
+/>
 
 <div class="relative flex h-dvh min-h-screen bg-[#eae0d5]">
     {#if session.user && showMenuBar}

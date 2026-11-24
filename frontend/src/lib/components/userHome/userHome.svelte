@@ -2,6 +2,7 @@
     import { onMount } from "svelte";
     import { MediaQuery } from "svelte/reactivity";
     import { refreshSession, session, setUser } from "$lib/stores/session.svelte";
+    import { gooeyToast } from "goey-toast-svelte";
     import CreateVineyardButton from "../userMenu/createVineyardButton.svelte";
     import InvitationButton from "../userMenu/invitationButton.svelte";
     import FormWindow from "$lib/components/formWindow/formWindow.svelte";
@@ -39,7 +40,6 @@
     let organisation = $state<Organisation | null>(null);
     let ready = $state(false);
     let dialog = $state<"create" | "edit" | "invite" | "delete" | "leave" | null>(null);
-    let formError = $state("");
     let showErrors = $state(false);
     let pending = $state(false);
     let deletePassword = $state("");
@@ -139,7 +139,6 @@
     };
 
     const openInvite = () => {
-        formError = "";
         dialog = "invite";
     };
 
@@ -187,42 +186,60 @@
             return;
         }
         showErrors = true;
+        gooeyToast.dismiss({ type: ["error", "warning"] });
         const messages = organisationMessages();
         if (messages.length > 0) {
-            alert(messages.join("\n"));
+            gooeyToast.warning("Check vineyard details", {
+                description: messages.join(" "),
+            });
             return;
         }
 
         pending = true;
         try {
-            organisation = await createOrganisation(draft());
-            membership = "MEMBER";
-            if (!roles.includes("OWNER")) {
-                roles = [...roles, "OWNER"];
-            }
-            if (session.user) {
-                const currentRoles = Array.isArray(session.user.roles) ? session.user.roles : [];
-                if (!currentRoles.includes("OWNER")) {
-                    setUser({
-                        ...session.user,
-                        roles: [...currentRoles, "OWNER"],
-                    });
+            const createTask = (async () => {
+                organisation = await createOrganisation(draft());
+                membership = "MEMBER";
+                if (!roles.includes("OWNER")) {
+                    roles = [...roles, "OWNER"];
                 }
-            }
-            if (logoFile) {
-                try {
-                    await uploadOrganisationLogo(logoFile);
-                    logoTimestamp = Date.now();
-                    organisation = await getOrganisation();
-                } catch {
-                    // logo upload failure is non-critical
+                if (session.user) {
+                    const currentRoles = Array.isArray(session.user.roles) ? session.user.roles : [];
+                    if (!currentRoles.includes("OWNER")) {
+                        setUser({
+                            ...session.user,
+                            roles: [...currentRoles, "OWNER"],
+                        });
+                    }
                 }
-            }
-            dialog = null;
-            await refreshSession();
-            alert("The organisation is ready. You are its owner.");
-        } catch (error) {
-            alert(error instanceof Error ? error.message : "Could not create the organisation.");
+                if (logoFile) {
+                    try {
+                        await uploadOrganisationLogo(logoFile);
+                        logoTimestamp = Date.now();
+                        organisation = await getOrganisation();
+                    } catch {
+                        gooeyToast.warning("Logo upload skipped", {
+                            description: "Vineyard created, but the logo could not be uploaded.",
+                        });
+                    }
+                }
+                dialog = null;
+                await refreshSession();
+            })();
+
+            gooeyToast.promise(createTask, {
+                loading: "Creating organisation...",
+                success: "Organisation created",
+                error: (err) =>
+                    err instanceof Error ? err.message : "Could not create the organisation.",
+                description: {
+                    success: "The organisation is ready. You are its owner.",
+                },
+            });
+
+            await createTask;
+        } catch {
+            // Handled via gooeyToast.promise
         } finally {
             pending = false;
         }
@@ -233,9 +250,12 @@
             return;
         }
         showErrors = true;
+        gooeyToast.dismiss({ type: ["error", "warning"] });
         const messages = organisationMessages();
         if (messages.length > 0) {
-            alert(messages.join("\n"));
+            gooeyToast.warning("Check vineyard details", {
+                description: messages.join(" "),
+            });
             return;
         }
 
@@ -248,12 +268,19 @@
                     logoTimestamp = Date.now();
                     organisation = await getOrganisation();
                 } catch {
-                    // logo upload failure is non-critical
+                    gooeyToast.warning("Logo upload failed", {
+                        description: "Details were saved, but the new logo could not be uploaded.",
+                    });
                 }
             }
             dialog = null;
+            gooeyToast.success("Vineyard updated", {
+                description: "Organisation details have been saved.",
+            });
         } catch (error) {
-            alert(error instanceof Error ? error.message : "Could not update the organisation.");
+            gooeyToast.error("Could not update the organisation", {
+                description: error instanceof Error ? error.message : "Please try again.",
+            });
         } finally {
             pending = false;
         }
@@ -264,8 +291,11 @@
             return;
         }
         showErrors = true;
+        gooeyToast.dismiss({ type: ["error", "warning"] });
         if (deletePassword.length === 0) {
-            alert("Enter your password.");
+            gooeyToast.warning("Password required", {
+                description: "Enter your password.",
+            });
             return;
         }
 
@@ -284,8 +314,13 @@
             }
             dialog = null;
             await refreshSession();
+            gooeyToast.info("Vineyard deleted", {
+                description: "The organisation has been permanently removed.",
+            });
         } catch (error) {
-            alert(error instanceof Error ? error.message : "Could not delete the organisation.");
+            gooeyToast.error("Could not delete the organisation", {
+                description: error instanceof Error ? error.message : "Please try again.",
+            });
         } finally {
             pending = false;
         }
@@ -309,8 +344,13 @@
             }
             dialog = null;
             await refreshSession();
+            gooeyToast.info("Left vineyard", {
+                description: "You are no longer a member of this organisation.",
+            });
         } catch (error) {
-            alert(error instanceof Error ? error.message : "Could not leave the vineyard.");
+            gooeyToast.error("Could not leave the vineyard", {
+                description: error instanceof Error ? error.message : "Please try again.",
+            });
         } finally {
             pending = false;
         }
@@ -321,12 +361,17 @@
             return;
         }
         pending = true;
-        formError = "";
+        gooeyToast.dismiss({ type: ["error", "warning"] });
         try {
             await acceptInvitation();
+            gooeyToast.success("Invitation accepted", {
+                description: `Welcome to ${inviteName || "the vineyard"}!`,
+            });
             window.location.href = "/workers";
         } catch (error) {
-            formError = error instanceof Error ? error.message : "Could not join the organisation.";
+            gooeyToast.error("Could not join the organisation", {
+                description: error instanceof Error ? error.message : "Please try again.",
+            });
             pending = false;
         }
     };
@@ -490,9 +535,6 @@
                     {/if}
                 </div>
             {/if}
-            {#if formError}
-                <p class="invite-error" role="alert">{formError}</p>
-            {/if}
         </div>
     </FormWindow>
 {/if}
@@ -627,10 +669,5 @@
         font-size: 1rem;
         line-height: 1.5rem;
         color: #3f3f46;
-    }
-
-    .invite-error {
-        margin-top: 0.5rem;
-        color: #8f3d32;
     }
 </style>

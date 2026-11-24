@@ -11,6 +11,7 @@
     import { logout } from "$lib/api/auth";
     import { updateUser } from "$lib/api/user";
     import { refreshSession, setUser } from "$lib/stores/session.svelte";
+    import { gooeyToast } from "goey-toast-svelte";
     import type { UserInfo } from "$lib/types/userInfo";
     import Button from "$lib/components/buttons/button.svelte";
     import FormWindow from "$lib/components/formWindow/formWindow.svelte";
@@ -24,7 +25,7 @@
     let loadError = $state("");
     let mode = $state<Mode>("view");
     let draft = $state("");
-    let formError = $state("");
+    let fieldInvalid = $state(false);
     let pending = $state(false);
     const sideBySide = new MediaQuery("(min-width: 840px) and (max-width: 1499px)");
 
@@ -33,6 +34,9 @@
             userInfo = await getUserInfo();
         } catch (error) {
             loadError = error instanceof Error ? error.message : "Could not load your profile.";
+            gooeyToast.error("Could not load profile", {
+                description: loadError,
+            });
         }
     });
 
@@ -42,7 +46,7 @@
     };
 
     const open = (next: Mode) => {
-        formError = "";
+        fieldInvalid = false;
         pending = false;
         if (next === "email") {
             draft = userInfo?.email ?? "";
@@ -55,7 +59,7 @@
 
     const close = () => {
         mode = "view";
-        formError = "";
+        fieldInvalid = false;
     };
 
     const signInAgain = async () => {
@@ -72,9 +76,13 @@
         if (!userInfo || pending) {
             return;
         }
+        gooeyToast.dismiss({ type: ["error", "warning"] });
         const email = draft.trim();
         if (!isValidEmail(email)) {
-            formError = "Enter a valid email.";
+            fieldInvalid = true;
+            gooeyToast.warning("Invalid email", {
+                description: "Enter a valid email.",
+            });
             return;
         }
         if (email === userInfo.email) {
@@ -83,13 +91,19 @@
         }
 
         pending = true;
-        formError = "";
+        fieldInvalid = false;
         try {
             await updateUser({ email });
             userInfo = { ...userInfo, email };
             mode = "email-done";
+            gooeyToast.info("Email updated", {
+                description: "Please sign in again with your new email address.",
+            });
         } catch (error) {
-            formError = error instanceof Error ? error.message : "Could not change your email.";
+            fieldInvalid = true;
+            gooeyToast.error("Could not change your email", {
+                description: error instanceof Error ? error.message : "Please try again.",
+            });
         } finally {
             pending = false;
         }
@@ -99,6 +113,7 @@
         if (!userInfo || pending) {
             return;
         }
+        gooeyToast.dismiss({ type: ["error", "warning"] });
         const phoneNumber = draft.trim();
         if (phoneNumber === (userInfo.phoneNumber ?? "")) {
             close();
@@ -106,15 +121,20 @@
         }
 
         pending = true;
-        formError = "";
+        fieldInvalid = false;
         try {
             await updateUser({ phoneNumber });
             userInfo = { ...userInfo, phoneNumber: phoneNumber.length > 0 ? phoneNumber : null };
             await refreshSession();
-            alert("Your phone number has been updated.");
+            gooeyToast.success("Phone number updated", {
+                description: "Your phone number has been updated.",
+            });
             close();
         } catch (error) {
-            formError = error instanceof Error ? error.message : "Could not change your phone number.";
+            fieldInvalid = true;
+            gooeyToast.error("Could not change your phone number", {
+                description: error instanceof Error ? error.message : "Please try again.",
+            });
         } finally {
             pending = false;
         }
@@ -198,10 +218,7 @@
     >
         <div class="flex flex-col gap-3">
             <p class="text-sm text-zinc-700">After this change you will need to sign in again.</p>
-            <InputField label="E-mail" type="email" placeholder="name@example.com" bind:value={draft} svg={mailIcon} invalid={formError.length > 0} />
-            {#if formError}
-                <p class="text-sm text-[#8f3d32]" role="alert">{formError}</p>
-            {/if}
+            <InputField label="E-mail" type="email" placeholder="name@example.com" bind:value={draft} svg={mailIcon} invalid={fieldInvalid} oninput={() => (fieldInvalid = false)} />
         </div>
     </FormWindow>
 {/if}
@@ -233,10 +250,7 @@
         onAccept={() => void savePhone()}
     >
         <div class="flex flex-col gap-3">
-            <InputField label="Phone" placeholder="Phone number" bind:value={draft} invalid={formError.length > 0} />
-            {#if formError}
-                <p class="text-sm text-[#8f3d32]" role="alert">{formError}</p>
-            {/if}
+            <InputField label="Phone" placeholder="Phone number" bind:value={draft} invalid={fieldInvalid} oninput={() => (fieldInvalid = false)} />
         </div>
     </FormWindow>
 {/if}

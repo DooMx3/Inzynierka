@@ -4,3 +4,8 @@ html,
 body {
 	background-color: #eae0d5;
 }
+
+[data-sonner-toaster] {
+	z-index: 9999 !important;
+}
+

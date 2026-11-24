@@ -6,6 +6,7 @@
         changePasswordErrorMessages,
         changePasswordInvalidFields,
     } from "$lib/functions/authFormValidation";
+    import { gooeyToast } from "goey-toast-svelte";
     import InputField from "$lib/components/inputField/inputField.svelte";
     import PasswordStrengthIndicator from "../passwordUtilities/passwordStrengthIndicator.svelte";
     import PasswordConditionsIndicator from "../passwordUtilities/passwordConditionsIndicator.svelte";
@@ -39,22 +40,29 @@
 
         pending = true;
         showErrors = true;
+        gooeyToast.dismiss({ type: ["error", "warning"] });
         const messages = changePasswordErrorMessages({ oldPassword, password, confirmPassword });
         if (!passwordValid && !messages.includes("Password does not meet the requirements.")) {
             messages.unshift("Password does not meet the requirements.");
         }
         if (messages.length > 0 || !passwordValid) {
             pending = false;
-            alert(messages.join("\n"));
+            gooeyToast.warning("Check password fields", {
+                description: messages.join(" "),
+            });
             return;
         }
 
         try {
             const message = await changePassword(oldPassword, password);
-            alert(message);
+            gooeyToast.success("Password changed", {
+                description: message,
+            });
             onFinished();
         } catch (error) {
-            alert(error instanceof Error ? error.message : "Password change failed");
+            gooeyToast.error("Password change failed", {
+                description: error instanceof Error ? error.message : "Could not change password.",
+            });
         } finally {
             pending = false;
         }

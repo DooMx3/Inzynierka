@@ -13,6 +13,7 @@
     import EmployeeRecord from "./employeeRecord.svelte";
     import { ApiError } from "$lib/api/auth";
     import { session } from "$lib/stores/session.svelte";
+    import { gooeyToast } from "goey-toast-svelte";
     import { isValidEmail } from "$lib/functions/authFormValidation";
     import {
         addOrganisationRole,
@@ -44,11 +45,9 @@
     let editing = $state<Employee | null>(null);
     let workerRole = $state(false);
     let oenologistRole = $state(false);
-    let roleError = $state("");
     let rolePending = $state(false);
 
     let removing = $state<Employee | null>(null);
-    let removeError = $state("");
     let removePending = $state(false);
 
     const load = async () => {
@@ -83,12 +82,21 @@
             selected = selected.filter((id) => employees.some((employee) => employee.id === id));
         } catch (error) {
             employees = [];
-            loadError =
-                error instanceof ApiError && error.status === 403
-                    ? "Only the organisation owner can manage employees."
-                    : error instanceof Error
-                      ? error.message
-                      : "Could not load employees.";
+            const isForbidden = error instanceof ApiError && error.status === 403;
+            loadError = isForbidden
+                ? "Only the organisation owner can manage employees."
+                : error instanceof Error
+                  ? error.message
+                  : "Could not load employees.";
+            if (!isForbidden) {
+                gooeyToast.error("Could not load employees", {
+                    description: loadError,
+                    action: {
+                        label: "Retry",
+                        onClick: () => void load(),
+                    },
+                });
+            }
         } finally {
             loading = false;
         }
@@ -172,9 +180,13 @@
             return;
         }
         showInviteErrors = true;
+        gooeyToast.dismiss({ type: ["error", "warning"] });
         const email = inviteEmail.trim();
         if (!isValidEmail(email)) {
-            alert("Enter a valid email. The person needs an account before they can be invited.");
+            gooeyToast.warning("Invalid email", {
+                description:
+                    "Enter a valid email. The person needs an account before they can be invited.",
+            });
             return;
         }
 
@@ -182,13 +194,17 @@
         try {
             await inviteEmployee(email);
             inviting = false;
+            gooeyToast.success("Invitation sent", {
+                description: `Invited ${email} to join the vineyard.`,
+            });
             await load();
         } catch (error) {
-            alert(
-                error instanceof Error
-                    ? error.message
-                    : "Could not invite this employee. Ask them to register first.",
-            );
+            gooeyToast.error("Could not invite employee", {
+                description:
+                    error instanceof Error
+                        ? error.message
+                        : "Could not invite this employee. Ask them to register first.",
+            });
         } finally {
             invitePending = false;
         }
@@ -198,7 +214,6 @@
         editing = employee;
         workerRole = employee.roles.includes("WORKER");
         oenologistRole = employee.roles.includes("OENOLOGIST");
-        roleError = "";
     };
 
     const saveRoles = async () => {
@@ -206,12 +221,13 @@
             return;
         }
 
+        const targetName = `${editing.firstname} ${editing.lastname}`.trim() || editing.email;
         const changes: { role: OrganisationRole; enabled: boolean }[] = [
             { role: "WORKER", enabled: workerRole },
             { role: "OENOLOGIST", enabled: oenologistRole },
         ];
         rolePending = true;
-        roleError = "";
+        gooeyToast.dismiss({ type: ["error", "warning"] });
         try {
             for (const change of changes) {
                 const hasRole = editing.roles.includes(change.role);
@@ -223,9 +239,14 @@
                 }
             }
             editing = null;
+            gooeyToast.success("Roles updated", {
+                description: `Updated roles for ${targetName}.`,
+            });
             await load();
         } catch (error) {
-            roleError = error instanceof Error ? error.message : "Could not update roles.";
+            gooeyToast.error("Could not update roles", {
+                description: error instanceof Error ? error.message : "Please try again.",
+            });
         } finally {
             rolePending = false;
         }
@@ -235,18 +256,28 @@
         if (!removing || removePending) {
             return;
         }
+        const target = removing;
+        const targetName = `${target.firstname} ${target.lastname}`.trim() || target.email;
         removePending = true;
-        removeError = "";
+        gooeyToast.dismiss({ type: ["error", "warning"] });
         try {
-            if (removing.pending) {
-                await cancelInvitation(removing.id);
+            if (target.pending) {
+                await cancelInvitation(target.id);
+                gooeyToast.info("Invitation cancelled", {
+                    description: `Cancelled invitation for ${targetName}.`,
+                });
             } else {
-                await removeUserFromOrganisation(removing.id);
+                await removeUserFromOrganisation(target.id);
+                gooeyToast.success("Employee removed", {
+                    description: `${targetName} was removed from the organisation.`,
+                });
             }
             removing = null;
             await load();
         } catch (error) {
-            removeError = error instanceof Error ? error.message : "Could not remove this person.";
+            gooeyToast.error(target.pending ? "Could not cancel invitation" : "Could not remove employee", {
+                description: error instanceof Error ? error.message : "Could not remove this person.",
+            });
         } finally {
             removePending = false;
         }
@@ -301,7 +332,6 @@
                         onToggle={() => toggle(employee.id)}
                         onChangeRoles={() => openRoles(employee)}
                         onRemove={() => {
-                            removeError = "";
                             removing = employee;
                         }}
                     />
@@ -402,9 +432,6 @@
                     </span>
                 </label>
             </div>
-            {#if roleError}
-                <p class="text-sm text-[#8f3d32]" role="alert">{roleError}</p>
-            {/if}
         </div>
     </FormWindow>
 {/if}
@@ -412,9 +439,9 @@
 {#if removing}
     <ConfirmationDialog
         title={removing.pending ? "Cancel invitation" : "Remove employee"}
-        text={removeError || (removing.pending
+        text={removing.pending
             ? `Cancel the invitation for ${removing.firstname} ${removing.lastname}? They will no longer be able to join.`
-            : `Remove ${removing.firstname} ${removing.lastname} from the organisation? They will lose access immediately.`)}
+            : `Remove ${removing.firstname} ${removing.lastname} from the organisation? They will lose access immediately.`}
         acceptText="Remove"
         onClose={() => (removing = null)}
         onCancel={() => (removing = null)}

@@ -1,5 +1,6 @@
 <script lang="ts">
     import { logout } from "$lib/api/auth";
+    import { gooeyToast } from "goey-toast-svelte";
     import logoutIcon from "$lib/assets/logout.svg?raw";
     import accountIcon from "$lib/assets/account.svg?raw";
     import ProfileDropdownButton from "../buttons/profileDropdownButton.svelte";
@@ -26,9 +27,14 @@
             await logout();
             setUser(null);
             open = false;
+            gooeyToast.info("Signed out", {
+                description: "You have been logged out safely.",
+            });
             window.location.href = "/auth";
         } catch (error) {
-            alert(error instanceof Error ? error.message : "Logout failed");
+            gooeyToast.error("Logout failed", {
+                description: error instanceof Error ? error.message : "Could not sign out.",
+            });
         }
     };
 </script>
