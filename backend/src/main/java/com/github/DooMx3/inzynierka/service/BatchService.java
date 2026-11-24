@@ -7,10 +7,14 @@ import com.github.DooMx3.inzynierka.dto.batch.BatchResponse;
 import com.github.DooMx3.inzynierka.dto.batch.BatchSourceResponse;
 import com.github.DooMx3.inzynierka.dto.batch.HarvestBatchRequest;
 import com.github.DooMx3.inzynierka.dto.batch.HarvestBatchResponse;
+import com.github.DooMx3.inzynierka.dto.ingredient.BatchIngredientRequest;
+import com.github.DooMx3.inzynierka.dto.ingredient.BatchIngredientResponse;
 import com.github.DooMx3.inzynierka.entities.Batch;
+import com.github.DooMx3.inzynierka.entities.BatchIngredient;
 import com.github.DooMx3.inzynierka.entities.BatchSource;
 import com.github.DooMx3.inzynierka.entities.Harvest;
 import com.github.DooMx3.inzynierka.entities.HarvestBatch;
+import com.github.DooMx3.inzynierka.entities.Ingredient;
 import com.github.DooMx3.inzynierka.entities.Organisation;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.enums.BatchStage;
@@ -20,10 +24,12 @@ import com.github.DooMx3.inzynierka.exceptions.InsufficientPermissionException;
 import com.github.DooMx3.inzynierka.exceptions.ResourceConflictException;
 import com.github.DooMx3.inzynierka.exceptions.ResourceNotFoundException;
 import com.github.DooMx3.inzynierka.exceptions.UnauthorizedException;
+import com.github.DooMx3.inzynierka.repositories.BatchIngredientRepository;
 import com.github.DooMx3.inzynierka.repositories.BatchRepository;
 import com.github.DooMx3.inzynierka.repositories.BatchSourceRepository;
 import com.github.DooMx3.inzynierka.repositories.HarvestBatchRepository;
 import com.github.DooMx3.inzynierka.repositories.HarvestRepository;
+import com.github.DooMx3.inzynierka.repositories.IngredientRepository;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
@@ -39,9 +45,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class BatchService {
   private final BatchRepository batchRepository;
+  private final BatchIngredientRepository batchIngredientRepository;
   private final HarvestBatchRepository harvestBatchRepository;
   private final BatchSourceRepository batchSourceRepository;
   private final HarvestRepository harvestRepository;
+  private final IngredientRepository ingredientRepository;
   private final UserRepository userRepository;
 
   @Transactional
@@ -129,6 +137,56 @@ public class BatchService {
             .toList();
     return new BatchHistoryResponse(
         BatchResponse.from(batch), harvestSources, sourceChanges, targetChanges);
+  }
+
+  @Transactional
+  public List<BatchIngredientResponse> getBatchIngredients(UUID batchId, User user) {
+    Organisation organisation = getActiveOrganisationForReading(user);
+    Batch batch = getActiveBatch(batchId, organisation);
+    return batchIngredientRepository
+        .findByBatchAndOrganisationOrderByIdAsc(batch, organisation)
+        .stream()
+        .map(BatchIngredientResponse::from)
+        .toList();
+  }
+
+  @Transactional
+  public BatchIngredientResponse addBatchIngredient(
+      UUID batchId, BatchIngredientRequest request, User user) {
+    Organisation organisation = getActiveOrganisationForWriting(user);
+    Batch batch = getActiveBatch(batchId, organisation);
+    Ingredient ingredient = getActiveIngredient(request.ingredientId(), organisation);
+    BatchIngredient batchIngredient = new BatchIngredient();
+    batchIngredient.setOrganisation(organisation);
+    batchIngredient.setBatch(batch);
+    batchIngredient.setIngredient(ingredient);
+    batchIngredient.setQuantityGrams(request.quantityGrams());
+    return BatchIngredientResponse.from(batchIngredientRepository.save(batchIngredient));
+  }
+
+  @Transactional
+  public BatchIngredientResponse updateBatchIngredient(
+      UUID batchId, UUID entryId, BatchIngredientRequest request, User user) {
+    Organisation organisation = getActiveOrganisationForWriting(user);
+    Batch batch = getActiveBatch(batchId, organisation);
+    BatchIngredient batchIngredient =
+        batchIngredientRepository
+            .findByIdAndBatchAndOrganisation(entryId, batch, organisation)
+            .orElseThrow(() -> new ResourceNotFoundException("Batch ingredient not found"));
+    batchIngredient.setIngredient(getActiveIngredient(request.ingredientId(), organisation));
+    batchIngredient.setQuantityGrams(request.quantityGrams());
+    return BatchIngredientResponse.from(batchIngredientRepository.save(batchIngredient));
+  }
+
+  @Transactional
+  public void deleteBatchIngredient(UUID batchId, UUID entryId, User user) {
+    Organisation organisation = getActiveOrganisationForWriting(user);
+    Batch batch = getActiveBatch(batchId, organisation);
+    BatchIngredient batchIngredient =
+        batchIngredientRepository
+            .findByIdAndBatchAndOrganisation(entryId, batch, organisation)
+            .orElseThrow(() -> new ResourceNotFoundException("Batch ingredient not found"));
+    batchIngredientRepository.delete(batchIngredient);
   }
 
   @Transactional
@@ -278,6 +336,17 @@ public class BatchService {
       throw new InactiveResourceException("Cannot access a deleted batch");
     }
     return batch;
+  }
+
+  private Ingredient getActiveIngredient(UUID id, Organisation organisation) {
+    Ingredient ingredient =
+        ingredientRepository
+            .findByIdAndOrganisation(id, organisation)
+            .orElseThrow(() -> new ResourceNotFoundException("Ingredient not found"));
+    if (!ingredient.isActive()) {
+      throw new InactiveResourceException("Cannot add an inactive ingredient to a batch");
+    }
+    return ingredient;
   }
 
   private Organisation getActiveOrganisationForWriting(User user) {

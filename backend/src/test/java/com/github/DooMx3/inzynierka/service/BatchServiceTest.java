@@ -14,16 +14,22 @@ import com.github.DooMx3.inzynierka.dto.batch.BatchHistoryResponse;
 import com.github.DooMx3.inzynierka.dto.batch.BatchRequest;
 import com.github.DooMx3.inzynierka.dto.batch.BatchResponse;
 import com.github.DooMx3.inzynierka.dto.batch.HarvestBatchRequest;
+import com.github.DooMx3.inzynierka.dto.ingredient.BatchIngredientRequest;
+import com.github.DooMx3.inzynierka.dto.ingredient.BatchIngredientResponse;
 import com.github.DooMx3.inzynierka.entities.Batch;
+import com.github.DooMx3.inzynierka.entities.BatchIngredient;
 import com.github.DooMx3.inzynierka.entities.Harvest;
+import com.github.DooMx3.inzynierka.entities.Ingredient;
 import com.github.DooMx3.inzynierka.entities.Organisation;
 import com.github.DooMx3.inzynierka.entities.User;
 import com.github.DooMx3.inzynierka.enums.BatchStage;
 import com.github.DooMx3.inzynierka.enums.RoleName;
+import com.github.DooMx3.inzynierka.repositories.BatchIngredientRepository;
 import com.github.DooMx3.inzynierka.repositories.BatchRepository;
 import com.github.DooMx3.inzynierka.repositories.BatchSourceRepository;
 import com.github.DooMx3.inzynierka.repositories.HarvestBatchRepository;
 import com.github.DooMx3.inzynierka.repositories.HarvestRepository;
+import com.github.DooMx3.inzynierka.repositories.IngredientRepository;
 import com.github.DooMx3.inzynierka.repositories.UserRepository;
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -41,9 +47,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class BatchServiceTest {
   @Mock private BatchRepository batchRepository;
+  @Mock private BatchIngredientRepository batchIngredientRepository;
   @Mock private HarvestBatchRepository harvestBatchRepository;
   @Mock private BatchSourceRepository batchSourceRepository;
   @Mock private HarvestRepository harvestRepository;
+  @Mock private IngredientRepository ingredientRepository;
   @Mock private UserRepository userRepository;
   @InjectMocks private BatchService service;
 
@@ -168,6 +176,47 @@ class BatchServiceTest {
   }
 
   @Test
+  void shouldAttachIngredientAndQuantityToBatch() {
+    Batch batch = batch(BatchStage.FERMENTING);
+    Ingredient ingredient = ingredient();
+    when(batchRepository.findByIdAndOrganisation(batch.getId(), organisation))
+        .thenReturn(Optional.of(batch));
+    when(ingredientRepository.findByIdAndOrganisation(ingredient.getId(), organisation))
+        .thenReturn(Optional.of(ingredient));
+    when(batchIngredientRepository.save(any(BatchIngredient.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    BatchIngredientResponse response =
+        service.addBatchIngredient(
+            batch.getId(),
+            new BatchIngredientRequest(ingredient.getId(), new BigDecimal("25.50")),
+            oenologist);
+
+    assertEquals(ingredient.getId(), response.ingredientId());
+    assertEquals("ING-001", response.ingredientNumber());
+    assertEquals(new BigDecimal("25.50"), response.quantityGrams());
+  }
+
+  @Test
+  void shouldRejectInactiveIngredientsWhenAttachingThemToBatch() {
+    Batch batch = batch(BatchStage.FERMENTING);
+    Ingredient ingredient = ingredient();
+    ingredient.setActive(false);
+    when(batchRepository.findByIdAndOrganisation(batch.getId(), organisation))
+        .thenReturn(Optional.of(batch));
+    when(ingredientRepository.findByIdAndOrganisation(ingredient.getId(), organisation))
+        .thenReturn(Optional.of(ingredient));
+
+    assertThrows(
+        com.github.DooMx3.inzynierka.exceptions.InactiveResourceException.class,
+        () ->
+            service.addBatchIngredient(
+                batch.getId(),
+                new BatchIngredientRequest(ingredient.getId(), BigDecimal.ONE),
+                oenologist));
+  }
+
+  @Test
   void shouldRejectQuantityAboveHarvest() {
     Harvest harvest = new Harvest();
     harvest.setId(UUID.randomUUID());
@@ -195,5 +244,15 @@ class BatchServiceTest {
     batch.setQuantity(new BigDecimal("100.00"));
     batch.setDeleted(false);
     return batch;
+  }
+
+  private Ingredient ingredient() {
+    Ingredient ingredient = new Ingredient();
+    ingredient.setId(UUID.randomUUID());
+    ingredient.setNumber(1L);
+    ingredient.setName("Potassium metabisulfite");
+    ingredient.setActive(true);
+    ingredient.setOrganisation(organisation);
+    return ingredient;
   }
 }
