@@ -588,7 +588,7 @@
                         Show all
                     </a>
                     {#if visibleBatches.length === 0}
-                        <div class="w-60">
+                        <div class="w-fit min-w-60 max-w-full">
                             <AddButton
                                 text="Create batch here"
                                 onClick={() => openCreate(qrEquipmentId)}
@@ -600,7 +600,7 @@
         {/if}
 
         <div class="flex justify-end">
-            <div class="w-56">
+            <div class="w-fit min-w-56 max-w-full">
                 <AddButton text={`New ${stageTitle.toLowerCase()} batch`} onClick={() => openCreate()} />
             </div>
         </div>
@@ -905,7 +905,7 @@
                     </span>
                     <div class="flex items-center gap-2">
                         {#if stage === "FERMENTING"}
-                            <div class="w-40">
+                            <div class="w-fit min-w-40">
                                 <Button
                                     text="Ingredients"
                                     isFolded={false}
@@ -916,13 +916,13 @@
                             </div>
                         {/if}
                         {#if availableSourceOptions.length > 0}
-                            <div class="w-40">
+                            <div class="w-fit min-w-40">
                                 <Button
                                     svg={plusIcon}
                                     text="Add source"
                                     isFolded={false}
                                     gentle={true}
-                                    class="bg-[#6b4f3a] text-white fill-white"
+                                    class="bg-[#6b4f3a] text-white fill-white pr-3"
                                     onClick={addSourceRow}
                                 />
                             </div>
@@ -937,7 +937,7 @@
                 {:else if formSources.length > 0}
                     <div class="flex flex-col gap-2">
                         {#each formSources as row, idx (row.id)}
-                            <div class="grid items-end gap-2 sm:grid-cols-[1fr_9rem_7rem]">
+                            <div class="grid items-end gap-2 sm:grid-cols-[1fr_9rem_auto]">
                                 <div class="flex flex-col gap-1">
                                     <label class="text-xs text-zinc-600" for={`src-row-${idx}`}>
                                         Source
@@ -965,7 +965,7 @@
                                     text="Remove"
                                     isFolded={false}
                                     gentle={true}
-                                    class="bg-[#8f3d32] text-white fill-white"
+                                    class="bg-[#8f3d32] text-white fill-white pr-3"
                                     onClick={() => removeSourceRow(row.id)}
                                 />
                             </div>

@@ -330,7 +330,7 @@
         {/if}
 
         <div class="flex justify-end">
-            <div class="w-60">
+            <div class="w-fit min-w-60 max-w-full">
                 <AddButton
                     text={isPlannedMode ? "New planned spraying" : "New spraying"}
                     onClick={openCreate}

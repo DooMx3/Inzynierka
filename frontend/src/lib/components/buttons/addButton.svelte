@@ -15,6 +15,6 @@
     onClick={() => onClick()}
     svg={plusIcon}
     {text}
-    class="bg-[#6b4f3a] text-white fill-white"
+    class="bg-[#6b4f3a] text-white fill-white pr-4"
     isFolded={false}
 />
