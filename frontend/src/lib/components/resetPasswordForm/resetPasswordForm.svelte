@@ -5,6 +5,7 @@
         resetPasswordErrorMessages,
         resetPasswordInvalidFields,
     } from "$lib/functions/authFormValidation";
+    import { gooeyToast } from "goey-toast-svelte";
     import InputField from "$lib/components/inputField/inputField.svelte";
     import PasswordStrengthIndicator from "../passwordUtilities/passwordStrengthIndicator.svelte";
     import PasswordConditionsIndicator from "../passwordUtilities/passwordConditionsIndicator.svelte";
@@ -34,20 +35,28 @@
         }
 
         showErrors = true;
+        gooeyToast.dismiss({ type: ["error", "warning"] });
         const messages = resetPasswordErrorMessages({ password, confirmPassword });
         if (!passwordValid && !messages.includes("Password does not meet the requirements.")) {
             messages.unshift("Password does not meet the requirements.");
         }
         if (messages.length > 0 || !passwordValid) {
-            alert(messages.join("\n"));
+            gooeyToast.warning("Check password requirements", {
+                description: messages.join(" "),
+            });
             return;
         }
 
         pending = true;
         try {
             doneMessage = await resetPassword(token.trim(), password);
+            gooeyToast.success("Password reset", {
+                description: doneMessage,
+            });
         } catch (error) {
-            alert(error instanceof Error ? error.message : "Password reset failed");
+            gooeyToast.error("Password reset failed", {
+                description: error instanceof Error ? error.message : "Could not reset password.",
+            });
         } finally {
             pending = false;
         }

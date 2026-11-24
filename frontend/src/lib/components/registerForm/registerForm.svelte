@@ -8,6 +8,7 @@
         registerInvalidFields,
     } from "$lib/functions/authFormValidation";
     import { setUser } from "$lib/stores/session.svelte";
+    import { gooeyToast } from "goey-toast-svelte";
     import InputField from "$lib/components/inputField/inputField.svelte";
     import PasswordStrengthIndicator from "../passwordUtilities/passwordStrengthIndicator.svelte";
     import PasswordConditionsIndicator from "../passwordUtilities/passwordConditionsIndicator.svelte";
@@ -50,6 +51,7 @@
         }
 
         showErrors = true;
+        gooeyToast.dismiss({ type: ["error", "warning"] });
         const messages = registerErrorMessages({
             username,
             lastname,
@@ -64,7 +66,9 @@
             messages.unshift("Password does not meet the requirements.");
         }
         if (messages.length > 0 || !passwordValid) {
-            alert(messages.join("\n"));
+            gooeyToast.warning("Check registration details", {
+                description: messages.join(" "),
+            });
             return;
         }
 
@@ -77,11 +81,15 @@
                 password,
             );
             setUser(user);
+            gooeyToast.success("Account created", {
+                description: "Welcome aboard!",
+            });
             window.location.href = "/";
         } catch (error) {
-            alert(
-                error instanceof Error ? error.message : "Registration failed",
-            );
+            gooeyToast.error("Registration failed", {
+                description:
+                    error instanceof Error ? error.message : "Could not create account.",
+            });
         } finally {
             pending = false;
         }

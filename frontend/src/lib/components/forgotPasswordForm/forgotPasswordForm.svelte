@@ -5,6 +5,7 @@
         forgotPasswordErrorMessages,
         forgotPasswordInvalidFields,
     } from "$lib/functions/authFormValidation";
+    import { gooeyToast } from "goey-toast-svelte";
     import InputField from "$lib/components/inputField/inputField.svelte";
     import SendResetLinkButton from "../buttons/sendResetLinkButton.svelte";
     import AuthSwitch from "../authSwitch/authSwitch.svelte";
@@ -29,17 +30,25 @@
         }
 
         showErrors = true;
+        gooeyToast.dismiss({ type: ["error", "warning"] });
         const messages = forgotPasswordErrorMessages(email);
         if (messages.length > 0) {
-            alert(messages.join("\n"));
+            gooeyToast.warning("Invalid email", {
+                description: messages.join(" "),
+            });
             return;
         }
 
         pending = true;
         try {
             sentMessage = await requestPasswordReset(email.trim());
+            gooeyToast.info("Reset link requested", {
+                description: sentMessage,
+            });
         } catch (error) {
-            alert(error instanceof Error ? error.message : "Could not send the reset link");
+            gooeyToast.error("Could not send the reset link", {
+                description: error instanceof Error ? error.message : undefined,
+            });
         } finally {
             pending = false;
         }

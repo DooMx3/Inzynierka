@@ -4,6 +4,7 @@
     import { logout } from "$lib/api/auth";
     import { deactivateAccount } from "$lib/api/user";
     import { setUser } from "$lib/stores/session.svelte";
+    import { gooeyToast } from "goey-toast-svelte";
     import InputField from "$lib/components/inputField/inputField.svelte";
     import Button from "../buttons/button.svelte";
 
@@ -27,9 +28,12 @@
 
         pending = true;
         showErrors = true;
+        gooeyToast.dismiss({ type: ["error", "warning"] });
         if (passwordMissing) {
             pending = false;
-            alert("Enter your password.");
+            gooeyToast.warning("Password required", {
+                description: "Enter your password.",
+            });
             return;
         }
 
@@ -41,9 +45,15 @@
                 // The account is already deactivated, so a leftover session can be dropped locally.
             }
             setUser(null);
+            gooeyToast.info("Account deactivated", {
+                description: "Your account has been deactivated.",
+            });
             window.location.href = "/auth";
         } catch (error) {
-            alert(error instanceof Error ? error.message : "Account deactivation failed");
+            gooeyToast.error("Account deactivation failed", {
+                description:
+                    error instanceof Error ? error.message : "Could not deactivate account.",
+            });
         } finally {
             pending = false;
         }

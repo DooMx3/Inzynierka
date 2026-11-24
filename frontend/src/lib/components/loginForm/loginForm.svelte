@@ -4,6 +4,7 @@
     import { login } from "$lib/api/auth";
     import { loginErrorMessages, loginInvalidFields } from "$lib/functions/authFormValidation";
     import { setUser } from "$lib/stores/session.svelte";
+    import { gooeyToast } from "goey-toast-svelte";
     import InputField from "$lib/components/inputField/inputField.svelte";
     import LoginButton from "../buttons/loginButton.svelte";
     import AuthSwitch from "../authSwitch/authSwitch.svelte";
@@ -55,9 +56,12 @@
 
         showErrors = true;
         authFailed = false;
+        gooeyToast.dismiss({ type: ["error", "warning"] });
         const messages = loginErrorMessages(email, password);
         if (messages.length > 0) {
-            alert(messages.join("\n"));
+            gooeyToast.warning("Check your credentials", {
+                description: messages.join(" "),
+            });
             return;
         }
 
@@ -65,10 +69,15 @@
         try {
             const user = await login(email.trim(), password);
             setUser(user);
+            gooeyToast.success("Signed in", {
+                description: "Welcome back!",
+            });
             window.location.href = getSafeRedirectTarget();
         } catch (error) {
             authFailed = true;
-            alert(error instanceof Error ? error.message : "Login failed");
+            gooeyToast.error("Login failed", {
+                description: error instanceof Error ? error.message : "Could not sign in.",
+            });
         } finally {
             pending = false;
         }
