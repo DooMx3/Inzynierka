@@ -1,3 +1,4 @@
+import { apiFetch, toApiError } from '$lib/api/auth';
 import { getBatches } from '$lib/api/batches';
 import { getFields } from '$lib/api/fields';
 import { getHarvests } from '$lib/api/harvests';
@@ -7,12 +8,18 @@ import { getTasks } from '$lib/api/tasks';
 import {
     computeReportContent,
     REPORT_TYPE_LABELS,
+    type AggregationLevel,
     type ComputedReportContent,
     type ReportParameters,
     type ReportType,
 } from '$lib/functions/reportCalculators';
 
+const jsonHeaders = {
+    'Content-Type': 'application/json',
+};
+
 const STORAGE_KEY = 'wms_generated_reports_v1';
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export type SavedReport = {
     id: string;
@@ -23,7 +30,17 @@ export type SavedReport = {
     createdAt: string;
     parameters: ReportParameters;
     content: ComputedReportContent;
+    serverHtml?: string | null;
     emailQueuedTo: string | null;
+};
+
+export type ServerReportRequestPayload = {
+    fromDate: string;
+    toDate: string;
+    batchIds: string[];
+    fieldIds: string[];
+    operationIds: string[];
+    aggregation: AggregationLevel;
 };
 
 export class EmptyReportPeriodError extends Error {
@@ -32,6 +49,12 @@ export class EmptyReportPeriodError extends Error {
         this.name = 'EmptyReportPeriodError';
     }
 }
+
+const ensureOk = async (response: Response) => {
+    if (!response.ok) {
+        throw await toApiError(response);
+    }
+};
 
 const makeId = () =>
     typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
@@ -60,6 +83,66 @@ const writeStore = (reports: SavedReport[]) => {
     }
 };
 
+export const buildServerReportRequest = (
+    params: ReportParameters,
+): ServerReportRequestPayload => ({
+    fromDate: params.startDate,
+    toDate: params.endDate,
+    batchIds:
+        params.batchFilterId && UUID_RE.test(params.batchFilterId) ? [params.batchFilterId] : [],
+    fieldIds:
+        params.fieldFilterId && UUID_RE.test(params.fieldFilterId) ? [params.fieldFilterId] : [],
+    operationIds: [],
+    aggregation: params.aggregation ?? 'MONTHLY',
+});
+
+export const fetchServerReportHtml = async (params: ReportParameters): Promise<string | null> => {
+    try {
+        const response = await apiFetch(`/api/reports/${encodeURIComponent(params.type)}`, {
+            method: 'POST',
+            headers: jsonHeaders,
+            body: JSON.stringify(buildServerReportRequest(params)),
+        });
+        if (!response.ok) {
+            return null;
+        }
+        const contentType = response.headers.get('content-type') ?? '';
+        const text = await response.text();
+        if (contentType.includes('text/html') || text.trimStart().startsWith('<')) {
+            return text;
+        }
+        return null;
+    } catch {
+        return null;
+    }
+};
+
+export const fetchServerReportPdf = async (params: ReportParameters): Promise<Blob> => {
+    const response = await apiFetch(`/api/reports/${encodeURIComponent(params.type)}/pdf`, {
+        method: 'POST',
+        headers: jsonHeaders,
+        body: JSON.stringify(buildServerReportRequest(params)),
+    });
+    await ensureOk(response);
+    return response.blob();
+};
+
+export const downloadServerReportPdf = async (
+    params: ReportParameters,
+    customFilename?: string,
+): Promise<void> => {
+    const pdfBlob = await fetchServerReportPdf(params);
+    const url = URL.createObjectURL(pdfBlob);
+    const anchor = document.createElement('a');
+    const slug = params.type.toLowerCase().replace(/_/g, '-');
+    anchor.href = url;
+    anchor.download = customFilename || `${slug}-${params.startDate}-to-${params.endDate}.pdf`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+};
+
 export const getSavedReports = (): SavedReport[] =>
     readStore().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
@@ -78,15 +161,14 @@ export const generateReport = async (
         throw new Error('Start date cannot be later than end date.');
     }
 
-    const [fields, harvests, sprayings, pests, tasks, batches] = await Promise.all([
-        params.type === 'GRAPEVINE_DIVERSITY' || params.type === 'PRODUCTION_EFFICIENCY'
-            ? getFields().catch(() => [])
-            : getFields().catch(() => []),
+    const [fields, harvests, sprayings, pests, tasks, batches, serverHtml] = await Promise.all([
+        getFields().catch(() => []),
         getHarvests().catch(() => []),
         getSprayings().catch(() => []),
         getPestObservations().catch(() => []),
         getTasks().catch(() => []),
         getBatches().catch(() => []),
+        fetchServerReportHtml(params),
     ]);
 
     const content = computeReportContent(params, {
@@ -109,8 +191,12 @@ export const generateReport = async (
         startDate: params.startDate,
         endDate: params.endDate,
         createdAt: new Date().toISOString(),
-        parameters: params,
+        parameters: {
+            ...params,
+            aggregation: params.aggregation ?? 'MONTHLY',
+        },
         content,
+        serverHtml,
         emailQueuedTo: ownerEmail?.trim() || null,
     };
 

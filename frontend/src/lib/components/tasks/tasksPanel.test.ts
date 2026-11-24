@@ -321,32 +321,34 @@ describe('TasksPanel', () => {
     });
 
     it('creates a task with dynamic TaskTypeOption required fields (SPRAYING requiring field and substance)', async () => {
-        localStorage.setItem(
-            'wms_production_batches_v1',
-            JSON.stringify([
-                {
-                    id: 'batch-1',
-                    batchNumber: 'BATCH-1001',
-                    name: 'Solaris 2026',
-                    stage: 'FERMENTING',
-                    quantity: 500,
-                    equipmentId: 'eq-1',
-                    equipmentLabel: 'Fermentor #1',
-                    createdAt: '2026-09-01T00:00:00.000Z',
-                    isSpoiled: false,
-                    yeastId: 'EC1118',
-                    description: '',
-                    sources: [],
-                    ingredients: [],
-                    nutrientsOverride: null,
-                },
-            ]),
-        );
-
         const tasksRef = { current: makeBaseTasks() };
         let capturedPostBody: Record<string, unknown> | null = null;
 
         globalThis.fetch = buildFetchMock(tasksRef, {
+            'GET /api/batches': () =>
+                new Response(
+                    JSON.stringify([
+                        {
+                            id: 'batch-1',
+                            name: 'Solaris 2026',
+                            stage: 'FERMENTING',
+                            quantity: 500,
+                            isSpoiled: false,
+                            deleted: false,
+                            createdAt: '2026-09-01T00:00:00.000Z',
+                        },
+                    ]),
+                    { status: 200 },
+                ),
+            'GET /api/batches/batch-1/history': () =>
+                new Response(
+                    JSON.stringify({
+                        harvestSources: [],
+                        sourceChanges: [],
+                        targetChanges: [],
+                    }),
+                    { status: 200 },
+                ),
             'POST /api/tasks': (_url, init) => {
                 const body = JSON.parse(String(init?.body ?? '{}')) as Record<string, unknown>;
                 capturedPostBody = body;
@@ -465,5 +467,8 @@ describe('TasksPanel', () => {
 
         const dialog = await screen.findByRole('dialog');
         expect(within(dialog).getByText('Create task')).toBeInTheDocument();
+        // GENERAL has OPTIONAL bottling and record fields visible
+        expect(within(dialog).getByLabelText('Bottling')).toBeInTheDocument();
+        expect(within(dialog).getByLabelText('Record')).toBeInTheDocument();
     });
 });

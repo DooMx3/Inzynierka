@@ -13,6 +13,7 @@
     import { getFields, type VineyardField } from "$lib/api/fields";
     import {
         deleteSavedReport,
+        downloadServerReportPdf,
         generateReport,
         getSavedReports,
         type SavedReport,
@@ -47,6 +48,7 @@
     let filter = $state("all");
 
     let deletingReport = $state<SavedReport | null>(null);
+    let downloadingPdfId = $state<string | null>(null);
 
     const isOwner = $derived(Boolean(session.user?.roles?.includes("OWNER")));
 
@@ -164,6 +166,26 @@
         URL.revokeObjectURL(url);
     };
 
+    const downloadReportPdf = async (report: SavedReport) => {
+        if (downloadingPdfId) {
+            return;
+        }
+        downloadingPdfId = report.id;
+        generateError = "";
+        try {
+            const slug = report.type.toLowerCase().replace(/_/g, "-");
+            await downloadServerReportPdf(
+                report.parameters,
+                `${slug}-${report.startDate}-to-${report.endDate}.pdf`,
+            );
+        } catch (error) {
+            generateError =
+                error instanceof Error ? error.message : "Could not download report PDF.";
+        } finally {
+            downloadingPdfId = null;
+        }
+    };
+
     const printReport = () => {
         if (typeof window !== "undefined" && typeof window.print === "function") {
             window.print();
@@ -276,6 +298,14 @@
                             </td>
                         {/snippet}
                         {#snippet actions()}
+                            <button
+                                type="button"
+                                disabled={downloadingPdfId === report.id}
+                                onclick={() => void downloadReportPdf(report)}
+                                class="inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-lg bg-[#3f2e22] px-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#5a4230] disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                {downloadingPdfId === report.id ? "PDF..." : "Download PDF"}
+                            </button>
                             <button
                                 type="button"
                                 onclick={() => exportReportCsv(report)}

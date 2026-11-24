@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
 import {
     createSpraying,
     deleteSpraying,
-    getPlannedSprayingIds,
     getSprayings,
     isPlannedSpraying,
     updateSpraying,
@@ -14,15 +13,13 @@ describe('spraying API', () => {
 
     beforeEach(() => {
         calls = [];
-        localStorage.clear();
     });
 
     afterEach(() => {
         globalThis.fetch = originalFetch;
-        localStorage.clear();
     });
 
-    it('creates planned and completed sprayings, tracks planned state, and deletes', async () => {
+    it('creates planned sprayings with sprayingDate: null, recognizes null sprayingDate as planned, completes via PUT, and deletes', async () => {
         const responses = [
             new Response(
                 JSON.stringify({
@@ -30,9 +27,9 @@ describe('spraying API', () => {
                     fieldId: 'f-1',
                     equipmentId: 'eq-1',
                     substanceId: 's-1',
-                    sprayingDate: '2026-12-01T12:00:00.000Z',
+                    sprayingDate: null,
                     quantity: 12,
-                    due: '2026-12-01T12:00:00.000Z',
+                    due: '2026-05-01T12:00:00.000Z',
                 }),
                 { status: 200 },
             ),
@@ -43,9 +40,9 @@ describe('spraying API', () => {
                         fieldId: 'f-1',
                         equipmentId: 'eq-1',
                         substanceId: 's-1',
-                        sprayingDate: '2026-12-01T12:00:00.000Z',
+                        sprayingDate: null,
                         quantity: 12,
-                        due: '2026-12-01T12:00:00.000Z',
+                        due: '2026-05-01T12:00:00.000Z',
                     },
                 ]),
                 { status: 200 },
@@ -56,9 +53,9 @@ describe('spraying API', () => {
                     fieldId: 'f-1',
                     equipmentId: 'eq-1',
                     substanceId: 's-1',
-                    sprayingDate: '2026-11-19T10:00:00.000Z',
+                    sprayingDate: '2026-05-01T10:00:00.000Z',
                     quantity: 12,
-                    due: '2026-12-01T12:00:00.000Z',
+                    due: '2026-05-01T12:00:00.000Z',
                 }),
                 { status: 200 },
             ),
@@ -75,20 +72,21 @@ describe('spraying API', () => {
                 fieldId: 'f-1',
                 equipmentId: 'eq-1',
                 substanceId: 's-1',
-                sprayingDate: '2026-12-01',
+                sprayingDate: null,
                 quantity: 12,
-                due: '2026-12-01',
+                due: '2026-05-01',
             },
             true,
         );
 
-        expect(getPlannedSprayingIds().has(created.id)).toBe(true);
-        expect(isPlannedSpraying(created, getPlannedSprayingIds(), new Date('2027-01-01'))).toBe(
-            true,
-        );
+        const postBody = JSON.parse(String(calls[0]?.init?.body ?? '{}'));
+        expect(postBody.sprayingDate).toBeNull();
+        expect(postBody.due).toBe('2026-05-01T12:00:00.000Z');
+        expect(isPlannedSpraying(created, undefined, new Date('2027-01-01'))).toBe(true);
 
         const list = await getSprayings();
         expect(list).toHaveLength(1);
+        expect(isPlannedSpraying(list[0]!)).toBe(true);
 
         const completed = await updateSpraying(
             'sp-1',
@@ -96,16 +94,15 @@ describe('spraying API', () => {
                 fieldId: 'f-1',
                 equipmentId: 'eq-1',
                 substanceId: 's-1',
-                sprayingDate: '2026-11-19T10:00:00.000Z',
+                sprayingDate: '2026-05-01T10:00:00.000Z',
                 quantity: 12,
-                due: '2026-12-01T12:00:00.000Z',
+                due: '2026-05-01T12:00:00.000Z',
             },
             false,
         );
-        expect(getPlannedSprayingIds().has('sp-1')).toBe(false);
-        expect(
-            isPlannedSpraying(completed, getPlannedSprayingIds(), new Date('2026-11-20T00:00:00Z')),
-        ).toBe(false);
+        expect(isPlannedSpraying(completed, undefined, new Date('2026-05-02T00:00:00Z'))).toBe(
+            false,
+        );
 
         await deleteSpraying('sp-1');
         expect(calls.at(-1)?.init?.method).toBe('DELETE');

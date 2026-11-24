@@ -47,16 +47,6 @@ describe('OfferingsManagementPanel', () => {
     });
 
     it('scopes offerings to owner vineyard, exposes direct vineyard catalog link, and supports CRUD with wine photo upload', async () => {
-        const bottledBatch = await createBatch({
-            name: 'Johanniter Classic 2026',
-            stage: 'BOTTLED',
-            quantity: 220,
-            equipmentId: 'eq-bot-1',
-            equipmentLabel: 'Bottling Line #1',
-            description: 'Crisp green apple and elderflower bouquet.',
-            sources: [],
-        });
-
         const remoteOfferings = [
             {
                 id: 'off-solaris-1',
@@ -76,8 +66,11 @@ describe('OfferingsManagementPanel', () => {
             },
         ];
 
+        const mockBatches: Record<string, unknown>[] = [];
+
         globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
             const url = String(input);
+            const method = init?.method ?? 'GET';
             if (url === '/api/organisations') {
                 return new Response(
                     JSON.stringify({
@@ -88,7 +81,30 @@ describe('OfferingsManagementPanel', () => {
                     { status: 200 },
                 );
             }
-            if (url === '/api/offerings' && init?.method === 'POST') {
+            if (url === '/api/batches' && method === 'POST') {
+                const body = JSON.parse(String(init?.body ?? '{}'));
+                const created = {
+                    id: 'batch-johanniter-1',
+                    name: body.name,
+                    stage: body.stage,
+                    quantity: body.quantity,
+                    isSpoiled: false,
+                    deleted: false,
+                    createdAt: '2026-10-10T10:00:00',
+                };
+                mockBatches.push(created);
+                return new Response(JSON.stringify(created), { status: 200 });
+            }
+            if (url === '/api/batches' && method === 'GET') {
+                return new Response(JSON.stringify(mockBatches), { status: 200 });
+            }
+            if (url.startsWith('/api/batches/') && url.endsWith('/history')) {
+                return new Response(
+                    JSON.stringify({ harvestSources: [], sourceChanges: [], targetChanges: [] }),
+                    { status: 200 },
+                );
+            }
+            if (url === '/api/offerings' && method === 'POST') {
                 return new Response(JSON.stringify({ message: 'Bottling not found' }), {
                     status: 404,
                 });
@@ -98,6 +114,16 @@ describe('OfferingsManagementPanel', () => {
             }
             return new Response('[]', { status: 200 });
         }) as unknown as typeof fetch;
+
+        const bottledBatch = await createBatch({
+            name: 'Johanniter Classic 2026',
+            stage: 'BOTTLED',
+            quantity: 220,
+            equipmentId: 'eq-bot-1',
+            equipmentLabel: 'Bottling Line #1',
+            description: 'Crisp green apple and elderflower bouquet.',
+            sources: [],
+        });
 
         render(OfferingsManagementPanel);
 

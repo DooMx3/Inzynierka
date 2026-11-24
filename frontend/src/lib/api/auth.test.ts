@@ -1,9 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
 import {
+    apiFetch,
     ApiError,
     fetchCurrentUser,
     login,
     logout,
+    refreshAccessToken,
     register,
     requestPasswordReset,
     resetPassword,
@@ -92,10 +94,73 @@ describe('Auth API', () => {
         );
     });
 
-    it('returns null when the session cookie is missing', async () => {
-        globalThis.fetch = (async () => new Response('', { status: 401 })) as typeof fetch;
+    it('returns null when the session cookie is missing and refresh fails', async () => {
+        globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+            calls.push({ url: String(input), init });
+            return new Response('', { status: 401 });
+        }) as typeof fetch;
 
         expect(await fetchCurrentUser()).toBeNull();
+        expect(calls.map((c) => c.url)).toEqual(['/api/user/info', '/api/auth/refresh']);
+    });
+
+    it('refreshes the access token on 401 and retries the original request', async () => {
+        let refreshed = false;
+        globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+            const url = String(input);
+            calls.push({ url, init });
+            if (url === '/api/auth/refresh') {
+                refreshed = true;
+                return new Response('', { status: 200 });
+            }
+            if (url === '/api/user/info') {
+                return refreshed
+                    ? jsonResponse({ ...userPayload, roles: ['OWNER'] })
+                    : new Response('', { status: 401 });
+            }
+            if (url === '/api/equipment') {
+                return refreshed
+                    ? jsonResponse([{ id: 'eq-1', name: 'Tank 1' }])
+                    : new Response('', { status: 401 });
+            }
+            return new Response('missing', { status: 404 });
+        }) as typeof fetch;
+
+        const user = await fetchCurrentUser();
+        expect(user).toEqual({ ...userPayload, roles: ['OWNER'] });
+        expect(calls.map((c) => c.url)).toEqual([
+            '/api/user/info',
+            '/api/auth/refresh',
+            '/api/user/info',
+        ]);
+
+        refreshed = false;
+        calls = [];
+        const eqRes = await apiFetch('/api/equipment');
+        expect(eqRes.status).toBe(200);
+        expect(calls.map((c) => c.url)).toEqual([
+            '/api/equipment',
+            '/api/auth/refresh',
+            '/api/equipment',
+        ]);
+    });
+
+    it('deduplicates concurrent token refresh requests', async () => {
+        let refreshCount = 0;
+        globalThis.fetch = (async (input: RequestInfo | URL) => {
+            const url = String(input);
+            if (url === '/api/auth/refresh') {
+                refreshCount += 1;
+                await new Promise((r) => setTimeout(r, 15));
+                return new Response('', { status: 200 });
+            }
+            return new Response('', { status: 200 });
+        }) as typeof fetch;
+
+        const [a, b] = await Promise.all([refreshAccessToken(), refreshAccessToken()]);
+        expect(a).toBe(true);
+        expect(b).toBe(true);
+        expect(refreshCount).toBe(1);
     });
 
     it('surfaces invalid credentials from the login response', async () => {

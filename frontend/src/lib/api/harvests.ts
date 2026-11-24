@@ -1,4 +1,4 @@
-import { toApiError } from '$lib/api/auth';
+import { apiFetch, toApiError } from '$lib/api/auth';
 import { readField, type VineyardField } from '$lib/api/fields';
 
 const jsonHeaders = {
@@ -51,7 +51,7 @@ export const getHarvests = async (fieldId?: string): Promise<HarvestRecord[]> =>
     const url = fieldId
         ? `/api/harvests?fieldId=${encodeURIComponent(fieldId)}`
         : '/api/harvests';
-    const response = await fetch(url, {
+    const response = await apiFetch(url, {
         method: 'GET',
         credentials: 'include',
     });
@@ -64,7 +64,7 @@ export const getHarvests = async (fieldId?: string): Promise<HarvestRecord[]> =>
 };
 
 export const createHarvest = async (draft: HarvestDraft): Promise<HarvestRecord> => {
-    const response = await fetch('/api/harvests', {
+    const response = await apiFetch('/api/harvests', {
         method: 'POST',
         credentials: 'include',
         headers: jsonHeaders,
@@ -75,7 +75,7 @@ export const createHarvest = async (draft: HarvestDraft): Promise<HarvestRecord>
 };
 
 export const updateHarvest = async (id: string, draft: HarvestDraft): Promise<HarvestRecord> => {
-    const response = await fetch(`/api/harvests/${encodeURIComponent(id)}`, {
+    const response = await apiFetch(`/api/harvests/${encodeURIComponent(id)}`, {
         method: 'PUT',
         credentials: 'include',
         headers: jsonHeaders,
@@ -86,7 +86,7 @@ export const updateHarvest = async (id: string, draft: HarvestDraft): Promise<Ha
 };
 
 export const deleteHarvest = async (id: string): Promise<void> => {
-    const response = await fetch(`/api/harvests/${encodeURIComponent(id)}`, {
+    const response = await apiFetch(`/api/harvests/${encodeURIComponent(id)}`, {
         method: 'DELETE',
         credentials: 'include',
     });

@@ -1,4 +1,4 @@
-import { toApiError } from '$lib/api/auth';
+import { apiFetch, toApiError } from '$lib/api/auth';
 
 const jsonHeaders = {
     'Content-Type': 'application/json',
@@ -26,7 +26,7 @@ const readSubstance = (data: unknown): Substance => {
 };
 
 export const getSubstances = async (): Promise<Substance[]> => {
-    const response = await fetch('/api/substances', {
+    const response = await apiFetch('/api/substances', {
         method: 'GET',
         credentials: 'include',
     });
@@ -39,7 +39,7 @@ export const getSubstances = async (): Promise<Substance[]> => {
 };
 
 export const createSubstance = async (name: string): Promise<Substance> => {
-    const response = await fetch('/api/substances', {
+    const response = await apiFetch('/api/substances', {
         method: 'POST',
         credentials: 'include',
         headers: jsonHeaders,
@@ -50,7 +50,7 @@ export const createSubstance = async (name: string): Promise<Substance> => {
 };
 
 export const updateSubstance = async (id: string, name: string): Promise<Substance> => {
-    const response = await fetch(`/api/substances/${encodeURIComponent(id)}`, {
+    const response = await apiFetch(`/api/substances/${encodeURIComponent(id)}`, {
         method: 'PUT',
         credentials: 'include',
         headers: jsonHeaders,
@@ -61,7 +61,7 @@ export const updateSubstance = async (id: string, name: string): Promise<Substan
 };
 
 export const patchSubstance = async (id: string, name: string): Promise<Substance> => {
-    const response = await fetch(`/api/substances/${encodeURIComponent(id)}`, {
+    const response = await apiFetch(`/api/substances/${encodeURIComponent(id)}`, {
         method: 'PATCH',
         credentials: 'include',
         headers: jsonHeaders,
@@ -72,7 +72,7 @@ export const patchSubstance = async (id: string, name: string): Promise<Substanc
 };
 
 export const deleteSubstance = async (id: string): Promise<void> => {
-    const response = await fetch(`/api/substances/${encodeURIComponent(id)}`, {
+    const response = await apiFetch(`/api/substances/${encodeURIComponent(id)}`, {
         method: 'DELETE',
         credentials: 'include',
     });

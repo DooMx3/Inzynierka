@@ -1,6 +1,10 @@
 <script lang="ts">
     import FormWindow from "$lib/components/formWindow/formWindow.svelte";
-    import { generateQrSvg, svgToDataUri } from "$lib/functions/qrCode";
+    import {
+        generateQrPngDataUrl,
+        generateQrSvg,
+        svgToDataUri,
+    } from "$lib/functions/qrCode";
 
     let {
         title,
@@ -20,17 +24,20 @@
 
     const qrSvgPromise = $derived(generateQrSvg(targetUrl));
 
-    const resolvedFilename = $derived.by(() => {
+    const resolvedBaseFilename = $derived.by(() => {
         const raw = downloadFilename.trim();
         if (raw) {
-            return raw.toLowerCase().endsWith(".svg") ? raw : `${raw}.svg`;
+            return raw.replace(/\.(svg|png)$/i, "");
         }
         const slugSource = (subtitle || title || "qr-code")
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, "-")
             .replace(/^-+|-+$/g, "");
-        return `${slugSource || "qr-code"}.svg`;
+        return slugSource || "qr-code";
     });
+
+    const resolvedSvgFilename = $derived(`${resolvedBaseFilename}.svg`);
+    const resolvedPngFilename = $derived(`${resolvedBaseFilename}.png`);
 
     const escapeHtml = (value: string): string =>
         value
@@ -61,11 +68,25 @@
             const objectUrl = URL.createObjectURL(blob);
             const anchor = document.createElement("a");
             anchor.href = objectUrl;
-            anchor.download = resolvedFilename;
+            anchor.download = resolvedSvgFilename;
             document.body.appendChild(anchor);
             anchor.click();
             anchor.remove();
             URL.revokeObjectURL(objectUrl);
+        } catch {
+            // Ignore download failure when QR payload is invalid
+        }
+    };
+
+    const handleDownloadPng = async () => {
+        try {
+            const pngDataUrl = await generateQrPngDataUrl(targetUrl);
+            const anchor = document.createElement("a");
+            anchor.href = pngDataUrl;
+            anchor.download = resolvedPngFilename;
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
         } catch {
             // Ignore download failure when QR payload is invalid
         }
@@ -188,6 +209,13 @@
         <div
             class="mt-2 flex w-full flex-wrap items-center justify-end gap-2.5 border-t border-[#e4d8cb] pt-4"
         >
+            <button
+                type="button"
+                onclick={() => void handleDownloadPng()}
+                class="cursor-pointer rounded-xl border border-[#6b4f3a] bg-[#fbf7f2] px-4 py-2.5 text-sm font-semibold text-[#3f2e22] transition-colors hover:bg-[#e4d8cb]"
+            >
+                Download PNG
+            </button>
             <button
                 type="button"
                 onclick={() => void handleDownloadSvg()}

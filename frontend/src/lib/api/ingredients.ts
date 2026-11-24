@@ -1,5 +1,8 @@
-const STORAGE_KEY = 'wms_ingredients_catalogue_v1';
-const COUNTER_KEY = 'wms_ingredients_counter_v1';
+import { apiFetch, toApiError } from '$lib/api/auth';
+
+const jsonHeaders = {
+    'Content-Type': 'application/json',
+};
 
 export type Ingredient = {
     id: string;
@@ -17,126 +20,89 @@ export type Ingredient = {
 
 export type IngredientDraft = Omit<Ingredient, 'id' | 'number'>;
 
-export const SEED_INGREDIENTS: Ingredient[] = [
-    {
-        id: 'ing-sucrose',
-        number: 'ING-001',
-        name: 'Sucrose (Chaptalization sugar)',
-        energyContent: 400,
-        fat: 0,
-        saturatedFattyAcids: 0,
-        carbs: 100,
-        sugars: 100,
-        protein: 0,
-        salt: 0,
-        fibers: 0,
-    },
-    {
-        id: 'ing-k2s2o5',
-        number: 'ING-002',
-        name: 'Potassium metabisulfite (K2S2O5)',
-        energyContent: 0,
-        fat: 0,
-        saturatedFattyAcids: 0,
-        carbs: 0,
-        sugars: 0,
-        protein: 0,
-        salt: 0,
-        fibers: 0,
-    },
-    {
-        id: 'ing-yeast-ec1118',
-        number: 'ING-003',
-        name: 'Wine yeast (Lalvin EC-1118)',
-        energyContent: 325,
-        fat: 5,
-        saturatedFattyAcids: 1,
-        carbs: 40,
-        sugars: 0,
-        protein: 40,
-        salt: 0.4,
-        fibers: 27,
-    },
-    {
-        id: 'ing-tartaric',
-        number: 'ING-004',
-        name: 'Tartaric acid',
-        energyContent: 200,
-        fat: 0,
-        saturatedFattyAcids: 0,
-        carbs: 0,
-        sugars: 0,
-        protein: 0,
-        salt: 0,
-        fibers: 0,
-    },
-    {
-        id: 'ing-water',
-        number: 'ING-005',
-        name: 'Water',
-        energyContent: 0,
-        fat: 0,
-        saturatedFattyAcids: 0,
-        carbs: 0,
-        sugars: 0,
-        protein: 0,
-        salt: 0,
-        fibers: 0,
-    },
-];
+export type BatchIngredientEntry = {
+    id: string;
+    ingredientId: string;
+    ingredientNumber?: string;
+    ingredientName: string;
+    quantityGrams: number;
+};
 
-const makeId = () =>
-    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-        ? crypto.randomUUID()
-        : `ing-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+export type BatchIngredientDraft = {
+    ingredientId: string;
+    quantityGrams: number;
+};
 
-const readStore = (): Ingredient[] => {
-    if (typeof localStorage === 'undefined') {
-        return [...SEED_INGREDIENTS];
-    }
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_INGREDIENTS));
-        localStorage.setItem(COUNTER_KEY, '6');
-        return [...SEED_INGREDIENTS];
-    }
-    try {
-        const parsed: unknown = JSON.parse(raw);
-        return Array.isArray(parsed) ? (parsed as Ingredient[]) : [...SEED_INGREDIENTS];
-    } catch {
-        return [...SEED_INGREDIENTS];
+const ensureOk = async (response: Response) => {
+    if (!response.ok) {
+        throw await toApiError(response);
     }
 };
 
-const writeStore = (items: Ingredient[]) => {
-    if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    }
+const toNum = (val: unknown): number =>
+    typeof val === 'number' && Number.isFinite(val) ? val : Number(val) || 0;
+
+const round2 = (val: number): number => Math.round(Math.max(0, Number(val) || 0) * 100) / 100;
+
+export const readIngredient = (data: unknown): Ingredient => {
+    const record = data && typeof data === 'object' ? (data as Record<string, unknown>) : {};
+    return {
+        id: typeof record.id === 'string' ? record.id : '',
+        number: typeof record.number === 'string' ? record.number : '',
+        name: typeof record.name === 'string' ? record.name : '',
+        energyContent: toNum(record.energyContent),
+        fat: toNum(record.fat),
+        saturatedFattyAcids: toNum(record.saturatedFattyAcids),
+        carbs: toNum(record.carbs),
+        sugars: toNum(record.sugars),
+        protein: toNum(record.protein),
+        salt: toNum(record.salt),
+        fibers: toNum(record.fibers),
+    };
 };
 
-const nextNumber = (): string => {
-    if (typeof localStorage === 'undefined') {
-        return 'ING-999';
-    }
-    const current = Number(localStorage.getItem(COUNTER_KEY) ?? '6') || 6;
-    localStorage.setItem(COUNTER_KEY, String(current + 1));
-    return `ING-${String(current).padStart(3, '0')}`;
+export const readBatchIngredient = (data: unknown): BatchIngredientEntry => {
+    const record = data && typeof data === 'object' ? (data as Record<string, unknown>) : {};
+    return {
+        id: typeof record.id === 'string' ? record.id : '',
+        ingredientId: typeof record.ingredientId === 'string' ? record.ingredientId : '',
+        ingredientNumber:
+            typeof record.ingredientNumber === 'string' ? record.ingredientNumber : undefined,
+        ingredientName: typeof record.ingredientName === 'string' ? record.ingredientName : '',
+        quantityGrams: toNum(record.quantityGrams),
+    };
 };
 
 const sanitizeDraft = (draft: IngredientDraft): IngredientDraft => ({
     name: draft.name.trim(),
-    energyContent: Math.max(0, Number(draft.energyContent) || 0),
-    fat: Math.max(0, Number(draft.fat) || 0),
-    saturatedFattyAcids: Math.max(0, Number(draft.saturatedFattyAcids) || 0),
-    carbs: Math.max(0, Number(draft.carbs) || 0),
-    sugars: Math.max(0, Number(draft.sugars) || 0),
-    protein: Math.max(0, Number(draft.protein) || 0),
-    salt: Math.max(0, Number(draft.salt) || 0),
-    fibers: Math.max(0, Number(draft.fibers) || 0),
+    energyContent: round2(draft.energyContent),
+    fat: round2(draft.fat),
+    saturatedFattyAcids: round2(draft.saturatedFattyAcids),
+    carbs: round2(draft.carbs),
+    sugars: round2(draft.sugars),
+    protein: round2(draft.protein),
+    salt: round2(draft.salt),
+    fibers: round2(draft.fibers),
 });
 
 export const getIngredients = async (): Promise<Ingredient[]> => {
-    return readStore();
+    const response = await apiFetch('/api/ingredients', {
+        method: 'GET',
+    });
+    await ensureOk(response);
+    const data: unknown = await response.json();
+    if (!Array.isArray(data)) {
+        return [];
+    }
+    return data.map(readIngredient).filter((item) => Boolean(item.id));
+};
+
+export const getIngredientById = async (id: string): Promise<Ingredient> => {
+    const response = await apiFetch(`/api/ingredients/${encodeURIComponent(id)}`, {
+        method: 'GET',
+    });
+    await ensureOk(response);
+    return readIngredient(await response.json());
 };
 
 export const createIngredient = async (draft: IngredientDraft): Promise<Ingredient> => {
@@ -144,14 +110,13 @@ export const createIngredient = async (draft: IngredientDraft): Promise<Ingredie
     if (!clean.name) {
         throw new Error('Ingredient name is required.');
     }
-    const items = readStore();
-    const created: Ingredient = {
-        id: makeId(),
-        number: nextNumber(),
-        ...clean,
-    };
-    writeStore([...items, created]);
-    return created;
+    const response = await apiFetch('/api/ingredients', {
+        method: 'POST',
+        headers: jsonHeaders,
+        body: JSON.stringify(clean),
+    });
+    await ensureOk(response);
+    return readIngredient(await response.json());
 };
 
 export const updateIngredient = async (
@@ -162,20 +127,130 @@ export const updateIngredient = async (
     if (!clean.name) {
         throw new Error('Ingredient name is required.');
     }
-    const items = readStore();
-    const existing = items.find((item) => item.id === id);
-    if (!existing) {
-        throw new Error('Ingredient not found.');
-    }
-    const updated: Ingredient = {
-        ...existing,
-        ...clean,
-    };
-    writeStore(items.map((item) => (item.id === id ? updated : item)));
-    return updated;
+    const response = await apiFetch(`/api/ingredients/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        headers: jsonHeaders,
+        body: JSON.stringify(clean),
+    });
+    await ensureOk(response);
+    return readIngredient(await response.json());
 };
 
 export const deleteIngredient = async (id: string): Promise<void> => {
-    const items = readStore();
-    writeStore(items.filter((item) => item.id !== id));
+    const response = await apiFetch(`/api/ingredients/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+    });
+    await ensureOk(response);
+};
+
+export const getBatchIngredients = async (batchId: string): Promise<BatchIngredientEntry[]> => {
+    const response = await apiFetch(
+        `/api/batches/${encodeURIComponent(batchId)}/ingredients`,
+        {
+            method: 'GET',
+        },
+    );
+    await ensureOk(response);
+    const data: unknown = await response.json();
+    if (!Array.isArray(data)) {
+        return [];
+    }
+    return data.map(readBatchIngredient).filter((item) => Boolean(item.id));
+};
+
+export const addBatchIngredient = async (
+    batchId: string,
+    draft: BatchIngredientDraft,
+): Promise<BatchIngredientEntry> => {
+    const response = await apiFetch(
+        `/api/batches/${encodeURIComponent(batchId)}/ingredients`,
+        {
+            method: 'POST',
+            headers: jsonHeaders,
+            body: JSON.stringify({
+                ingredientId: draft.ingredientId,
+                quantityGrams: round2(draft.quantityGrams),
+            }),
+        },
+    );
+    await ensureOk(response);
+    return readBatchIngredient(await response.json());
+};
+
+export const updateBatchIngredient = async (
+    batchId: string,
+    entryId: string,
+    draft: BatchIngredientDraft,
+): Promise<BatchIngredientEntry> => {
+    const response = await apiFetch(
+        `/api/batches/${encodeURIComponent(batchId)}/ingredients/${encodeURIComponent(entryId)}`,
+        {
+            method: 'PUT',
+            headers: jsonHeaders,
+            body: JSON.stringify({
+                ingredientId: draft.ingredientId,
+                quantityGrams: round2(draft.quantityGrams),
+            }),
+        },
+    );
+    await ensureOk(response);
+    return readBatchIngredient(await response.json());
+};
+
+export const deleteBatchIngredient = async (
+    batchId: string,
+    entryId: string,
+): Promise<void> => {
+    const response = await apiFetch(
+        `/api/batches/${encodeURIComponent(batchId)}/ingredients/${encodeURIComponent(entryId)}`,
+        {
+            method: 'DELETE',
+        },
+    );
+    await ensureOk(response);
+};
+
+export const syncBatchIngredients = async (
+    batchId: string,
+    nextItems: BatchIngredientEntry[],
+    previousItems?: BatchIngredientEntry[],
+): Promise<BatchIngredientEntry[]> => {
+    const current = previousItems ?? (await getBatchIngredients(batchId));
+    const currentById = new Map(current.map((item) => [item.id, item]));
+    const nextById = new Map(nextItems.map((item) => [item.id, item]));
+
+    for (const prev of current) {
+        if (!nextById.has(prev.id)) {
+            await deleteBatchIngredient(batchId, prev.id);
+        }
+    }
+
+    const synced: BatchIngredientEntry[] = [];
+    for (const item of nextItems) {
+        const existing = currentById.get(item.id);
+        if (existing) {
+            if (
+                existing.ingredientId !== item.ingredientId ||
+                existing.quantityGrams !== item.quantityGrams
+            ) {
+                synced.push(
+                    await updateBatchIngredient(batchId, existing.id, {
+                        ingredientId: item.ingredientId,
+                        quantityGrams: item.quantityGrams,
+                    }),
+                );
+            } else {
+                synced.push(existing);
+            }
+        } else {
+            synced.push(
+                await addBatchIngredient(batchId, {
+                    ingredientId: item.ingredientId,
+                    quantityGrams: item.quantityGrams,
+                }),
+            );
+        }
+    }
+
+    return synced;
 };

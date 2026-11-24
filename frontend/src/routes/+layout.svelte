@@ -47,12 +47,19 @@
             aria-hidden={menu.folded}
             tabindex={menu.folded ? -1 : 0}
             class={[
-                "fixed inset-0 z-40 appearance-none border-0 bg-transparent p-0",
-                menu.folded && "pointer-events-none",
+                "fixed inset-0 z-40 appearance-none border-0 bg-black/25 md:bg-transparent p-0 transition-opacity duration-200",
+                menu.folded ? "pointer-events-none opacity-0" : "opacity-100",
             ]}
             onclick={toggleMenu}
         ></button>
-        <div class="relative z-50 h-full w-14 sm:w-16 shrink-0 overflow-visible">
+        <div
+            class={[
+                "fixed md:relative inset-y-0 left-0 z-50 h-full shrink-0 transition-[width] duration-300",
+                menu.folded
+                    ? "w-0 overflow-hidden md:w-16 md:overflow-visible"
+                    : "w-72 md:w-16 overflow-visible",
+            ]}
+        >
             <MenuBar />
         </div>
     {/if}
@@ -62,7 +69,7 @@
             <div
                 class={[
                     "relative m-1.5 sm:m-3 flex min-h-0 min-w-0 flex-1 overflow-hidden bg-[#eae0d5]",
-                    showMenuBar && "ml-2",
+                    showMenuBar && "md:ml-2",
                 ]}
             >
                 <main class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">

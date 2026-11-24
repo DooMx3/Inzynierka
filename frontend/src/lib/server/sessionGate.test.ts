@@ -73,6 +73,37 @@ describe('Session gate', () => {
         await protectedLoad(eventFor('/profile', signedIn));
     });
 
+    it('attempts POST /api/auth/refresh when /api/user/info returns 401 and stays signed in on success', async () => {
+        const calls: string[] = [];
+        let tokenRefreshed = false;
+        const mockFetch = (async (input: RequestInfo | URL) => {
+            const url = String(input);
+            calls.push(url);
+            if (url === '/api/auth/refresh') {
+                tokenRefreshed = true;
+                return new Response('', { status: 200 });
+            }
+            return tokenRefreshed ? signedIn() : new Response('', { status: 401 });
+        }) as typeof fetch;
+
+        await redirectIfSignedOut(mockFetch, '/vinery/must');
+        expect(calls).toEqual(['/api/user/info', '/api/auth/refresh', '/api/user/info']);
+    });
+
+    it('redirects to /auth when both /api/user/info and /api/auth/refresh return 401', async () => {
+        const calls: string[] = [];
+        const mockFetch = (async (input: RequestInfo | URL) => {
+            calls.push(String(input));
+            return new Response('', { status: 401 });
+        }) as typeof fetch;
+
+        await expectRedirect(
+            () => redirectIfSignedOut(mockFetch, '/vinery/must'),
+            '/auth?redirectTo=%2Fvinery%2Fmust',
+        );
+        expect(calls).toEqual(['/api/user/info', '/api/auth/refresh']);
+    });
+
     it('allows guest access only to specific vineyard catalog links and bottle QR views, blocking global /offerings', async () => {
         expect(isGuestPath('/offerings')).toBe(false);
         expect(isGuestPath('/offerings/')).toBe(false);

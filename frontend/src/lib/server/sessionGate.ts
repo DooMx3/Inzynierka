@@ -36,6 +36,19 @@ export const sanitizeRedirectTarget = (target: string | null | undefined): strin
 
 const currentUser = async (fetch: typeof globalThis.fetch): Promise<Response | null> => {
     try {
+        const response = await fetch('/api/user/info');
+        if (response.status !== 401) {
+            return response;
+        }
+
+        const refreshResponse = await fetch('/api/auth/refresh', {
+            method: 'POST',
+            credentials: 'include',
+        });
+        if (!refreshResponse.ok) {
+            return response;
+        }
+
         return await fetch('/api/user/info');
     } catch {
         return null;

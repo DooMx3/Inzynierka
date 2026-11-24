@@ -179,4 +179,85 @@ describe('offerings API, vineyard scoping, wine photos & customer bottle provena
         expect(details.parameters.pH).toBe(3.52);
         expect(details.nutrients.energyKcal).toBeGreaterThan(0);
     });
+
+    it('links remote Offering bottling wineId to backend Batch.id via GET /api/offerings/{id}/history', async () => {
+        globalThis.fetch = (async (input: RequestInfo | URL) => {
+            const url = String(input);
+            if (url === '/api/offerings' || url === '/api/offerings/off-db-1') {
+                const payload = {
+                    id: 'off-db-1',
+                    organisationId: 'org-1',
+                    wineId: 'bottling-uuid-1',
+                    wineName: 'Chardonnay Grand Cru',
+                    wineDescription: 'Mineral finish',
+                    price: 78,
+                };
+                return new Response(
+                    JSON.stringify(url === '/api/offerings' ? [payload] : payload),
+                    { status: 200 },
+                );
+            }
+            if (url === '/api/offerings/off-db-1/history') {
+                return new Response(
+                    JSON.stringify({
+                        batch: {
+                            id: 'batch-db-1',
+                            name: 'Chardonnay Lot #4',
+                            stage: 'BOTTLED',
+                            quantity: 250,
+                            createdAt: '2026-11-05T10:00:00',
+                        },
+                        harvestSources: [],
+                        sourceChanges: [],
+                        targetChanges: [],
+                    }),
+                    { status: 200 },
+                );
+            }
+            if (url === '/api/batches') {
+                return new Response(
+                    JSON.stringify([
+                        {
+                            id: 'batch-db-1',
+                            name: 'Chardonnay Lot #4',
+                            stage: 'BOTTLED',
+                            quantity: 250,
+                            isSpoiled: false,
+                            deleted: false,
+                            createdAt: '2026-11-05T10:00:00',
+                        },
+                    ]),
+                    { status: 200 },
+                );
+            }
+            if (url === '/api/batches/batch-db-1/records') {
+                return new Response(
+                    JSON.stringify([
+                        {
+                            id: 'rec-db-1',
+                            batchId: 'batch-db-1',
+                            recordedAt: '2026-11-05T11:00:00Z',
+                            sugarLevel: 2.8,
+                            acidity: 6.4,
+                            pH: 3.28,
+                            temperature: 16,
+                            alcoholContent: 13.6,
+                        },
+                    ]),
+                    { status: 200 },
+                );
+            }
+            return new Response('[]', { status: 200 });
+        }) as unknown as typeof fetch;
+
+        const list = await getOfferingsByOrganisation('org-1');
+        expect(list).toHaveLength(1);
+        expect(list[0]?.alcoholPercent).toBe(13.6);
+        expect(list[0]?.wineStyle).toBe('Dry wine');
+
+        const bottle = await getCustomerBottleDetails('off-db-1');
+        expect(bottle.parameters.alcoholContent).toBe(13.6);
+        expect(bottle.parameters.pH).toBe(3.28);
+        expect(bottle.bottledDate).toBe('2026-11-05');
+    });
 });

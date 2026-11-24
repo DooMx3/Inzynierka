@@ -1,10 +1,8 @@
-import { toApiError } from '$lib/api/auth';
+import { apiFetch, toApiError } from '$lib/api/auth';
 
 const jsonHeaders = {
     'Content-Type': 'application/json',
 };
-
-const PLANNED_STORAGE_KEY = 'wms_planned_spraying_ids';
 
 export type SprayingRecord = {
     id: string;
@@ -20,9 +18,9 @@ export type SprayingDraft = {
     fieldId: string;
     equipmentId: string;
     substanceId: string;
-    sprayingDate: string;
+    sprayingDate?: string | null;
     quantity: number;
-    due: string;
+    due?: string | null;
 };
 
 const ensureOk = async (response: Response) => {
@@ -31,10 +29,10 @@ const ensureOk = async (response: Response) => {
     }
 };
 
-export const toIsoDateTime = (input: string): string => {
-    const trimmed = input.trim();
+export const toNullableIsoDateTime = (input?: string | null): string | null => {
+    const trimmed = input?.trim() ?? '';
     if (!trimmed) {
-        return new Date().toISOString();
+        return null;
     }
     if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
         return `${trimmed}T12:00:00.000Z`;
@@ -43,7 +41,10 @@ export const toIsoDateTime = (input: string): string => {
     return Number.isNaN(parsed.getTime()) ? trimmed : parsed.toISOString();
 };
 
-export const toDateInputValue = (iso: string): string => {
+export const toIsoDateTime = (input: string): string =>
+    toNullableIsoDateTime(input) ?? new Date().toISOString();
+
+export const toDateInputValue = (iso?: string | null): string => {
     if (!iso) {
         return '';
     }
@@ -63,53 +64,33 @@ const readSpraying = (data: unknown): SprayingRecord => {
     };
 };
 
-const serializeDraft = (draft: SprayingDraft) =>
-    JSON.stringify({
+const serializeDraft = (draft: SprayingDraft, planned = false) => {
+    const sprayingDate = planned
+        ? null
+        : toNullableIsoDateTime(draft.sprayingDate);
+    const due = toNullableIsoDateTime(draft.due);
+
+    return JSON.stringify({
         fieldId: draft.fieldId,
         equipmentId: draft.equipmentId,
         substanceId: draft.substanceId,
-        sprayingDate: toIsoDateTime(draft.sprayingDate),
+        sprayingDate,
         quantity: Math.round(draft.quantity),
-        due: toIsoDateTime(draft.due),
+        due,
     });
-
-export const getPlannedSprayingIds = (): Set<string> => {
-    if (typeof localStorage === 'undefined') {
-        return new Set();
-    }
-    try {
-        const raw = localStorage.getItem(PLANNED_STORAGE_KEY);
-        if (!raw) {
-            return new Set();
-        }
-        const parsed: unknown = JSON.parse(raw);
-        return Array.isArray(parsed)
-            ? new Set(parsed.filter((item): item is string => typeof item === 'string'))
-            : new Set();
-    } catch {
-        return new Set();
-    }
 };
 
-export const markSprayingAsPlannedLocal = (id: string, planned: boolean): void => {
-    if (typeof localStorage === 'undefined') {
-        return;
-    }
-    const ids = getPlannedSprayingIds();
-    if (planned) {
-        ids.add(id);
-    } else {
-        ids.delete(id);
-    }
-    localStorage.setItem(PLANNED_STORAGE_KEY, JSON.stringify([...ids]));
-};
+export const getPlannedSprayingIds = (): Set<string> => new Set();
 
 export const isPlannedSpraying = (
     record: SprayingRecord,
-    plannedIds: Set<string> = getPlannedSprayingIds(),
+    plannedIds?: Set<string>,
     now: Date = new Date(),
 ): boolean => {
-    if (plannedIds.has(record.id)) {
+    if (!record.sprayingDate || !record.sprayingDate.trim()) {
+        return true;
+    }
+    if (plannedIds?.has(record.id)) {
         return true;
     }
     const sprayTime = Date.parse(record.sprayingDate);
@@ -120,9 +101,8 @@ export const isPlannedSpraying = (
 };
 
 export const getSprayings = async (): Promise<SprayingRecord[]> => {
-    const response = await fetch('/api/spraying', {
+    const response = await apiFetch('/api/spraying', {
         method: 'GET',
-        credentials: 'include',
     });
     await ensureOk(response);
     const data: unknown = await response.json();
@@ -136,18 +116,13 @@ export const createSpraying = async (
     draft: SprayingDraft,
     planned = false,
 ): Promise<SprayingRecord> => {
-    const response = await fetch('/api/spraying', {
+    const response = await apiFetch('/api/spraying', {
         method: 'POST',
-        credentials: 'include',
         headers: jsonHeaders,
-        body: serializeDraft(draft),
+        body: serializeDraft(draft, planned),
     });
     await ensureOk(response);
-    const created = readSpraying(await response.json());
-    if (created.id) {
-        markSprayingAsPlannedLocal(created.id, planned);
-    }
-    return created;
+    return readSpraying(await response.json());
 };
 
 export const updateSpraying = async (
@@ -155,23 +130,18 @@ export const updateSpraying = async (
     draft: SprayingDraft,
     planned = false,
 ): Promise<SprayingRecord> => {
-    const response = await fetch(`/api/spraying/${encodeURIComponent(id)}`, {
+    const response = await apiFetch(`/api/spraying/${encodeURIComponent(id)}`, {
         method: 'PUT',
-        credentials: 'include',
         headers: jsonHeaders,
-        body: serializeDraft(draft),
+        body: serializeDraft(draft, planned),
     });
     await ensureOk(response);
-    const updated = readSpraying(await response.json());
-    markSprayingAsPlannedLocal(id, planned);
-    return updated;
+    return readSpraying(await response.json());
 };
 
 export const deleteSpraying = async (id: string): Promise<void> => {
-    const response = await fetch(`/api/spraying/${encodeURIComponent(id)}`, {
+    const response = await apiFetch(`/api/spraying/${encodeURIComponent(id)}`, {
         method: 'DELETE',
-        credentials: 'include',
     });
     await ensureOk(response);
-    markSprayingAsPlannedLocal(id, false);
 };

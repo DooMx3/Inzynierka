@@ -67,8 +67,14 @@
 
     const applyPotassiumDose = (grams: number) => {
         const potassiumIng =
-            catalogue.find((c) => c.name.toLowerCase().includes("metabisulfite")) ??
-            catalogue[0];
+            catalogue.find((c) => {
+                const lower = c.name.toLowerCase();
+                return (
+                    lower.includes("metabisulfite") ||
+                    lower.includes("pirosiarczyn") ||
+                    lower.includes("k2s2o5")
+                );
+            }) ?? catalogue[0];
         if (!potassiumIng) {
             return;
         }

@@ -93,16 +93,24 @@ describe('SprayingPanel', () => {
         expect(screen.getByText(/Inspection valid until: 2028-04-01/)).toBeInTheDocument();
     });
 
-    it('renders planned sprayings and marks one completed', async () => {
-        let records = [
+    it('renders planned sprayings (including null sprayingDate from backend) and marks one completed', async () => {
+        let records: {
+            id: string;
+            fieldId: string;
+            equipmentId: string;
+            substanceId: string;
+            sprayingDate: string | null;
+            quantity: number;
+            due: string;
+        }[] = [
             {
-                id: 'sp-future',
+                id: 'sp-planned-null',
                 fieldId: 'f-1',
                 equipmentId: 'eq-1',
                 substanceId: 's-1',
-                sprayingDate: '2099-06-01T12:00:00.000Z',
+                sprayingDate: null,
                 quantity: 25,
-                due: '2099-06-01T12:00:00.000Z',
+                due: '2026-06-01T12:00:00.000Z',
             },
         ];
 

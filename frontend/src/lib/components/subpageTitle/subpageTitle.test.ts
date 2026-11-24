@@ -70,4 +70,15 @@ describe('SubpageTitle', () => {
         const span = container.querySelector('span');
         expect(span).toHaveTextContent('Custom Modal Title');
     });
+
+    it('replaces dynamic UUID segments on offerings and QR routes with clean titles', () => {
+        setPathname('/offerings/vineyard/550e8400-e29b-41d4-a716-446655440000');
+        const first = render(SubpageTitle);
+        expect(first.container.querySelector('span')).toHaveTextContent('Vineyard Offerings');
+        first.unmount();
+
+        setPathname('/offerings/550e8400-e29b-41d4-a716-446655440000');
+        const second = render(SubpageTitle);
+        expect(second.container.querySelector('span')).toHaveTextContent('Wine Details');
+    });
 });

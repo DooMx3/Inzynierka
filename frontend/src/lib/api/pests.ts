@@ -1,4 +1,4 @@
-import { toApiError } from '$lib/api/auth';
+import { apiFetch, toApiError } from '$lib/api/auth';
 
 const jsonHeaders = {
     'Content-Type': 'application/json',
@@ -56,7 +56,7 @@ export const getPestObservations = async (fieldId?: string): Promise<PestObserva
     const url = fieldId
         ? `/api/pest-observations?fieldId=${encodeURIComponent(fieldId)}`
         : '/api/pest-observations';
-    const response = await fetch(url, {
+    const response = await apiFetch(url, {
         method: 'GET',
         credentials: 'include',
     });
@@ -71,7 +71,7 @@ export const getPestObservations = async (fieldId?: string): Promise<PestObserva
 export const createPestObservation = async (
     draft: PestObservationDraft,
 ): Promise<PestObservation> => {
-    const response = await fetch('/api/pest-observations', {
+    const response = await apiFetch('/api/pest-observations', {
         method: 'POST',
         credentials: 'include',
         headers: jsonHeaders,
@@ -85,7 +85,7 @@ export const updatePestObservation = async (
     id: string,
     draft: PestObservationDraft,
 ): Promise<PestObservation> => {
-    const response = await fetch(`/api/pest-observations/${encodeURIComponent(id)}`, {
+    const response = await apiFetch(`/api/pest-observations/${encodeURIComponent(id)}`, {
         method: 'PUT',
         credentials: 'include',
         headers: jsonHeaders,
@@ -96,7 +96,7 @@ export const updatePestObservation = async (
 };
 
 export const deletePestObservation = async (id: string): Promise<void> => {
-    const response = await fetch(`/api/pest-observations/${encodeURIComponent(id)}`, {
+    const response = await apiFetch(`/api/pest-observations/${encodeURIComponent(id)}`, {
         method: 'DELETE',
         credentials: 'include',
     });

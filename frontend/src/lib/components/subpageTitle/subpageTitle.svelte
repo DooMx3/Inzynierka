@@ -1,17 +1,10 @@
 <script lang="ts">
     import { page } from "$app/state";
+    import { resolveSubpageTitle } from "$lib/functions/routeLabels";
 
     let { text }: { text?: string } = $props();
 
-    const location = $derived(
-        text ??
-            page.url.pathname
-                .split("/")
-                .filter((x) => x !== "")
-                .map((x) => x.charAt(0).toUpperCase() + x.slice(1))
-                .at(-1),
-    );
+    const location = $derived(text ?? resolveSubpageTitle(page.url.pathname));
 </script>
 
-<span class="text-zinc-500 text-3xl font-bold">{location ?? ""}</span>
-
+<span class="text-zinc-500 text-3xl font-bold">{location}</span>

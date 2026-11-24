@@ -72,6 +72,12 @@ const buildFetchMock = (options?: { emptyAll?: boolean }) =>
         if (url.startsWith('/api/harvests')) {
             return new Response(JSON.stringify(sampleHarvests), { status: 200 });
         }
+        if (url.endsWith('/pdf')) {
+            return new Response(new Uint8Array([37, 80, 68, 70]), {
+                status: 200,
+                headers: { 'Content-Type': 'application/pdf' },
+            });
+        }
         return new Response(JSON.stringify([]), { status: 200 });
     }) as unknown as typeof fetch;
 
@@ -253,9 +259,15 @@ describe('ReportsPanel', () => {
                 .getByText('Production efficiency report')
                 .closest('tr')!;
 
+            // Download PDF action from POST /api/reports/{type}/pdf
+            await fireEvent.click(within(row).getByRole('button', { name: 'Download PDF' }));
+            await waitFor(() => {
+                expect(createObjectURLMock).toHaveBeenCalledTimes(1);
+            });
+
             // Export CSV action
             await fireEvent.click(within(row).getByRole('button', { name: 'Export CSV' }));
-            expect(createObjectURLMock).toHaveBeenCalledTimes(1);
+            expect(createObjectURLMock).toHaveBeenCalledTimes(2);
             expect(revokeObjectURLMock).toHaveBeenCalledWith('blob:mock-report-csv');
 
             // Print action

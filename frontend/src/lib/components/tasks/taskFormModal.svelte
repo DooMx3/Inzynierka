@@ -339,21 +339,21 @@
             </div>
         {/if}
 
-        {#if activeOption.bottling === "REQUIRED"}
+        {#if activeOption.bottling !== "FORBIDDEN"}
             <InputField
-                label="Bottling (required)"
+                label={activeOption.bottling === "REQUIRED" ? "Bottling (required)" : "Bottling"}
                 placeholder="Enter bottling ID"
                 bind:value={formBottlingId}
-                invalid={showValidation && !formBottlingId.trim()}
+                invalid={showValidation && activeOption.bottling === "REQUIRED" && !formBottlingId.trim()}
             />
         {/if}
 
-        {#if activeOption.record === "REQUIRED"}
+        {#if activeOption.record !== "FORBIDDEN"}
             <InputField
-                label="Record (required)"
+                label={activeOption.record === "REQUIRED" ? "Record (required)" : "Record"}
                 placeholder="Enter record ID"
                 bind:value={formRecordId}
-                invalid={showValidation && !formRecordId.trim()}
+                invalid={showValidation && activeOption.record === "REQUIRED" && !formRecordId.trim()}
             />
         {/if}
 
