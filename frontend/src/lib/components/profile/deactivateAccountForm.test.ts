@@ -1,23 +1,24 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, it, expect, beforeEach, afterEach, spyOn } from 'bun:test';
 import { flushSync } from 'svelte';
+import { gooeyToast } from 'goey-toast-svelte';
 import DeactivateAccountForm from './deactivateAccountForm.svelte';
 import { session, setUser } from '$lib/stores/session.svelte';
 
 describe('Deactivate account form', () => {
     const originalFetch = globalThis.fetch;
-    const originalAlert = globalThis.alert;
     const originalLocation = window.location;
-    let alerts: string[];
     let calls: { url: string; init?: RequestInit }[];
+    let warningSpy: ReturnType<typeof spyOn<typeof gooeyToast, 'warning'>>;
+    let errorSpy: ReturnType<typeof spyOn<typeof gooeyToast, 'error'>>;
+    let infoSpy: ReturnType<typeof spyOn<typeof gooeyToast, 'info'>>;
 
     beforeEach(() => {
-        alerts = [];
         calls = [];
         setUser({ id: 'user-1', firstname: 'Jane', email: 'jane.doe@example.com' });
-        globalThis.alert = ((message?: string) => {
-            alerts.push(String(message ?? ''));
-        }) as typeof alert;
+        warningSpy = spyOn(gooeyToast, 'warning');
+        errorSpy = spyOn(gooeyToast, 'error');
+        infoSpy = spyOn(gooeyToast, 'info');
         Object.defineProperty(window, 'location', {
             configurable: true,
             writable: true,
@@ -38,7 +39,9 @@ describe('Deactivate account form', () => {
 
     afterEach(() => {
         globalThis.fetch = originalFetch;
-        globalThis.alert = originalAlert;
+        warningSpy.mockRestore();
+        errorSpy.mockRestore();
+        infoSpy.mockRestore();
         setUser(null);
         Object.defineProperty(window, 'location', {
             configurable: true,
@@ -52,7 +55,9 @@ describe('Deactivate account form', () => {
         await fireEvent.click(screen.getByRole('button', { name: 'Delete account' }));
         flushSync();
 
-        expect(alerts[0]).toBe('Enter your password.');
+        expect(warningSpy).toHaveBeenCalledWith('Password required', {
+            description: 'Enter your password.',
+        });
         expect(screen.getByLabelText('Password').parentElement).toHaveClass('border-red-500');
         expect(calls).toEqual([]);
         expect(window.location.href).toBe('http://localhost/profile');
@@ -72,7 +77,9 @@ describe('Deactivate account form', () => {
         await fireEvent.click(screen.getByRole('button', { name: 'Delete account' }));
 
         await waitFor(() => {
-            expect(alerts[0]).toBe('Current password is wrong');
+            expect(errorSpy).toHaveBeenCalledWith('Account deactivation failed', {
+                description: 'Current password is wrong',
+            });
         });
         expect(window.location.href).toBe('http://localhost/profile');
         expect(session.user?.email).toBe('jane.doe@example.com');
@@ -97,7 +104,11 @@ describe('Deactivate account form', () => {
             expect(window.location.href).toBe('/auth');
         });
         expect(session.user).toBeNull();
-        expect(alerts).toEqual([]);
+        expect(infoSpy).toHaveBeenCalledWith('Account deactivated', {
+            description: 'Your account has been deactivated.',
+        });
+        expect(warningSpy).not.toHaveBeenCalled();
+        expect(errorSpy).not.toHaveBeenCalled();
         expect(calls.map((call) => call.url)).toEqual(['/api/user/deactivate', '/api/auth/logout']);
     });
 

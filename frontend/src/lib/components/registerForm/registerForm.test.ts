@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, it, expect, beforeEach, afterEach, spyOn } from 'bun:test';
 import { flushSync } from 'svelte';
+import { gooeyToast } from 'goey-toast-svelte';
 import RegisterForm from './registerForm.svelte';
 import { session, setUser } from '$lib/stores/session.svelte';
 
@@ -21,16 +22,14 @@ const fillReadyAccount = async (confirmPassword = readyPassword) => {
 
 describe('Register form', () => {
     const originalFetch = globalThis.fetch;
-    const originalAlert = globalThis.alert;
     const originalLocation = window.location;
-    let alerts: string[];
+    let warningSpy: ReturnType<typeof spyOn<typeof gooeyToast, 'warning'>>;
+    let errorSpy: ReturnType<typeof spyOn<typeof gooeyToast, 'error'>>;
 
     beforeEach(() => {
-        alerts = [];
         setUser(null);
-        globalThis.alert = ((message?: string) => {
-            alerts.push(String(message ?? ''));
-        }) as typeof alert;
+        warningSpy = spyOn(gooeyToast, 'warning');
+        errorSpy = spyOn(gooeyToast, 'error');
         Object.defineProperty(window, 'location', {
             configurable: true,
             writable: true,
@@ -40,7 +39,8 @@ describe('Register form', () => {
 
     afterEach(() => {
         globalThis.fetch = originalFetch;
-        globalThis.alert = originalAlert;
+        warningSpy.mockRestore();
+        errorSpy.mockRestore();
         Object.defineProperty(window, 'location', {
             configurable: true,
             writable: true,
@@ -86,7 +86,12 @@ describe('Register form', () => {
         flushSync();
 
         expect(called).toBe(false);
-        expect(alerts[0]).toContain('Password does not meet the requirements.');
+        expect(warningSpy).toHaveBeenCalledWith(
+            'Check registration details',
+            expect.objectContaining({
+                description: expect.stringContaining('Password does not meet the requirements.'),
+            }),
+        );
         expect(screen.getByLabelText('Password').parentElement).toHaveClass('border-red-500', 'text-red-700/80');
     });
 
@@ -98,7 +103,12 @@ describe('Register form', () => {
         await fireEvent.click(screen.getByRole('button', { name: 'Create free account' }));
         flushSync();
 
-        expect(alerts[0]).toContain('Passwords do not match.');
+        expect(warningSpy).toHaveBeenCalledWith(
+            'Check registration details',
+            expect.objectContaining({
+                description: expect.stringContaining('Passwords do not match.'),
+            }),
+        );
         expect(screen.getByLabelText('Confirm Password')).toHaveClass('text-red-700/80');
         expect(screen.getByLabelText('Confirm Password').parentElement).toHaveClass('border-red-500');
         expect(session.user).toBeNull();
@@ -136,6 +146,7 @@ describe('Register form', () => {
             expect(session.user?.email).toBe('jan.kowalski@example.com');
         });
         expect(window.location.href).toBe('/');
-        expect(alerts).toEqual([]);
+        expect(warningSpy).not.toHaveBeenCalled();
+        expect(errorSpy).not.toHaveBeenCalled();
     });
 });
