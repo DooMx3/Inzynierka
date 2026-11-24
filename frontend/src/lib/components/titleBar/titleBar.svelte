@@ -1,5 +1,5 @@
 <script lang="ts">
-    import logo from "$lib/assets/logo.webp";
+    import logo from "$lib/assets/logo.png";
     import loginIcon from "$lib/assets/login.svg?raw";
     import TasksHeaderButton from "../buttons/tasksHeaderButton.svelte";
     import ProfileMenu from "../profileMenu/profileMenu.svelte";
