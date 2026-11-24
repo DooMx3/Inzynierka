@@ -6,10 +6,12 @@ import {
     deleteOffering,
     getCustomerBottleDetails,
     getOfferings,
+    getOfferingsByOrganisation,
+    readWinePhotoAsDataUrl,
     updateOffering,
 } from './offerings';
 
-describe('offerings API & customer bottle provenance', () => {
+describe('offerings API, vineyard scoping, wine photos & customer bottle provenance', () => {
     const originalFetch = globalThis.fetch;
 
     beforeEach(() => {
@@ -21,7 +23,7 @@ describe('offerings API & customer bottle provenance', () => {
         localStorage.clear();
     });
 
-    it('lists and creates backend offerings, and supports edit/delete overlay', async () => {
+    it('lists, scopes by organisationId, preserves wine photo, and supports edit/delete overlay', async () => {
         let postedBody = '';
         globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
             const url = String(input);
@@ -50,6 +52,14 @@ describe('offerings API & customer bottle provenance', () => {
                             wineDescription: 'Crisp citrus aroma',
                             price: 55,
                         },
+                        {
+                            id: 'off-other',
+                            organisationId: 'org-2',
+                            wineId: 'wine-2',
+                            wineName: 'Other Vineyard Merlot',
+                            wineDescription: 'Should not leak into org-1',
+                            price: 90,
+                        },
                     ]),
                     { status: 200 },
                 );
@@ -57,18 +67,46 @@ describe('offerings API & customer bottle provenance', () => {
             return new Response(JSON.stringify([]), { status: 200 });
         }) as unknown as typeof fetch;
 
-        const created = await createOffering({ wineId: 'wine-1', price: 55 });
+        const samplePhoto = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
+
+        const created = await createOffering({
+            wineId: 'wine-1',
+            price: 55,
+            imageUrl: samplePhoto,
+            organisationName: 'Winnica Pierwsza',
+        });
         expect(created.wineName).toBe('Solaris Reserve');
+        expect(created.imageUrl).toBe(samplePhoto);
         expect(JSON.parse(postedBody)).toEqual({ wineId: 'wine-1', price: 55 });
 
-        const updated = await updateOffering('off-1', { price: 62 });
+        const org1Only = await getOfferingsByOrganisation('org-1');
+        expect(org1Only).toHaveLength(1);
+        expect(org1Only[0]?.id).toBe('off-1');
+        expect(org1Only[0]?.imageUrl).toBe(samplePhoto);
+
+        const updated = await updateOffering('off-1', { price: 62, imageUrl: null });
         expect(updated.price).toBe(62);
+        expect(updated.imageUrl).toBeNull();
 
         await deleteOffering('off-1');
-        expect(await getOfferings()).toHaveLength(0);
+        expect(await getOfferingsByOrganisation('org-1')).toHaveLength(0);
+        expect(await getOfferings('org-2')).toHaveLength(1);
     });
 
-    it('falls back to local bottled batch offering when backend bottling UUID is missing and resolves full bottle provenance', async () => {
+    it('converts valid PNG/JPEG/WebP files to Data URLs and rejects unsupported file types', async () => {
+        const pngFile = new File([new Uint8Array([137, 80, 78, 71])], 'bottle.png', {
+            type: 'image/png',
+        });
+        const dataUrl = await readWinePhotoAsDataUrl(pngFile);
+        expect(dataUrl.startsWith('data:image/png;base64,')).toBe(true);
+
+        const badFile = new File(['hello'], 'notes.txt', { type: 'text/plain' });
+        await expect(readWinePhotoAsDataUrl(badFile)).rejects.toThrow(
+            'Choose a PNG, JPEG, or WebP wine image.',
+        );
+    });
+
+    it('falls back to local bottled batch offering when backend bottling UUID is missing and resolves full bottle provenance with photo', async () => {
         globalThis.fetch = (async () =>
             new Response(JSON.stringify({ error: 'Wine bottling not found' }), {
                 status: 404,
@@ -114,19 +152,25 @@ describe('offerings API & customer bottle provenance', () => {
             alcoholContent: 13.5,
         });
 
+        const photoDataUrl = 'data:image/webp;base64,UklGRh4AAABXRUJQVlA4TBEAAAAvAAAAAAfQ//73v/+BiOh/AAA=';
         const offering = await createOffering({
             wineId: bottled.id,
             wineName: bottled.name,
             wineDescription: bottled.description,
             price: 79,
+            imageUrl: photoDataUrl,
+            organisationId: 'org-lubelska',
             organisationName: 'Winnica Lubelska',
         });
 
         expect(offering.localOnly).toBe(true);
+        expect(offering.imageUrl).toBe(photoDataUrl);
 
         const details = await getCustomerBottleDetails(offering.id);
         expect(details.wineName).toBe('Regent Grand Reserve 2026');
         expect(details.vineyardName).toBe('Winnica Lubelska');
+        expect(details.organisationId).toBe('org-lubelska');
+        expect(details.imageUrl).toBe(photoDataUrl);
         expect(details.grapeVariety).toBe('Regent');
         expect(details.harvestDate).toBe('2026-09-12');
         expect(details.barrelType).toContain('French Oak Barrel');

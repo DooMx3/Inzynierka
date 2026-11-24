@@ -14,6 +14,8 @@ const jsonHeaders = {
 };
 
 const OVERLAY_STORAGE_KEY = 'wms_offerings_overlay_v1';
+const ALLOWED_PHOTO_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp']);
+const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 
 export type WineOffering = {
     id: string;
@@ -23,6 +25,7 @@ export type WineOffering = {
     wineName: string;
     wineDescription: string;
     price: number;
+    imageUrl?: string | null;
     vintageYear?: number;
     alcoholPercent?: number;
     wineStyle?: string;
@@ -36,6 +39,7 @@ export type OfferingDraft = {
     price: number;
     wineName?: string;
     wineDescription?: string;
+    imageUrl?: string | null;
     organisationId?: string;
     organisationName?: string;
     vintageYear?: number;
@@ -64,6 +68,7 @@ export type CustomerBottleDetails = {
     vineyardName: string;
     organisationId: string;
     logoUrl: string | null;
+    imageUrl: string | null;
     description: string;
     price: number | null;
     wineStyle: string;
@@ -94,6 +99,33 @@ const makeId = () =>
     typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
         ? crypto.randomUUID()
         : `off-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+export const readWinePhotoAsDataUrl = async (file: File): Promise<string> => {
+    const inferredMime =
+        file.type ||
+        (/\.png$/i.test(file.name)
+            ? 'image/png'
+            : /\.webp$/i.test(file.name)
+              ? 'image/webp'
+              : /\.(jpe?g)$/i.test(file.name)
+                ? 'image/jpeg'
+                : '');
+
+    if (!ALLOWED_PHOTO_TYPES.has(inferredMime)) {
+        throw new Error('Choose a PNG, JPEG, or WebP wine image.');
+    }
+    if (file.size > MAX_PHOTO_BYTES) {
+        throw new Error('Wine photo must be 5 MB or smaller.');
+    }
+
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    let binary = '';
+    const chunkSize = 0x8000;
+    for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+        binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize));
+    }
+    return `data:${inferredMime};base64,${btoa(binary)}`;
+};
 
 const readOverlay = (): LocalOverlayState => {
     if (typeof localStorage === 'undefined') {
@@ -127,16 +159,29 @@ const ensureOk = async (response: Response) => {
     }
 };
 
+const readRemoteImageUrl = (record: Record<string, unknown>): string | null => {
+    for (const key of ['imageUrl', 'photoUrl', 'imagePath']) {
+        const candidate = record[key];
+        if (typeof candidate === 'string' && candidate.trim().length > 0) {
+            return candidate.trim();
+        }
+    }
+    return null;
+};
+
 const readOffering = (data: unknown): WineOffering => {
     const record = data && typeof data === 'object' ? (data as Record<string, unknown>) : {};
     return {
         id: typeof record.id === 'string' ? record.id : '',
         organisationId: typeof record.organisationId === 'string' ? record.organisationId : '',
+        organisationName:
+            typeof record.organisationName === 'string' ? record.organisationName : undefined,
         wineId: typeof record.wineId === 'string' ? record.wineId : '',
         wineName: typeof record.wineName === 'string' ? record.wineName : 'Estate Wine',
         wineDescription:
             typeof record.wineDescription === 'string' ? record.wineDescription : '',
         price: typeof record.price === 'number' ? record.price : Number(record.price) || 0,
+        imageUrl: readRemoteImageUrl(record),
     };
 };
 
@@ -201,7 +246,7 @@ const enrichOfferingWithLocalBatch = (
     };
 };
 
-export const getOfferings = async (): Promise<WineOffering[]> => {
+export const getOfferings = async (organisationId?: string): Promise<WineOffering[]> => {
     const overlay = readOverlay();
     const deletedSet = new Set(overlay.deletedIds);
     let remote: WineOffering[] = [];
@@ -244,9 +289,25 @@ export const getOfferings = async (): Promise<WineOffering[]> => {
         }
     }
 
-    return [...mergedMap.values()].map((item) =>
+    const scopedOrgId = organisationId?.trim() ?? '';
+    const enriched = [...mergedMap.values()].map((item) =>
         enrichOfferingWithLocalBatch(item, allBatches, allParams),
     );
+
+    if (scopedOrgId.length > 0) {
+        return enriched.filter((item) => item.organisationId === scopedOrgId);
+    }
+    return enriched;
+};
+
+export const getOfferingsByOrganisation = async (
+    organisationId: string,
+): Promise<WineOffering[]> => {
+    const trimmed = organisationId.trim();
+    if (!trimmed) {
+        throw new Error('Missing vineyard identifier.');
+    }
+    return getOfferings(trimmed);
 };
 
 export const createOffering = async (draft: OfferingDraft): Promise<WineOffering> => {
@@ -264,14 +325,36 @@ export const createOffering = async (draft: OfferingDraft): Promise<WineOffering
         });
         await ensureOk(response);
         const created = readOffering(await response.json());
+
+        const extraMetadata: Partial<WineOffering> = {
+            ...(draft.imageUrl !== undefined ? { imageUrl: draft.imageUrl } : {}),
+            ...(draft.organisationName ? { organisationName: draft.organisationName } : {}),
+            ...(draft.wineDescription ? { wineDescription: draft.wineDescription.trim() } : {}),
+            ...(draft.vintageYear !== undefined ? { vintageYear: draft.vintageYear } : {}),
+            ...(draft.alcoholPercent !== undefined ? { alcoholPercent: draft.alcoholPercent } : {}),
+            ...(draft.wineStyle ? { wineStyle: draft.wineStyle } : {}),
+            ...(draft.barrelInfo ? { barrelInfo: draft.barrelInfo } : {}),
+            ...(draft.grapeType ? { grapeType: draft.grapeType } : {}),
+        };
+
+        if (created.id && Object.keys(extraMetadata).length > 0) {
+            const overlay = readOverlay();
+            writeOverlay({
+                ...overlay,
+                updated: {
+                    ...overlay.updated,
+                    [created.id]: {
+                        ...(overlay.updated[created.id] ?? {}),
+                        ...extraMetadata,
+                    },
+                },
+            });
+        }
+
         return {
             ...created,
-            organisationName: draft.organisationName,
-            vintageYear: draft.vintageYear,
-            alcoholPercent: draft.alcoholPercent,
-            wineStyle: draft.wineStyle,
-            barrelInfo: draft.barrelInfo,
-            grapeType: draft.grapeType,
+            ...extraMetadata,
+            imageUrl: draft.imageUrl ?? created.imageUrl ?? null,
         };
     } catch (error) {
         // Fallback when wineId points to a client-side BOTTLED batch because backend lacks /api/bottlings CRUD
@@ -289,6 +372,7 @@ export const createOffering = async (draft: OfferingDraft): Promise<WineOffering
                 wineName: draft.wineName.trim(),
                 wineDescription: draft.wineDescription?.trim() ?? '',
                 price,
+                imageUrl: draft.imageUrl ?? null,
                 vintageYear: draft.vintageYear,
                 alcoholPercent: draft.alcoholPercent,
                 wineStyle: draft.wineStyle,
@@ -320,6 +404,7 @@ export const updateOffering = async (
         ...(draft.price !== undefined
             ? { price: Math.max(0, Math.round(Number(draft.price) || 0)) }
             : {}),
+        ...(draft.imageUrl !== undefined ? { imageUrl: draft.imageUrl } : {}),
     };
 
     writeOverlay({
@@ -524,6 +609,7 @@ export const getCustomerBottleDetails = async (id: string): Promise<CustomerBott
         vineyardName: offering?.organisationName || 'Estate Vineyard & Winery',
         organisationId: orgId,
         logoUrl: orgId ? getOrganisationLogoByIdUrl(orgId) : null,
+        imageUrl: offering?.imageUrl ?? null,
         description:
             offering?.wineDescription ||
             matchedBatch?.description ||

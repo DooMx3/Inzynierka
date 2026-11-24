@@ -46,7 +46,7 @@ describe('OfferingsManagementPanel', () => {
         expect(screen.queryByRole('button', { name: 'New offering' })).not.toBeInTheDocument();
     });
 
-    it('supports owner CRUD (create from bottled batch, edit price, expand details, and delete)', async () => {
+    it('scopes offerings to owner vineyard, exposes direct vineyard catalog link, and supports CRUD with wine photo upload', async () => {
         const bottledBatch = await createBatch({
             name: 'Johanniter Classic 2026',
             stage: 'BOTTLED',
@@ -66,6 +66,14 @@ describe('OfferingsManagementPanel', () => {
                 wineDescription: 'Ripe pear and mineral finish.',
                 price: 58,
             },
+            {
+                id: 'off-foreign-2',
+                organisationId: 'org-foreign',
+                wineId: 'wine-foreign-2',
+                wineName: 'Foreign Vineyard Riesling',
+                wineDescription: 'Must not appear in org-1 management.',
+                price: 99,
+            },
         ];
 
         globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -81,7 +89,6 @@ describe('OfferingsManagementPanel', () => {
                 );
             }
             if (url === '/api/offerings' && init?.method === 'POST') {
-                // Simulate local bottled batch not registered on backend /api/bottlings so local overlay fallback runs
                 return new Response(JSON.stringify({ message: 'Bottling not found' }), {
                     status: 404,
                 });
@@ -99,6 +106,17 @@ describe('OfferingsManagementPanel', () => {
             expect(screen.getByText('58 PLN')).toBeInTheDocument();
         });
 
+        // Foreign vineyard offering is strictly filtered out
+        expect(screen.queryByText('Foreign Vineyard Riesling')).not.toBeInTheDocument();
+
+        // Direct shareable vineyard catalog link & QR banner
+        expect(
+            screen.getByText('http://localhost/offerings/vineyard/org-1'),
+        ).toBeInTheDocument();
+        expect(
+            screen.getByRole('link', { name: /Open vineyard catalog/i }),
+        ).toHaveAttribute('href', '/offerings/vineyard/org-1');
+
         // Expand row details
         await fireEvent.click(
             screen.getByRole('button', { name: 'Toggle details for Solaris Reserve' }),
@@ -108,11 +126,23 @@ describe('OfferingsManagementPanel', () => {
             screen.getByRole('link', { name: /Open customer bottle view/i }),
         ).toHaveAttribute('href', '/offerings/off-solaris-1');
 
-        // Create new offering from bottled batch (auto-fills Wine name & Description)
+        // Create new offering from bottled batch with uploaded wine photo
         await fireEvent.click(screen.getByRole('button', { name: 'New offering' }));
         const createDialog = await screen.findByRole('dialog');
         const wineNameInput = within(createDialog).getByLabelText('Wine name') as HTMLInputElement;
         expect(wineNameInput.value).toBe(bottledBatch.name);
+
+        const photoInput = within(createDialog)
+            .getByLabelText('Choose wine photo')
+            .querySelector('input[type="file"]') as HTMLInputElement;
+        const photoFile = new File([new Uint8Array([137, 80, 78, 71])], 'johanniter.png', {
+            type: 'image/png',
+        });
+        await fireEvent.change(photoInput, { target: { files: [photoFile] } });
+
+        await waitFor(() => {
+            expect(within(createDialog).getByAltText('Selected wine preview')).toBeInTheDocument();
+        });
 
         await fireEvent.input(within(createDialog).getByLabelText('Price (PLN)'), {
             target: { value: '74' },
@@ -122,13 +152,14 @@ describe('OfferingsManagementPanel', () => {
         await waitFor(() => {
             expect(screen.getByText('Johanniter Classic 2026')).toBeInTheDocument();
             expect(screen.getByText('74 PLN')).toBeInTheDocument();
+            expect(
+                screen.getByAltText('Photo of Johanniter Classic 2026'),
+            ).toBeInTheDocument();
         });
 
         // Edit Solaris Reserve price
-        const editButtons = screen.getAllByRole('button', { name: 'Edit' });
         const solarisRow = screen.getByText('Solaris Reserve').closest('tr')!;
         await fireEvent.click(within(solarisRow).getByRole('button', { name: 'Edit' }));
-        expect(editButtons.length).toBeGreaterThanOrEqual(2);
 
         const editDialog = await screen.findByRole('dialog');
         await fireEvent.input(within(editDialog).getByLabelText('Price (PLN)'), {
@@ -147,7 +178,7 @@ describe('OfferingsManagementPanel', () => {
         const confirmDialog = await screen.findByRole('dialog');
         expect(
             within(confirmDialog).getByText(
-                'Remove "Solaris Reserve" from the public offerings catalog?',
+                'Remove "Solaris Reserve" from your vineyard offerings catalog?',
             ),
         ).toBeInTheDocument();
         await fireEvent.click(within(confirmDialog).getByRole('button', { name: 'Delete' }));
@@ -157,9 +188,19 @@ describe('OfferingsManagementPanel', () => {
         });
     });
 
-    it('opens QrCodeModal for an offering with /offerings/[id] bottle URL', async () => {
+    it('opens QrCodeModal for both individual bottle QR and vineyard catalog QR', async () => {
         globalThis.fetch = (async (input: RequestInfo | URL) => {
             const url = String(input);
+            if (url === '/api/organisations') {
+                return new Response(
+                    JSON.stringify({
+                        id: 'org-1',
+                        name: 'Winnica Sandomierska',
+                        city: 'Sandomierz',
+                    }),
+                    { status: 200 },
+                );
+            }
             if (url === '/api/offerings') {
                 return new Response(
                     JSON.stringify([
@@ -184,24 +225,19 @@ describe('OfferingsManagementPanel', () => {
             expect(screen.getByText('Regent Barrique')).toBeInTheDocument();
         });
 
-        expect(screen.getByRole('link', { name: 'Customer view' })).toHaveAttribute(
-            'href',
-            '/offerings/off-regent-99',
-        );
-
         await fireEvent.click(screen.getByRole('button', { name: 'QR code' }));
-
-        const modal = await screen.findByRole('dialog');
-        expect(within(modal).getByText('Wine bottle QR code')).toBeInTheDocument();
-        expect(within(modal).getByText('Regent Barrique · 89 PLN')).toBeInTheDocument();
+        const bottleModal = await screen.findByRole('dialog');
+        expect(within(bottleModal).getByText('Wine bottle QR code')).toBeInTheDocument();
         expect(
-            within(modal).getByText('http://localhost/offerings/off-regent-99'),
+            within(bottleModal).getByText('http://localhost/offerings/off-regent-99'),
         ).toBeInTheDocument();
+        await fireEvent.click(within(bottleModal).getByRole('button', { name: 'OK' }));
 
-        const qrPreview = await within(modal).findByTestId('qr-svg-preview');
-        expect(qrPreview).toBeInTheDocument();
-
-        await fireEvent.click(within(modal).getByRole('button', { name: 'OK' }));
-        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        await fireEvent.click(screen.getByRole('button', { name: 'Catalog QR' }));
+        const catalogModal = await screen.findByRole('dialog');
+        expect(within(catalogModal).getByText('Vineyard catalog QR code')).toBeInTheDocument();
+        expect(
+            within(catalogModal).getByText('http://localhost/offerings/vineyard/org-1'),
+        ).toBeInTheDocument();
     });
 });

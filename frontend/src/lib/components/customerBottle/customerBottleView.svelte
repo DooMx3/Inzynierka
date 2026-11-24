@@ -18,6 +18,13 @@
     let loading = $state(true);
     let errorMessage = $state("");
     let logoHidden = $state(false);
+    let photoHidden = $state(false);
+
+    const vineyardCatalogHref = $derived(
+        details?.organisationId
+            ? `/offerings/vineyard/${encodeURIComponent(details.organisationId)}`
+            : null,
+    );
 
     const loadDetails = async () => {
         if (!bottleId) {
@@ -28,6 +35,7 @@
         loading = true;
         errorMessage = "";
         logoHidden = false;
+        photoHidden = false;
         try {
             details = await getCustomerBottleDetails(bottleId);
         } catch (error) {
@@ -50,14 +58,16 @@
 </script>
 
 <div class="mx-auto flex w-full max-w-5xl flex-col gap-5 pb-6">
-    <div>
-        <a
-            href="/offerings"
-            class="inline-flex items-center gap-1.5 rounded-full border border-[#d9cbbd] bg-[#fbf7f2] px-4 py-2 text-sm font-semibold text-[#3f2e22] shadow-xs transition-colors hover:bg-[#e4d8cb]"
-        >
-            ← Back to offerings
-        </a>
-    </div>
+    {#if vineyardCatalogHref}
+        <div>
+            <a
+                href={vineyardCatalogHref}
+                class="inline-flex items-center gap-1.5 rounded-full border border-[#d9cbbd] bg-[#fbf7f2] px-4 py-2 text-sm font-semibold text-[#3f2e22] shadow-xs transition-colors hover:bg-[#e4d8cb]"
+            >
+                ← Back to vineyard offerings
+            </a>
+        </div>
+    {/if}
 
     {#if loading}
         <section
@@ -75,12 +85,6 @@
             <p class="max-w-md text-sm text-zinc-700">
                 {errorMessage || "We could not find provenance data for this wine bottle."}
             </p>
-            <a
-                href="/offerings"
-                class="mt-1 rounded-xl bg-[#6b4f3a] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#3f2e22]"
-            >
-                Browse our wine offerings
-            </a>
         </section>
     {:else}
         <!-- Bottle & Vineyard Hero Section -->
@@ -89,110 +93,122 @@
             aria-label="Wine bottle overview"
         >
             <div class="grid grid-cols-1 gap-6 p-6 md:grid-cols-[240px_1fr] md:p-8">
-                <!-- Stylized SVG Wine Bottle with Warm Dark-Brown/Gold Label -->
+                <!-- Wine Photo or Stylized SVG Wine Bottle -->
                 <div
-                    class="flex items-center justify-center rounded-2xl border border-[#e4d8cb] bg-[#fbf7f2] p-5"
+                    class={[
+                        "flex items-center justify-center overflow-hidden rounded-2xl border border-[#e4d8cb] bg-[#fbf7f2]",
+                        details.imageUrl && !photoHidden ? "p-2" : "p-5",
+                    ]}
                 >
-                    <svg
-                        viewBox="0 0 180 320"
-                        class="h-72 w-44 drop-shadow-md select-none"
-                        role="img"
-                        aria-label={`Wine bottle label for ${details.wineName}`}
-                    >
-                        <ellipse cx="90" cy="304" rx="54" ry="8" fill="#e4d8cb" />
-                        <!-- Bottle body -->
-                        <path
-                            d="M74 18 H106 V58 C106 78 138 94 138 132 V284 C138 295 130 302 119 302 H61 C50 302 42 295 42 284 V132 C42 94 74 78 74 58 Z"
-                            fill="#2d1e15"
-                            stroke="#1c120c"
-                            stroke-width="2"
+                    {#if details.imageUrl && !photoHidden}
+                        <img
+                            src={details.imageUrl}
+                            alt={`Photo of ${details.wineName}`}
+                            onerror={() => (photoHidden = true)}
+                            class="h-72 w-full rounded-xl object-cover"
                         />
-                        <!-- Capsule & gold foil collar -->
-                        <rect x="73" y="14" width="34" height="28" rx="4" fill="#6b4f3a" />
-                        <rect x="73" y="38" width="34" height="5" fill="#c9a46a" />
-                        <!-- Glass sheen -->
-                        <path
-                            d="M52 136 C52 108 69 92 78 68 V288 H52 Z"
-                            fill="#ffffff"
-                            opacity="0.06"
-                        />
-                        <!-- Warm dark-brown & gold bottle front label -->
-                        <rect
-                            x="50"
-                            y="136"
-                            width="80"
-                            height="118"
-                            rx="6"
-                            fill="#3f2e22"
-                            stroke="#c9a46a"
-                            stroke-width="2"
-                        />
-                        <rect
-                            x="54"
-                            y="140"
-                            width="72"
-                            height="110"
-                            rx="4"
-                            fill="none"
-                            stroke="#c9a46a"
-                            stroke-width="0.7"
-                            opacity="0.75"
-                        />
-                        <!-- Vineyard crest -->
-                        <circle
-                            cx="90"
-                            cy="156"
-                            r="7"
-                            fill="none"
-                            stroke="#c9a46a"
-                            stroke-width="1.2"
-                        />
-                        <path d="M87 156 L90 151 L93 156 L90 161 Z" fill="#c9a46a" />
-                        <!-- Label typography -->
-                        <text
-                            x="90"
-                            y="173"
-                            text-anchor="middle"
-                            fill="#e4d3c0"
-                            font-size="6.5"
-                            font-weight="600"
-                            letter-spacing="0.8"
+                    {:else}
+                        <svg
+                            viewBox="0 0 180 320"
+                            class="h-72 w-44 drop-shadow-md select-none"
+                            role="img"
+                            aria-label={`Wine bottle label for ${details.wineName}`}
                         >
-                            {truncateLabel(details.vineyardName.toUpperCase(), 22)}
-                        </text>
-                        <line x1="62" y1="179" x2="118" y2="179" stroke="#c9a46a" stroke-width="0.8" />
-                        <text
-                            x="90"
-                            y="196"
-                            text-anchor="middle"
-                            fill="#fbf7f2"
-                            font-size="8.5"
-                            font-weight="700"
-                        >
-                            {truncateLabel(`${details.wineName} (${details.vintageYear})`, 20)}
-                        </text>
-                        <text
-                            x="90"
-                            y="213"
-                            text-anchor="middle"
-                            fill="#d9b882"
-                            font-size="7.5"
-                            font-weight="600"
-                        >
-                            {`${details.wineStyle} · ${details.vintageYear}`}
-                        </text>
-                        <line x1="66" y1="223" x2="114" y2="223" stroke="#8c735c" stroke-width="0.8" />
-                        <text
-                            x="90"
-                            y="239"
-                            text-anchor="middle"
-                            fill="#fbf7f2"
-                            font-size="8"
-                            font-weight="700"
-                        >
-                            {`${details.parameters.alcoholContent}% ABV · 750 ml`}
-                        </text>
-                    </svg>
+                            <ellipse cx="90" cy="304" rx="54" ry="8" fill="#e4d8cb" />
+                            <!-- Bottle body -->
+                            <path
+                                d="M74 18 H106 V58 C106 78 138 94 138 132 V284 C138 295 130 302 119 302 H61 C50 302 42 295 42 284 V132 C42 94 74 78 74 58 Z"
+                                fill="#2d1e15"
+                                stroke="#1c120c"
+                                stroke-width="2"
+                            />
+                            <!-- Capsule & gold foil collar -->
+                            <rect x="73" y="14" width="34" height="28" rx="4" fill="#6b4f3a" />
+                            <rect x="73" y="38" width="34" height="5" fill="#c9a46a" />
+                            <!-- Glass sheen -->
+                            <path
+                                d="M52 136 C52 108 69 92 78 68 V288 H52 Z"
+                                fill="#ffffff"
+                                opacity="0.06"
+                            />
+                            <!-- Warm dark-brown & gold bottle front label -->
+                            <rect
+                                x="50"
+                                y="136"
+                                width="80"
+                                height="118"
+                                rx="6"
+                                fill="#3f2e22"
+                                stroke="#c9a46a"
+                                stroke-width="2"
+                            />
+                            <rect
+                                x="54"
+                                y="140"
+                                width="72"
+                                height="110"
+                                rx="4"
+                                fill="none"
+                                stroke="#c9a46a"
+                                stroke-width="0.7"
+                                opacity="0.75"
+                            />
+                            <!-- Vineyard crest -->
+                            <circle
+                                cx="90"
+                                cy="156"
+                                r="7"
+                                fill="none"
+                                stroke="#c9a46a"
+                                stroke-width="1.2"
+                            />
+                            <path d="M87 156 L90 151 L93 156 L90 161 Z" fill="#c9a46a" />
+                            <!-- Label typography -->
+                            <text
+                                x="90"
+                                y="173"
+                                text-anchor="middle"
+                                fill="#e4d3c0"
+                                font-size="6.5"
+                                font-weight="600"
+                                letter-spacing="0.8"
+                            >
+                                {truncateLabel(details.vineyardName.toUpperCase(), 22)}
+                            </text>
+                            <line x1="62" y1="179" x2="118" y2="179" stroke="#c9a46a" stroke-width="0.8" />
+                            <text
+                                x="90"
+                                y="196"
+                                text-anchor="middle"
+                                fill="#fbf7f2"
+                                font-size="8.5"
+                                font-weight="700"
+                            >
+                                {truncateLabel(`${details.wineName} (${details.vintageYear})`, 20)}
+                            </text>
+                            <text
+                                x="90"
+                                y="213"
+                                text-anchor="middle"
+                                fill="#d9b882"
+                                font-size="7.5"
+                                font-weight="600"
+                            >
+                                {`${details.wineStyle} · ${details.vintageYear}`}
+                            </text>
+                            <line x1="66" y1="223" x2="114" y2="223" stroke="#8c735c" stroke-width="0.8" />
+                            <text
+                                x="90"
+                                y="239"
+                                text-anchor="middle"
+                                fill="#fbf7f2"
+                                font-size="8"
+                                font-weight="700"
+                            >
+                                {`${details.parameters.alcoholContent}% ABV · 750 ml`}
+                            </text>
+                        </svg>
+                    {/if}
                 </div>
 
                 <!-- Vineyard & Bottle Details -->

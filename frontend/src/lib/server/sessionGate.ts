@@ -1,6 +1,6 @@
 import { redirect, type ServerLoad } from '@sveltejs/kit';
 
-const exactGuestPaths = new Set(['/auth', '/forgot-password', '/reset-password', '/offerings']);
+const exactGuestPaths = new Set(['/auth', '/forgot-password', '/reset-password']);
 
 const normalizePath = (pathname: string) => {
     if (pathname.length > 1 && pathname.endsWith('/')) {
@@ -14,7 +14,13 @@ export const isGuestPath = (pathname: string) => {
     if (exactGuestPaths.has(normalized)) {
         return true;
     }
-    return normalized.startsWith('/offerings/');
+    if (/^\/offerings\/vineyard\/[^/]+$/.test(normalized)) {
+        return true;
+    }
+    if (/^\/offerings\/(?!vineyard(?:\/|$))[^/]+$/.test(normalized)) {
+        return true;
+    }
+    return false;
 };
 
 export const sanitizeRedirectTarget = (target: string | null | undefined): string => {

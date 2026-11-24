@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    import { gooeyToast } from "goey-toast-svelte";
     import editIcon from "$lib/assets/edit.svg?raw";
     import closeIcon from "$lib/assets/close.svg?raw";
     import AddButton from "$lib/components/buttons/addButton.svelte";
@@ -20,11 +21,15 @@
         createOffering,
         deleteOffering,
         getOfferings,
+        readWinePhotoAsDataUrl,
         updateOffering,
         type WineOffering,
     } from "$lib/api/offerings";
     import { getOrganisation, type Organisation } from "$lib/api/organisation";
-    import { buildBottleQrUrl } from "$lib/functions/qrRouting";
+    import {
+        buildBottleQrUrl,
+        buildVineyardOfferingsUrl,
+    } from "$lib/functions/qrRouting";
     import { session } from "$lib/stores/session.svelte";
 
     const CUSTOM_BATCH_VALUE = "__custom__";
@@ -34,6 +39,7 @@
     let organisation = $state<Organisation | null>(null);
     let loading = $state(true);
     let loadError = $state("");
+    let copiedCatalogLink = $state(false);
 
     let draftQuery = $state("");
     let query = $state("");
@@ -47,6 +53,8 @@
     let formWineName = $state("");
     let formPrice = $state<string | number | null>("");
     let formDescription = $state("");
+    let formImageUrl = $state<string | null>(null);
+    let formPhotoFilename = $state("");
     let formError = $state("");
     let formPending = $state(false);
     let showValidation = $state(false);
@@ -55,22 +63,40 @@
     let deleteError = $state("");
     let deletePending = $state(false);
 
-    let qrModalItem = $state<WineOffering | null>(null);
+    let qrModalState = $state<{
+        title: string;
+        subtitle: string;
+        targetUrl: string;
+        downloadFilename: string;
+    } | null>(null);
 
     const isOwner = $derived(session.user?.roles.includes("OWNER") ?? false);
+
+    const vineyardCatalogPath = $derived(
+        organisation?.id
+            ? `/offerings/vineyard/${encodeURIComponent(organisation.id)}`
+            : null,
+    );
+
+    const vineyardCatalogFullUrl = $derived.by(() => {
+        if (!organisation?.id) {
+            return "";
+        }
+        const origin = typeof window !== "undefined" ? window.location.origin : "";
+        return buildVineyardOfferingsUrl(origin, organisation.id);
+    });
 
     const load = async () => {
         loading = true;
         loadError = "";
         try {
-            const [loadedOfferings, loadedBottled, loadedOrg] = await Promise.all([
-                getOfferings(),
-                getBatches("BOTTLED"),
+            const [loadedOrg, loadedBottled] = await Promise.all([
                 getOrganisation().catch(() => null),
+                getBatches("BOTTLED"),
             ]);
-            items = loadedOfferings;
-            bottledBatches = loadedBottled;
             organisation = loadedOrg;
+            bottledBatches = loadedBottled;
+            items = await getOfferings(loadedOrg?.id);
         } catch (error) {
             items = [];
             loadError =
@@ -91,6 +117,48 @@
         }
         void load();
     });
+
+    const copyCatalogLink = async () => {
+        if (!vineyardCatalogFullUrl) {
+            return;
+        }
+        try {
+            await navigator.clipboard?.writeText(vineyardCatalogFullUrl);
+            copiedCatalogLink = true;
+            gooeyToast.success("Catalog link copied", {
+                description: "Share this link directly with your vineyard customers.",
+            });
+            setTimeout(() => {
+                copiedCatalogLink = false;
+            }, 2500);
+        } catch {
+            gooeyToast.warning("Copy unavailable", {
+                description: vineyardCatalogFullUrl,
+            });
+        }
+    };
+
+    const openBottleQrModal = (item: WineOffering) => {
+        const origin = typeof window !== "undefined" ? window.location.origin : "";
+        qrModalState = {
+            title: "Wine bottle QR code",
+            subtitle: `${item.wineName} · ${item.price} PLN`,
+            targetUrl: buildBottleQrUrl(origin, item.id),
+            downloadFilename: `qr-bottle-${item.id}.svg`,
+        };
+    };
+
+    const openCatalogQrModal = () => {
+        if (!organisation?.id || !vineyardCatalogFullUrl) {
+            return;
+        }
+        qrModalState = {
+            title: "Vineyard catalog QR code",
+            subtitle: organisation.name || "Vineyard Wine Offerings",
+            targetUrl: vineyardCatalogFullUrl,
+            downloadFilename: `qr-vineyard-offerings-${organisation.id}.svg`,
+        };
+    };
 
     const styleFilterOptions = $derived.by(() => {
         const distinctStyles = Array.from(
@@ -161,12 +229,37 @@
         }
     };
 
+    const handlePhotoSelected = async (event: Event) => {
+        const input = event.currentTarget as HTMLInputElement;
+        const file = input.files?.[0] ?? null;
+        if (!file) {
+            return;
+        }
+        formError = "";
+        try {
+            formImageUrl = await readWinePhotoAsDataUrl(file);
+            formPhotoFilename = file.name;
+        } catch (error) {
+            formError =
+                error instanceof Error ? error.message : "Could not read selected wine photo.";
+        } finally {
+            input.value = "";
+        }
+    };
+
+    const clearPhoto = () => {
+        formImageUrl = null;
+        formPhotoFilename = "";
+    };
+
     const openCreate = () => {
         editingItem = null;
         formError = "";
         showValidation = false;
         formPrice = "";
         formCustomWineId = "";
+        formImageUrl = null;
+        formPhotoFilename = "";
 
         const defaultBatch = bottledBatches[0] ?? null;
         if (defaultBatch) {
@@ -196,6 +289,8 @@
         formWineName = item.wineName;
         formPrice = item.price;
         formDescription = item.wineDescription;
+        formImageUrl = item.imageUrl ?? null;
+        formPhotoFilename = "";
         formOpen = true;
     };
 
@@ -234,6 +329,7 @@
                     wineName: trimmedName,
                     wineDescription: formDescription.trim(),
                     price: parsedPrice,
+                    imageUrl: formImageUrl,
                 });
             } else {
                 await createOffering({
@@ -241,6 +337,7 @@
                     wineName: trimmedName,
                     wineDescription: formDescription.trim(),
                     price: parsedPrice,
+                    imageUrl: formImageUrl,
                     organisationId: organisation?.id,
                     organisationName: organisation?.name,
                 });
@@ -281,6 +378,51 @@
             Only the organisation owner can manage wine offerings.
         </p>
     {:else}
+        {#if vineyardCatalogPath && vineyardCatalogFullUrl}
+            <section
+                class="flex flex-col gap-3 rounded-2xl border border-[#d9cbbd] bg-[#f7f1ea] p-4 text-[#3f2e22] shadow-xs sm:flex-row sm:items-center sm:justify-between"
+                aria-label="Share your vineyard offerings"
+            >
+                <div class="min-w-0 flex-1">
+                    <span class="block text-xs font-semibold tracking-wider text-[#8c735c] uppercase">
+                        Direct Vineyard Catalog Link
+                    </span>
+                    <p class="mt-0.5 text-sm text-zinc-700">
+                        Share this private vineyard link or QR code with customers so they only see
+                        <strong class="font-semibold text-[#3f2e22]">
+                            {organisation?.name || "your vineyard"}
+                        </strong>.
+                    </p>
+                    <p class="mt-1 truncate font-mono text-xs text-[#6b4f3a]">
+                        {vineyardCatalogFullUrl}
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2 shrink-0">
+                    <button
+                        type="button"
+                        onclick={() => void copyCatalogLink()}
+                        class="cursor-pointer rounded-lg border border-[#6b4f3a] bg-[#fbf7f2] px-3.5 py-2 text-xs font-semibold text-[#3f2e22] transition-colors hover:bg-[#e4d8cb]"
+                    >
+                        {copiedCatalogLink ? "Copied!" : "Copy link"}
+                    </button>
+                    <button
+                        type="button"
+                        onclick={openCatalogQrModal}
+                        class="cursor-pointer rounded-lg border border-[#c4b6a6] bg-[#fbf7f2] px-3.5 py-2 text-xs font-semibold text-[#3f2e22] transition-colors hover:bg-[#e4d8cb]"
+                    >
+                        Catalog QR
+                    </button>
+                    <a
+                        href={vineyardCatalogPath}
+                        class="rounded-lg bg-[#6b4f3a] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#3f2e22]"
+                    >
+                        Open vineyard catalog →
+                    </a>
+                </div>
+            </section>
+        {/if}
+
         <div class="flex justify-end">
             <div class="w-56">
                 <AddButton text="New offering" onClick={openCreate} />
@@ -326,15 +468,30 @@
                         >
                             {#snippet cells()}
                                 <td class="px-4 py-3">
-                                    <div class="flex flex-col gap-0.5">
-                                        <span class="font-semibold text-[#3f2e22]">
-                                            {item.wineName}
-                                        </span>
-                                        {#if item.grapeType}
-                                            <span class="text-xs text-zinc-600">
-                                                {item.grapeType}
+                                    <div class="flex items-center gap-3">
+                                        {#if item.imageUrl}
+                                            <img
+                                                src={item.imageUrl}
+                                                alt={`Photo of ${item.wineName}`}
+                                                class="h-11 w-11 shrink-0 rounded-lg border border-[#d9cbbd] bg-[#fbf7f2] object-cover"
+                                            />
+                                        {:else}
+                                            <span
+                                                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[#e4d8cb] bg-[#fbf7f2] text-[10px] font-semibold uppercase text-[#8c735c]"
+                                            >
+                                                Wine
                                             </span>
                                         {/if}
+                                        <div class="flex flex-col gap-0.5">
+                                            <span class="font-semibold text-[#3f2e22]">
+                                                {item.wineName}
+                                            </span>
+                                            {#if item.grapeType}
+                                                <span class="text-xs text-zinc-600">
+                                                    {item.grapeType}
+                                                </span>
+                                            {/if}
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="px-4 py-3">
@@ -362,7 +519,7 @@
                                         isFolded={false}
                                         gentle={true}
                                         class="justify-center border border-[#6b4f3a] bg-[#fbf7f2] font-medium text-[#3f2e22]"
-                                        onClick={() => (qrModalItem = item)}
+                                        onClick={() => openBottleQrModal(item)}
                                     />
                                 </div>
                                 <a
@@ -397,10 +554,19 @@
                             {/snippet}
                             {#snippet details()}
                                 <div class="flex flex-col gap-3 text-sm text-[#3f2e22]">
-                                    <p class="italic text-zinc-700">
-                                        {item.wineDescription ||
-                                            "No tasting description provided for this offering."}
-                                    </p>
+                                    <div class="flex flex-col gap-4 sm:flex-row sm:items-start">
+                                        {#if item.imageUrl}
+                                            <img
+                                                src={item.imageUrl}
+                                                alt={`Bottle preview for ${item.wineName}`}
+                                                class="h-28 w-28 shrink-0 rounded-xl border border-[#d9cbbd] bg-white object-cover shadow-xs"
+                                            />
+                                        {/if}
+                                        <p class="italic text-zinc-700">
+                                            {item.wineDescription ||
+                                                "No tasting description provided for this offering."}
+                                        </p>
+                                    </div>
                                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-4">
                                         <div class="rounded-xl border border-[#e4d8cb] bg-white px-3.5 py-2.5">
                                             <span class="block text-xs font-medium text-zinc-500">
@@ -507,6 +673,46 @@
                 }
             />
 
+            <div class="flex flex-col gap-1.5">
+                <span class="text-sm text-zinc-600">Wine photo</span>
+                <label
+                    class="flex h-36 w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-[#c4b6a6] bg-[#fdfaf7] transition-colors hover:border-[#8c735c]"
+                    aria-label="Choose wine photo"
+                >
+                    {#if formImageUrl}
+                        <img
+                            src={formImageUrl}
+                            alt="Selected wine preview"
+                            class="h-full w-full object-contain p-1.5"
+                        />
+                    {:else}
+                        <span class="px-4 text-center text-sm text-[#a89180]">
+                            Click to upload wine photo (PNG, JPEG, WebP)
+                        </span>
+                    {/if}
+                    <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        class="sr-only"
+                        onchange={(event) => void handlePhotoSelected(event)}
+                    />
+                </label>
+                {#if formImageUrl}
+                    <div class="flex items-center justify-between gap-2 text-xs">
+                        <span class="truncate text-zinc-500">
+                            {formPhotoFilename || "Photo attached"}
+                        </span>
+                        <button
+                            type="button"
+                            onclick={clearPhoto}
+                            class="cursor-pointer font-semibold text-[#8f3d32] hover:underline"
+                        >
+                            Remove photo
+                        </button>
+                    </div>
+                {/if}
+            </div>
+
             <TextareaField
                 label="Description (optional)"
                 placeholder="Tasting notes, aroma profile, food pairings..."
@@ -524,7 +730,7 @@
 {#if deletingItem}
     <ConfirmationDialog
         title="Delete wine offering"
-        text={deleteError || `Remove "${deletingItem.wineName}" from the public offerings catalog?`}
+        text={deleteError || `Remove "${deletingItem.wineName}" from your vineyard offerings catalog?`}
         acceptText="Delete"
         onClose={() => (deletingItem = null)}
         onCancel={() => (deletingItem = null)}
@@ -532,12 +738,12 @@
     />
 {/if}
 
-{#if qrModalItem}
+{#if qrModalState}
     <QrCodeModal
-        title="Wine bottle QR code"
-        subtitle={`${qrModalItem.wineName} · ${qrModalItem.price} PLN`}
-        targetUrl={buildBottleQrUrl(window.location.origin, qrModalItem.id)}
-        downloadFilename={`qr-bottle-${qrModalItem.id}.svg`}
-        onClose={() => (qrModalItem = null)}
+        title={qrModalState.title}
+        subtitle={qrModalState.subtitle}
+        targetUrl={qrModalState.targetUrl}
+        downloadFilename={qrModalState.downloadFilename}
+        onClose={() => (qrModalState = null)}
     />
 {/if}

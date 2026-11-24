@@ -6,28 +6,15 @@
     import CreateVineyardButton from "../userMenu/createVineyardButton.svelte";
     import InvitationButton from "../userMenu/invitationButton.svelte";
     import FormWindow from "$lib/components/formWindow/formWindow.svelte";
-    import ConfirmationDialog from "$lib/components/confirmationDialog/confirmationDialog.svelte";
-    import InputField from "$lib/components/inputField/inputField.svelte";
-    import Button from "$lib/components/buttons/button.svelte";
+    import OrganisationFields from "./organisationFields.svelte";
     import OwnerDashboard from "$lib/components/dashboard/ownerDashboard.svelte";
     import EmployeeDashboard from "$lib/components/dashboard/employeeDashboard.svelte";
     import { getUserInfo } from "$lib/functions/getUserInfo";
-    import nameIcon from "$lib/assets/name.svg?raw";
-    import cityIcon from "$lib/assets/city.svg?raw";
-    import streetIcon from "$lib/assets/street.svg?raw";
-    import postalCodeIcon from "$lib/assets/postal_code.svg?raw";
-    import taxIcon from "$lib/assets/tax.svg?raw";
-    import mottoIcon from "$lib/assets/motto.svg?raw";
-    import closeIcon from "$lib/assets/close.svg?raw";
-    import passwordIcon from "$lib/assets/password.svg?raw";
     import {
         acceptInvitation,
         createOrganisation,
-        deleteOrganisation,
         getOrganisation,
         getUserInvitations,
-        leaveOrganisation,
-        updateOrganisation,
         uploadOrganisationLogo,
         getOrganisationLogoByIdUrl,
         type Organisation,
@@ -39,10 +26,9 @@
     let roles = $state<string[]>([]);
     let organisation = $state<Organisation | null>(null);
     let ready = $state(false);
-    let dialog = $state<"create" | "edit" | "invite" | "delete" | "leave" | null>(null);
+    let dialog = $state<"create" | "invite" | null>(null);
     let showErrors = $state(false);
     let pending = $state(false);
-    let deletePassword = $state("");
 
     let name = $state("");
     let city = $state("");
@@ -60,7 +46,6 @@
     const isMember = $derived(membership === "MEMBER" || isOwner);
     const nameInvalid = $derived(showErrors && name.trim().length === 0);
     const cityInvalid = $derived(showErrors && city.trim().length === 0);
-    const deletePasswordMissing = $derived(showErrors && deletePassword.length === 0);
     const inviteName = $derived(organisation?.name || invitation?.organisationName || "");
     const inviteMotto = $derived(organisation?.motto?.trim() || "");
     const inviteStreet = $derived(organisation?.street?.trim() || "");
@@ -76,13 +61,13 @@
             : null,
     );
 
-    const fillForm = (source: Organisation | null) => {
-        name = source?.name ?? "";
-        city = source?.city ?? "";
-        street = source?.street ?? "";
-        postalCode = source?.postalCode ?? "";
-        taxId = source?.taxId ?? "";
-        motto = source?.motto ?? "";
+    const resetForm = () => {
+        name = "";
+        city = "";
+        street = "";
+        postalCode = "";
+        taxId = "";
+        motto = "";
         logoFile = null;
         if (logoPreviewUrl) {
             URL.revokeObjectURL(logoPreviewUrl);
@@ -127,25 +112,13 @@
     });
 
     const openCreate = () => {
-        fillForm(null);
+        resetForm();
         showErrors = false;
         dialog = "create";
     };
 
-    const openEdit = () => {
-        fillForm(organisation);
-        showErrors = false;
-        dialog = "edit";
-    };
-
     const openInvite = () => {
         dialog = "invite";
-    };
-
-    const openDelete = () => {
-        deletePassword = "";
-        showErrors = false;
-        dialog = "delete";
     };
 
     const onLogoFileChange = (event: Event) => {
@@ -245,117 +218,6 @@
         }
     };
 
-    const saveOrganisation = async () => {
-        if (pending) {
-            return;
-        }
-        showErrors = true;
-        gooeyToast.dismiss({ type: ["error", "warning"] });
-        const messages = organisationMessages();
-        if (messages.length > 0) {
-            gooeyToast.warning("Check vineyard details", {
-                description: messages.join(" "),
-            });
-            return;
-        }
-
-        pending = true;
-        try {
-            organisation = await updateOrganisation(draft());
-            if (logoFile) {
-                try {
-                    await uploadOrganisationLogo(logoFile);
-                    logoTimestamp = Date.now();
-                    organisation = await getOrganisation();
-                } catch {
-                    gooeyToast.warning("Logo upload failed", {
-                        description: "Details were saved, but the new logo could not be uploaded.",
-                    });
-                }
-            }
-            dialog = null;
-            gooeyToast.success("Vineyard updated", {
-                description: "Organisation details have been saved.",
-            });
-        } catch (error) {
-            gooeyToast.error("Could not update the organisation", {
-                description: error instanceof Error ? error.message : "Please try again.",
-            });
-        } finally {
-            pending = false;
-        }
-    };
-
-    const submitDelete = async () => {
-        if (pending) {
-            return;
-        }
-        showErrors = true;
-        gooeyToast.dismiss({ type: ["error", "warning"] });
-        if (deletePassword.length === 0) {
-            gooeyToast.warning("Password required", {
-                description: "Enter your password.",
-            });
-            return;
-        }
-
-        pending = true;
-        try {
-            await deleteOrganisation(deletePassword);
-            organisation = null;
-            membership = "NONE";
-            roles = roles.filter((role) => role !== "OWNER");
-            if (session.user) {
-                const currentRoles = Array.isArray(session.user.roles) ? session.user.roles : [];
-                setUser({
-                    ...session.user,
-                    roles: currentRoles.filter((role) => role !== "OWNER"),
-                });
-            }
-            dialog = null;
-            await refreshSession();
-            gooeyToast.info("Vineyard deleted", {
-                description: "The organisation has been permanently removed.",
-            });
-        } catch (error) {
-            gooeyToast.error("Could not delete the organisation", {
-                description: error instanceof Error ? error.message : "Please try again.",
-            });
-        } finally {
-            pending = false;
-        }
-    };
-
-    const confirmLeave = async () => {
-        if (pending) {
-            return;
-        }
-        pending = true;
-        try {
-            await leaveOrganisation();
-            organisation = null;
-            membership = "NONE";
-            if (session.user) {
-                const currentRoles = Array.isArray(session.user.roles) ? session.user.roles : [];
-                setUser({
-                    ...session.user,
-                    roles: currentRoles.filter((role) => role !== "WORKER" && role !== "OENOLOGIST"),
-                });
-            }
-            dialog = null;
-            await refreshSession();
-            gooeyToast.info("Left vineyard", {
-                description: "You are no longer a member of this organisation.",
-            });
-        } catch (error) {
-            gooeyToast.error("Could not leave the vineyard", {
-                description: error instanceof Error ? error.message : "Please try again.",
-            });
-        } finally {
-            pending = false;
-        }
-    };
-
     const joinOrganisation = async () => {
         if (pending) {
             return;
@@ -377,38 +239,6 @@
     };
 </script>
 
-{#snippet organisationFields()}
-    <div class={["org-fields", sideBySide.current && "is-side"]}>
-        <InputField class="field-name" label="Name" placeholder="Vineyard name" bind:value={name} svg={nameIcon} invalid={nameInvalid} />
-        <InputField class="field-city" label="City" placeholder="City" bind:value={city} svg={cityIcon} invalid={cityInvalid} />
-        <InputField class="field-street" label="Street" placeholder="Street" bind:value={street} svg={streetIcon} />
-        <InputField class="field-postal" label="Postal code" placeholder="00-000" bind:value={postalCode} svg={postalCodeIcon} />
-        <InputField class="field-tax" label="Tax ID" placeholder="Tax ID" bind:value={taxId} svg={taxIcon} />
-        <InputField class="field-motto" label="Motto" placeholder="Motto" bind:value={motto} svg={mottoIcon} />
-        <div class="logo-field">
-            <span class="text-sm text-zinc-600">Logo</span>
-            <label class="logo-upload-label" aria-label="Choose a logo image">
-                {#if logoPreviewUrl}
-                    <img src={logoPreviewUrl} alt="Logo preview" class="logo-preview" />
-                {:else if organisation?.id && organisation?.logoPath}
-                    <img src="{getOrganisationLogoByIdUrl(organisation.id)}?t={logoTimestamp}" alt="Current logo" class="logo-preview" />
-                {:else}
-                    <span class="logo-placeholder">Click to upload logo</span>
-                {/if}
-                <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp"
-                    class="sr-only"
-                    onchange={onLogoFileChange}
-                />
-            </label>
-            {#if logoFile}
-                <p class="text-xs text-zinc-500 mt-1">{logoFile.name}</p>
-            {/if}
-        </div>
-    </div>
-{/snippet}
-
 <div
     class={[
         "flex min-h-full w-full flex-col overflow-y-auto",
@@ -424,80 +254,52 @@
     {:else if !ready}
         <p class="text-lg text-zinc-700">Loading your vineyard...</p>
     {:else if isOwner}
-        <OwnerDashboard
-            {organisation}
-            {logoTimestamp}
-            onEditVineyard={openEdit}
-            onDeleteVineyard={openDelete}
-        />
+        <OwnerDashboard {organisation} {logoTimestamp} />
     {:else if isMember}
-        <EmployeeDashboard
-            {organisation}
-            {roles}
-            {logoTimestamp}
-            onLeaveVineyard={() => (dialog = "leave")}
-        />
+        <EmployeeDashboard {organisation} {roles} {logoTimestamp} />
     {:else}
-        <section class="flex flex-wrap gap-4" aria-label="User menu">
-            <CreateVineyardButton disabled={!ready || isMember} onClick={openCreate} />
-            <InvitationButton disabled={!ready || !invited} onClick={openInvite} />
+        <section class="flex flex-col items-center gap-4" aria-label="User menu">
+            <div class="flex flex-wrap justify-center gap-4">
+                <CreateVineyardButton disabled={!ready || isMember} onClick={openCreate} />
+                <InvitationButton disabled={!ready || !invited} onClick={openInvite} />
+            </div>
+            <p class="text-xs text-zinc-600">
+                You can also manage vineyard membership anytime in your
+                <a href="/profile" class="font-semibold text-[#6b4f3a] underline hover:text-[#3f2e22]">
+                    Profile
+                </a>.
+            </p>
         </section>
     {/if}
 </div>
 
-{#if dialog === "create" || dialog === "edit"}
+{#if dialog === "create"}
     <FormWindow
-        title={dialog === "edit" ? "Edit vineyard" : "Create organisation"}
+        title="Create organisation"
         showBreadcrumbs={false}
-        acceptText={dialog === "edit" ? "Save" : "Create"}
+        acceptText="Create"
         wide={sideBySide.current}
         onClose={() => (dialog = null)}
         onCancel={() => (dialog = null)}
-        onAccept={() => void (dialog === "edit" ? saveOrganisation() : submitOrganisation())}
+        onAccept={() => void submitOrganisation()}
     >
-        {@render organisationFields()}
+        <OrganisationFields
+            bind:name
+            bind:city
+            bind:street
+            bind:postalCode
+            bind:taxId
+            bind:motto
+            bind:logoFile
+            {logoPreviewUrl}
+            organisation={null}
+            {logoTimestamp}
+            {nameInvalid}
+            {cityInvalid}
+            sideBySide={sideBySide.current}
+            {onLogoFileChange}
+        />
     </FormWindow>
-{/if}
-
-{#if dialog === "delete"}
-    <FormWindow
-        title="Delete vineyard"
-        showBreadcrumbs={false}
-        showActions={false}
-        onClose={() => (dialog = null)}
-    >
-        <form class="flex flex-col gap-4" novalidate onsubmit={(event) => { event.preventDefault(); void submitDelete(); }}>
-            <p class="text-lg leading-relaxed text-zinc-800">
-                Deleting the vineyard removes it for every member. Enter your password to confirm.
-            </p>
-            <InputField
-                label="Password"
-                type="password"
-                placeholder="Please enter your password"
-                autocomplete="current-password"
-                bind:value={deletePassword}
-                svg={passwordIcon}
-                invalid={deletePasswordMissing}
-            />
-            <div class="flex flex-col gap-4 px-1">
-                <Button type="submit" svg={closeIcon} text="Delete vineyard" isFolded={false} gentle={true} class="bg-[#8f3d32] text-white fill-white" />
-                <button type="button" class="h-12 w-full cursor-pointer rounded-lg border border-[#c4b6a6] text-zinc-800 hover:bg-[#efe6dc]" onclick={() => (dialog = null)}>
-                    Cancel
-                </button>
-            </div>
-        </form>
-    </FormWindow>
-{/if}
-
-{#if dialog === "leave"}
-    <ConfirmationDialog
-        title="Leave vineyard"
-        text="Leave the vineyard? You will need a new invitation before you can work here again."
-        acceptText="Leave"
-        onClose={() => (dialog = null)}
-        onCancel={() => (dialog = null)}
-        onAccept={() => void confirmLeave()}
-    />
 {/if}
 
 {#if dialog === "invite"}
@@ -541,88 +343,6 @@
 
 <style>
     @reference "../../../app.css";
-
-    .org-fields {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .org-fields.is-side {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-        grid-template-areas:
-            "name city"
-            "street postal"
-            "tax motto"
-            "logo logo";
-        align-items: start;
-        column-gap: 1.25rem;
-        row-gap: 1rem;
-    }
-
-    .org-fields.is-side :global(.field-name) {
-        grid-area: name;
-    }
-
-    .org-fields.is-side :global(.field-city) {
-        grid-area: city;
-    }
-
-    .org-fields.is-side :global(.field-street) {
-        grid-area: street;
-    }
-
-    .org-fields.is-side :global(.field-postal) {
-        grid-area: postal;
-    }
-
-    .org-fields.is-side :global(.field-tax) {
-        grid-area: tax;
-    }
-
-    .org-fields.is-side :global(.field-motto) {
-        grid-area: motto;
-    }
-
-    .org-fields.is-side .logo-field {
-        grid-area: logo;
-    }
-
-    .logo-field {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-    }
-
-    .logo-upload-label {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        height: 10rem;
-        border-radius: 0.75rem;
-        border: 2px dashed #c4b6a6;
-        background: #fdfaf7;
-        cursor: pointer;
-        overflow: hidden;
-        transition: border-color 0.2s;
-    }
-
-    .logo-upload-label:hover {
-        border-color: #8c735c;
-    }
-
-    .logo-preview {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-    }
-
-    .logo-placeholder {
-        font-size: 0.875rem;
-        color: #a89180;
-    }
 
     .org-logo {
         width: 7rem;

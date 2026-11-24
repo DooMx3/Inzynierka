@@ -113,3 +113,7 @@ export const buildEquipmentQrUrl = (origin: string, equipmentId: string): string
 
 export const buildBottleQrUrl = (origin: string, offeringId: string): string =>
     `${origin.replace(/\/$/, '')}/offerings/${encodeURIComponent(offeringId)}`;
+
+export const buildVineyardOfferingsUrl = (origin: string, organisationId: string): string =>
+    `${origin.replace(/\/$/, '')}/offerings/vineyard/${encodeURIComponent(organisationId)}`;
+

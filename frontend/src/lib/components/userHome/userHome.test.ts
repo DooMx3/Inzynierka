@@ -316,7 +316,7 @@ describe('User home', () => {
         expect(calls.some((call) => call.url === '/api/organisations' && call.init?.method === 'POST')).toBe(false);
     });
 
-    it('offers a member a way to leave the vineyard', async () => {
+    it('shows employee workspace without Leave vineyard button on home (relocated to Profile)', async () => {
         membershipStatus = 'MEMBER';
         invitationPayload = null;
         infoOrganisation = organisation;
@@ -325,24 +325,13 @@ describe('User home', () => {
 
         expect(screen.getByRole('heading', { name: 'Winnica Anna' })).toBeInTheDocument();
         expect(screen.queryByRole('button', { name: /Create new vineyard/i })).not.toBeInTheDocument();
-        await fireEvent.click(screen.getByRole('button', { name: 'Leave vineyard' }));
-        expect(screen.getByText(/Leave the vineyard/)).toBeInTheDocument();
-        await fireEvent.click(screen.getByRole('button', { name: 'Leave' }));
-
-        await waitFor(() => {
-            expect(screen.getByRole('button', { name: /Create new vineyard/i })).toBeEnabled();
-            expect(infoSpy).toHaveBeenCalledWith('Left vineyard', {
-                description: 'You are no longer a member of this organisation.',
-            });
-        });
-        expect(warningSpy).not.toHaveBeenCalled();
-        expect(errorSpy).not.toHaveBeenCalled();
+        expect(screen.queryByRole('button', { name: 'Leave vineyard' })).not.toBeInTheDocument();
         expect(
-            calls.some((call) => call.url === '/api/organisations/leave' && call.init?.method === 'DELETE'),
-        ).toBe(true);
+            screen.getByRole('link', { name: /Membership settings in Profile/i }),
+        ).toHaveAttribute('href', '/profile');
     });
 
-    it('lets the owner edit and delete the vineyard', async () => {
+    it('shows owner executive dashboard without Edit/Delete vineyard buttons on home (relocated to Management)', async () => {
         membershipStatus = 'MEMBER';
         roles = ['OWNER'];
         invitationPayload = null;
@@ -351,42 +340,11 @@ describe('User home', () => {
         await shown();
 
         expect(await screen.findByText('Sun in every glass.')).toBeInTheDocument();
-        await fireEvent.click(screen.getByRole('button', { name: 'Edit vineyard' }));
-        const name = screen.getByLabelText('Name') as HTMLInputElement;
-        expect(name.value).toBe('Winnica Anna');
-        await fireEvent.input(name, { target: { value: 'Winnica Nowa' } });
-        await fireEvent.click(screen.getByRole('button', { name: 'Save' }));
-
-        await waitFor(() => {
-            expect(screen.getByRole('heading', { name: 'Winnica Nowa' })).toBeInTheDocument();
-        });
-        expect(successSpy).toHaveBeenCalledWith('Vineyard updated', {
-            description: 'Organisation details have been saved.',
-        });
-        const update = calls.find((call) => call.url === '/api/organisations' && call.init?.method === 'PUT');
-        expect(update?.init?.body).toContain('"name":"Winnica Nowa"');
-
-        await fireEvent.click(screen.getByRole('button', { name: 'Delete vineyard' }));
-        const dialog = screen.getByRole('dialog');
-        await fireEvent.click(within(dialog).getByRole('button', { name: 'Delete vineyard' }));
-        expect(warningSpy).toHaveBeenCalledWith('Password required', {
-            description: 'Enter your password.',
-        });
-        expect(within(dialog).getByLabelText('Password').parentElement).toHaveClass('border-red-500');
-        expect(calls.some((call) => call.url === '/api/organisations' && call.init?.method === 'DELETE')).toBe(false);
-
-        await fireEvent.input(within(dialog).getByLabelText('Password'), {
-            target: { value: 'Superextrasecurepassword1!' },
-        });
-        await fireEvent.click(within(dialog).getByRole('button', { name: 'Delete vineyard' }));
-
-        await waitFor(() => {
-            expect(screen.getByRole('button', { name: /Create new vineyard/i })).toBeEnabled();
-            expect(infoSpy).toHaveBeenCalledWith('Vineyard deleted', {
-                description: 'The organisation has been permanently removed.',
-            });
-        });
-        const removal = calls.find((call) => call.url === '/api/organisations' && call.init?.method === 'DELETE');
-        expect(removal?.init?.body).toBe(JSON.stringify({ password: 'Superextrasecurepassword1!' }));
+        expect(screen.queryByRole('button', { name: 'Edit vineyard' })).not.toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Delete vineyard' })).not.toBeInTheDocument();
+        expect(screen.getByRole('link', { name: 'Vineyard' })).toHaveAttribute(
+            'href',
+            '/management/vineyard',
+        );
     });
 });

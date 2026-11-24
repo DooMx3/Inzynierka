@@ -36,19 +36,13 @@
         </span>
     {/if}
     <span class={["flex items-center justify-end gap-1.5 sm:gap-2 shrink-0 pr-2 sm:pr-4", showSearch && "w-1/3"]}>
-        <a
-            href="/offerings"
-            class="ml-auto rounded-lg border border-[#d9cbbd] bg-[#f7f1ea] px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium text-[#4a3428] transition-colors hover:bg-[#e4d3c0]"
-        >
-            Offerings
-        </a>
         {#if session.user}
             <TasksHeaderButton />
             <ProfileMenu />
         {:else}
             <a
                 href="/auth"
-                class="sign-in flex items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-lg bg-[#e4d3c0] px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium text-[#4a3428] fill-[#4a3428] stroke-[#4a3428] transition-colors duration-200 hover:bg-[#d4c0a8]"
+                class="sign-in ml-auto flex items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-lg bg-[#e4d3c0] px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium text-[#4a3428] fill-[#4a3428] stroke-[#4a3428] transition-colors duration-200 hover:bg-[#d4c0a8]"
             >
                 <span class="shrink-0" role="img" aria-hidden="true">
                     <!-- eslint-disable-next-line svelte/no-at-html-tags -->

@@ -139,16 +139,14 @@ describe('Title bar', () => {
         expect(tasksBtn).toHaveClass('bg-[#6b4f3a]', 'text-white');
     });
 
-    it('renders Offerings link for both signed-in and signed-out users', () => {
+    it('does not render an Offerings button in the top bar for signed-in or signed-out users', () => {
         const { unmount } = render(TitleBar);
-        const signedInOfferings = screen.getByRole('link', { name: 'Offerings' });
-        expect(signedInOfferings).toHaveAttribute('href', '/offerings');
+        expect(screen.queryByRole('link', { name: 'Offerings' })).not.toBeInTheDocument();
         unmount();
 
         setUser(null);
         render(TitleBar);
-        const signedOutOfferings = screen.getByRole('link', { name: 'Offerings' });
-        expect(signedOutOfferings).toHaveAttribute('href', '/offerings');
+        expect(screen.queryByRole('link', { name: 'Offerings' })).not.toBeInTheDocument();
         expect(screen.queryByRole('button', { name: 'Tasks' })).not.toBeInTheDocument();
     });
 

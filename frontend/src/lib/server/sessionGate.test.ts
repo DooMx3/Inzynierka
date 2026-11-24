@@ -73,16 +73,24 @@ describe('Session gate', () => {
         await protectedLoad(eventFor('/profile', signedIn));
     });
 
-    it('allows guest access to public offerings and customer bottle QR views without session check', async () => {
-        expect(isGuestPath('/offerings')).toBe(true);
-        expect(isGuestPath('/offerings/')).toBe(true);
+    it('allows guest access only to specific vineyard catalog links and bottle QR views, blocking global /offerings', async () => {
+        expect(isGuestPath('/offerings')).toBe(false);
+        expect(isGuestPath('/offerings/')).toBe(false);
+        expect(isGuestPath('/offerings/vineyard')).toBe(false);
+        expect(isGuestPath('/offerings/vineyard/')).toBe(false);
+        expect(isGuestPath('/offerings/vineyard/org-uuid-123')).toBe(true);
         expect(isGuestPath('/offerings/bottle-uuid-123')).toBe(true);
         expect(isGuestPath('/qr/equipment/eq-1')).toBe(false);
+
+        await expectRedirect(
+            () => protectedLoad(eventFor('/offerings', signedOut)),
+            '/auth?redirectTo=%2Fofferings',
+        );
 
         let called = false;
         for (const publicUrl of [
             'http://localhost/forgot-password',
-            'http://localhost/offerings',
+            'http://localhost/offerings/vineyard/org-1',
             'http://localhost/offerings/wine-1',
         ]) {
             await layoutLoad({

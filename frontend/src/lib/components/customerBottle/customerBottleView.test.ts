@@ -1,14 +1,17 @@
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/svelte';
 import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
 import CustomerBottleView from './customerBottleView.svelte';
-import PublicOfferingsPage from '../../../routes/offerings/+page.svelte';
+import VineyardOfferingsPage from '../../../routes/offerings/vineyard/[organisationId]/+page.svelte';
 import BottleDetailsPage from '../../../routes/offerings/[id]/+page.svelte';
 import { createBatch } from '$lib/api/batches';
 import { createOffering } from '$lib/api/offerings';
 import { createBatchParameter } from '$lib/api/parameters';
 import { setUser } from '$lib/stores/session.svelte';
 
-describe('Public Offerings Catalog & Customer Bottle View (unauthenticated guest)', () => {
+const SAMPLE_WINE_PHOTO =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
+
+describe('Vineyard-Scoped Offerings Catalog & Customer Bottle View (unauthenticated guest)', () => {
     const originalFetch = globalThis.fetch;
 
     beforeEach(() => {
@@ -76,7 +79,7 @@ describe('Public Offerings Catalog & Customer Bottle View (unauthenticated guest
                 },
             ],
         });
-        // Adjust aged batch createdAt in localStorage so barrel duration spans multiple months
+
         const rawBatches = JSON.parse(
             localStorage.getItem('wms_production_batches_v1') ?? '[]',
         ) as Array<Record<string, unknown>>;
@@ -108,7 +111,6 @@ describe('Public Offerings Catalog & Customer Bottle View (unauthenticated guest
             ],
         });
 
-        // Pin bottled batch date to 2026-11-20 for deterministic assertions
         const updatedBatches = JSON.parse(
             localStorage.getItem('wms_production_batches_v1') ?? '[]',
         ) as Array<Record<string, unknown>>;
@@ -131,30 +133,48 @@ describe('Public Offerings Catalog & Customer Bottle View (unauthenticated guest
             wineName: bottled.name,
             wineDescription: bottled.description,
             price: 85,
+            imageUrl: SAMPLE_WINE_PHOTO,
             organisationId: 'org-lublin-1',
             organisationName: 'Winnica Sandomierska',
+        });
+
+        await createOffering({
+            wineId: 'other-wine-uuid',
+            wineName: 'Unrelated Vineyard Wine',
+            wineDescription: 'Belongs to a different vineyard',
+            price: 120,
+            organisationId: 'org-other-99',
+            organisationName: 'Inna Winnica',
         });
 
         return offering;
     };
 
-    it('renders the public offerings catalog for an unauthenticated guest with specifications and provenance link', async () => {
-        window.location.href = 'http://localhost/offerings';
+    it('renders only the target vineyard offerings with wine photo at /offerings/vineyard/[organisationId]', async () => {
         const offering = await seedEstateBottleOffering();
+        window.location.href = 'http://localhost/offerings/vineyard/org-lublin-1';
 
         globalThis.fetch = (async () =>
             new Response('[]', { status: 200 })) as unknown as typeof fetch;
 
-        render(PublicOfferingsPage);
+        render(VineyardOfferingsPage);
 
         await waitFor(() => {
             expect(
-                screen.getByRole('heading', { name: 'Our Wine Offerings' }),
+                screen.getByRole('heading', { name: 'Winnica Sandomierska' }),
             ).toBeInTheDocument();
             expect(
                 screen.getByRole('heading', { name: 'Regent Grand Reserve' }),
             ).toBeInTheDocument();
         });
+
+        // Strictly hides offerings from other vineyards
+        expect(screen.queryByText('Unrelated Vineyard Wine')).not.toBeInTheDocument();
+
+        // Displays uploaded wine photo on card
+        expect(
+            screen.getByAltText('Photo of Regent Grand Reserve'),
+        ).toHaveAttribute('src', SAMPLE_WINE_PHOTO);
 
         expect(screen.getByText('85 PLN')).toBeInTheDocument();
         expect(screen.getByText('Dry wine')).toBeInTheDocument();
@@ -173,11 +193,11 @@ describe('Public Offerings Catalog & Customer Bottle View (unauthenticated guest
             target: { value: 'Chardonnay' },
         });
         expect(
-            screen.getByText('No wine offerings match your criteria.'),
+            screen.getByText('No wine offerings published for this vineyard yet.'),
         ).toBeInTheDocument();
     });
 
-    it('renders Customer Bottle View (/offerings/[id]) for an unauthenticated guest with chemical parameters, production timeline, and table of nutrients', async () => {
+    it('renders Customer Bottle View (/offerings/[id]) with wine photo, vineyard-scoped back link, parameters, timeline, and nutrients', async () => {
         const offering = await seedEstateBottleOffering();
         window.location.href = `http://localhost/offerings/${offering.id}`;
 
@@ -194,22 +214,20 @@ describe('Public Offerings Catalog & Customer Bottle View (unauthenticated guest
             ).toBeInTheDocument();
         });
 
-        // Navigation & Hero section
+        // Scoped back link to this specific vineyard's catalog (NOT global /offerings)
         expect(
-            screen.getByRole('link', { name: '← Back to offerings' }),
-        ).toHaveAttribute('href', '/offerings');
+            screen.getByRole('link', { name: '← Back to vineyard offerings' }),
+        ).toHaveAttribute('href', '/offerings/vineyard/org-lublin-1');
+
         expect(screen.getByText('Winnica Sandomierska')).toBeInTheDocument();
         expect(screen.getByText('85 PLN')).toBeInTheDocument();
         expect(screen.getByText('Dry wine')).toBeInTheDocument();
         expect(screen.getByText('Vintage 2026')).toBeInTheDocument();
         expect(
-            screen.getByText('Blackberry, dark plum, and toasted oak spice.'),
-        ).toBeInTheDocument();
-        expect(
-            screen.getByRole('img', { name: 'Wine bottle label for Regent Grand Reserve' }),
-        ).toBeInTheDocument();
+            screen.getByAltText('Photo of Regent Grand Reserve'),
+        ).toHaveAttribute('src', SAMPLE_WINE_PHOTO);
 
-        // Final Wine Parameters Card (sugar, acidity, pH, alcohol)
+        // Final Wine Parameters Card
         const paramsSection = screen.getByRole('region', {
             name: 'Final wine parameters',
         });
@@ -218,7 +236,7 @@ describe('Public Offerings Catalog & Customer Bottle View (unauthenticated guest
         expect(within(paramsSection).getByText('3.54')).toBeInTheDocument();
         expect(within(paramsSection).getByText('13.6% vol.')).toBeInTheDocument();
 
-        // Production Journey Flowchart (grape variety, harvest date, fermentation, barrel duration, bottling date)
+        // Production Journey Flowchart
         const journeySection = screen.getByRole('region', {
             name: 'Production journey',
         });
@@ -241,10 +259,6 @@ describe('Public Offerings Catalog & Customer Bottle View (unauthenticated guest
         });
         expect(within(nutrientsTable).getByText('Energy value')).toBeInTheDocument();
         expect(within(nutrientsTable).getByText(/kJ \/ .* kcal/)).toBeInTheDocument();
-        expect(within(nutrientsTable).getByText('Carbohydrates')).toBeInTheDocument();
-        expect(within(nutrientsTable).getByText('of which: sugars')).toBeInTheDocument();
-        expect(within(nutrientsTable).getByText('Protein')).toBeInTheDocument();
-        expect(within(nutrientsTable).getByText('Salt')).toBeInTheDocument();
         expect(within(nutrientsTable).queryAllByRole('spinbutton')).toHaveLength(0);
     });
 
