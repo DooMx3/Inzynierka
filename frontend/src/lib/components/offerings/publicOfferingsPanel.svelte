@@ -3,29 +3,50 @@
     import DropdownInput from "$lib/components/dropdownInput/dropdownInput.svelte";
     import InputField from "$lib/components/inputField/inputField.svelte";
     import OfferingCard from "./offeringCard.svelte";
-    import { getOfferings, type WineOffering } from "$lib/api/offerings";
+    import {
+        getOfferingsByOrganisation,
+        type WineOffering,
+    } from "$lib/api/offerings";
+    import { getOrganisationLogoByIdUrl } from "$lib/api/organisation";
     import { session } from "$lib/stores/session.svelte";
+
+    let {
+        organisationId,
+    }: {
+        organisationId: string;
+    } = $props();
 
     let offerings = $state<WineOffering[]>([]);
     let loading = $state(true);
     let loadError = $state("");
+    let logoHidden = $state(false);
 
     let searchQuery = $state("");
     let selectedStyle = $state("all");
 
     const isOwner = $derived(session.user?.roles.includes("OWNER") ?? false);
 
+    const vineyardTitle = $derived.by(() => {
+        const named = offerings.find((item) => Boolean(item.organisationName?.trim()));
+        return named?.organisationName?.trim() || "Vineyard Wine Offerings";
+    });
+
+    const logoUrl = $derived(
+        organisationId.trim() ? getOrganisationLogoByIdUrl(organisationId.trim()) : null,
+    );
+
     const loadCatalog = async () => {
         loading = true;
         loadError = "";
+        logoHidden = false;
         try {
-            offerings = await getOfferings();
+            offerings = await getOfferingsByOrganisation(organisationId);
         } catch (error) {
             offerings = [];
             loadError =
                 error instanceof Error
                     ? error.message
-                    : "Could not load wine offerings.";
+                    : "Could not load wine offerings for this vineyard.";
         } finally {
             loading = false;
         }
@@ -81,16 +102,26 @@
         aria-label="Wine offerings header"
     >
         <div class="flex flex-wrap items-start justify-between gap-4">
-            <div class="flex flex-col gap-1.5">
-                <span class="text-xs font-semibold tracking-wider text-[#8c735c] uppercase">
-                    Vineyard Cellar Selection
-                </span>
-                <h1 class="text-2xl font-bold text-[#3f2e22] sm:text-3xl">
-                    Our Wine Offerings
-                </h1>
-                <p class="max-w-2xl text-sm leading-relaxed text-zinc-600">
-                    Explore bottled estate releases with transparent harvest dates, cellar maturation history, final wine parameters, and nutritional facts.
-                </p>
+            <div class="flex items-center gap-4">
+                {#if logoUrl && !logoHidden}
+                    <img
+                        src={logoUrl}
+                        alt="Vineyard logo"
+                        onerror={() => (logoHidden = true)}
+                        class="h-16 w-16 shrink-0 rounded-xl border border-[#d9cbbd] bg-[#fbf7f2] object-contain p-1.5 shadow-xs"
+                    />
+                {/if}
+                <div class="flex flex-col gap-1.5">
+                    <span class="text-xs font-semibold tracking-wider text-[#8c735c] uppercase">
+                        Vineyard Cellar Selection
+                    </span>
+                    <h1 class="text-2xl font-bold text-[#3f2e22] sm:text-3xl">
+                        {vineyardTitle}
+                    </h1>
+                    <p class="max-w-2xl text-sm leading-relaxed text-zinc-600">
+                        Explore bottled estate releases from this vineyard with transparent harvest dates, cellar maturation history, final wine parameters, and nutritional facts.
+                    </p>
+                </div>
             </div>
 
             {#if isOwner}
@@ -146,7 +177,7 @@
             class="rounded-2xl border border-[#d9cbbd] bg-[#fbf7f2] p-10 text-center shadow-sm"
         >
             <p class="text-base font-semibold text-[#3f2e22]">
-                No wine offerings match your criteria.
+                No wine offerings published for this vineyard yet.
             </p>
             <p class="mt-1 text-sm text-zinc-600">
                 Try clearing your search filter or check back after the next estate bottling.

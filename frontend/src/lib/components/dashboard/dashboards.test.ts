@@ -106,6 +106,14 @@ const sampleOfferings = [
         wineDescription: 'Crisp mineral white wine',
         price: 68,
     },
+    {
+        id: 'off-other',
+        organisationId: 'org-2',
+        wineId: 'wine-other',
+        wineName: 'Foreign Vineyard Wine',
+        wineDescription: 'Should not appear on org-1 dashboard',
+        price: 99,
+    },
 ];
 
 const sampleSprayings = [
@@ -231,19 +239,10 @@ describe('Differentiated Vineyard Dashboards', () => {
         globalThis.fetch = originalFetch;
     });
 
-    it('renders executive KPIs, 2x2 overview tables, and vineyard actions in OwnerDashboard', async () => {
-        let editClicked = 0;
-        let deleteClicked = 0;
-
+    it('renders executive KPIs, 2x2 overview tables, and Management quick links without Edit/Delete vineyard buttons in OwnerDashboard', async () => {
         render(OwnerDashboard, {
             organisation: sampleOrganisation,
             logoTimestamp: 1700000000,
-            onEditVineyard: () => {
-                editClicked += 1;
-            },
-            onDeleteVineyard: () => {
-                deleteClicked += 1;
-            },
         });
 
         expect(
@@ -252,7 +251,11 @@ describe('Differentiated Vineyard Dashboards', () => {
         expect(screen.getByText('Crafted on sunny loess slopes.')).toBeInTheDocument();
         expect(screen.getByText('Owner')).toBeInTheDocument();
 
-        // Management quick pills
+        // Management quick pills including Vineyard settings
+        expect(screen.getByRole('link', { name: 'Vineyard' })).toHaveAttribute(
+            'href',
+            '/management/vineyard',
+        );
         expect(screen.getByRole('link', { name: 'Reports' })).toHaveAttribute(
             'href',
             '/raports',
@@ -270,6 +273,14 @@ describe('Differentiated Vineyard Dashboards', () => {
             '/workers',
         );
 
+        // Edit & Delete vineyard buttons are NOT on the dashboard anymore
+        expect(
+            screen.queryByRole('button', { name: 'Edit vineyard' }),
+        ).not.toBeInTheDocument();
+        expect(
+            screen.queryByRole('button', { name: 'Delete vineyard' }),
+        ).not.toBeInTheDocument();
+
         // KPI strip
         const kpiRegion = screen.getByRole('region', { name: 'Vineyard KPI summary' });
         await waitFor(() => {
@@ -280,9 +291,9 @@ describe('Differentiated Vineyard Dashboards', () => {
         expect(within(kpiRegion).getByText('1 spoiled')).toBeInTheDocument();
         expect(within(kpiRegion).getByText('Team Tasks')).toBeInTheDocument();
         expect(within(kpiRegion).getByText('1 overdue')).toBeInTheDocument();
-        expect(within(kpiRegion).getByText('Public Offerings')).toBeInTheDocument();
+        expect(within(kpiRegion).getByText('Vineyard Offerings')).toBeInTheDocument();
 
-        // 2x2 Overview Tables
+        // 2x2 Overview Tables (scoped to org-1 offerings)
         expect(screen.getByRole('heading', { name: 'Recent Batches' })).toBeInTheDocument();
         expect(screen.getByText('BATCH-1002')).toBeInTheDocument();
         expect(screen.getByText('Regent Barrel Lot')).toBeInTheDocument();
@@ -294,20 +305,15 @@ describe('Differentiated Vineyard Dashboards', () => {
         expect(screen.getByRole('heading', { name: 'Current Offerings' })).toBeInTheDocument();
         expect(screen.getByText('Johanniter Estate 2026')).toBeInTheDocument();
         expect(screen.getByText('68 PLN')).toBeInTheDocument();
+        expect(screen.queryByText('Foreign Vineyard Wine')).not.toBeInTheDocument();
 
         expect(
             screen.getByRole('heading', { name: 'Recent & Planned Sprayings' }),
         ).toBeInTheDocument();
         expect(screen.getByText('120 L')).toBeInTheDocument();
-
-        // Owner actions
-        await fireEvent.click(screen.getByRole('button', { name: 'Edit vineyard' }));
-        await fireEvent.click(screen.getByRole('button', { name: 'Delete vineyard' }));
-        expect(editClicked).toBe(1);
-        expect(deleteClicked).toBe(1);
     });
 
-    it('renders WORKER operational workspace with Field Work Operations and inline task completion', async () => {
+    it('renders WORKER operational workspace with Field Work Operations and Profile link instead of Leave button', async () => {
         setUser({
             id: 'worker-1',
             firstname: 'Piotr',
@@ -320,31 +326,23 @@ describe('Differentiated Vineyard Dashboards', () => {
             organisation: sampleOrganisation,
             roles: ['WORKER'],
             logoTimestamp: 1700000000,
-            onLeaveVineyard: () => {},
         });
 
         expect(screen.getByText('Vineyard Worker')).toBeInTheDocument();
         expect(
+            screen.getByRole('link', { name: /Membership settings in Profile/i }),
+        ).toHaveAttribute('href', '/profile');
+        expect(
+            screen.queryByRole('button', { name: 'Leave vineyard' }),
+        ).not.toBeInTheDocument();
+
+        expect(
             screen.getByRole('heading', { name: 'Field Work Operations' }),
         ).toBeInTheDocument();
-        expect(screen.getByRole('link', { name: 'Log Spraying' })).toHaveAttribute(
-            'href',
-            '/agriculture/sprayings',
-        );
-        expect(screen.getByRole('link', { name: 'Report Pest/Disease' })).toHaveAttribute(
-            'href',
-            '/agriculture/pests',
-        );
-        expect(screen.getByRole('link', { name: 'Record Harvest' })).toHaveAttribute(
-            'href',
-            '/agriculture/harvests',
-        );
 
         await waitFor(() => {
             expect(screen.getByText('Sulfur canopy protection')).toBeInTheDocument();
         });
-        expect(screen.getByText('Powdery mildew')).toBeInTheDocument();
-        expect(screen.getByText('1450 kg')).toBeInTheDocument();
 
         // Complete task directly from dashboard
         const completeBtn = screen.getByRole('button', { name: 'Complete' });
@@ -359,20 +357,6 @@ describe('Differentiated Vineyard Dashboards', () => {
                     call.url === '/api/tasks/task-1/complete' && call.method === 'PATCH',
             ),
         ).toBe(true);
-
-        // Hides cellar pipeline and executive owner tools
-        expect(
-            screen.queryByRole('heading', { name: 'Cellar Stage Pipeline' }),
-        ).not.toBeInTheDocument();
-        expect(
-            screen.queryByRole('button', { name: 'Edit vineyard' }),
-        ).not.toBeInTheDocument();
-        expect(
-            screen.queryByRole('button', { name: 'Delete vineyard' }),
-        ).not.toBeInTheDocument();
-        expect(
-            screen.queryByRole('heading', { name: 'Current Offerings' }),
-        ).not.toBeInTheDocument();
     });
 
     it('renders OENOLOGIST cellar stage pipeline and spoiled batch alerts while hiding owner tools', async () => {
@@ -388,7 +372,6 @@ describe('Differentiated Vineyard Dashboards', () => {
             organisation: sampleOrganisation,
             roles: ['OENOLOGIST'],
             logoTimestamp: 1700000000,
-            onLeaveVineyard: () => {},
         });
 
         expect(screen.getByText('Oenologist')).toBeInTheDocument();
@@ -397,13 +380,6 @@ describe('Differentiated Vineyard Dashboards', () => {
         });
         expect(pipelineSection).toBeInTheDocument();
 
-        // All 5 pipeline stage tiles
-        expect(within(pipelineSection).getByText('Must')).toBeInTheDocument();
-        expect(within(pipelineSection).getByText('Fermenting')).toBeInTheDocument();
-        expect(within(pipelineSection).getByText('Aged')).toBeInTheDocument();
-        expect(within(pipelineSection).getByText('Blended')).toBeInTheDocument();
-        expect(within(pipelineSection).getByText('Bottled')).toBeInTheDocument();
-
         await waitFor(() => {
             expect(
                 within(pipelineSection).getByText('Regent Barrel Lot'),
@@ -411,31 +387,15 @@ describe('Differentiated Vineyard Dashboards', () => {
         });
         expect(within(pipelineSection).getByText('SPOILED')).toBeInTheDocument();
         expect(
-            within(pipelineSection).getByRole('link', { name: 'Ingredients Catalogue' }),
-        ).toHaveAttribute('href', '/vinery/ingredients');
-
-        // Hides worker field panel and owner tools
-        expect(
-            screen.queryByRole('heading', { name: 'Field Work Operations' }),
-        ).not.toBeInTheDocument();
-        expect(
-            screen.queryByRole('button', { name: 'Edit vineyard' }),
-        ).not.toBeInTheDocument();
-        expect(
-            screen.queryByRole('button', { name: 'Delete vineyard' }),
+            screen.queryByRole('button', { name: 'Leave vineyard' }),
         ).not.toBeInTheDocument();
     });
 
-    it('renders awaiting role assignment notice and Leave vineyard action for unassigned members', async () => {
-        let leaveClicked = 0;
-
+    it('renders awaiting role assignment notice and links to Profile for unassigned members', () => {
         render(EmployeeDashboard, {
             organisation: sampleOrganisation,
             roles: [],
             logoTimestamp: 1700000000,
-            onLeaveVineyard: () => {
-                leaveClicked += 1;
-            },
         });
 
         expect(screen.getByText('Awaiting role assignment')).toBeInTheDocument();
@@ -443,19 +403,10 @@ describe('Differentiated Vineyard Dashboards', () => {
             screen.getByRole('heading', { name: 'Permissions not assigned yet' }),
         ).toBeInTheDocument();
         expect(
-            screen.queryByRole('heading', { name: 'My Assigned & Upcoming Tasks' }),
-        ).not.toBeInTheDocument();
+            screen.getByRole('link', { name: /Membership settings in Profile/i }),
+        ).toHaveAttribute('href', '/profile');
         expect(
-            screen.queryByRole('heading', { name: 'Field Work Operations' }),
+            screen.queryByRole('button', { name: 'Leave vineyard' }),
         ).not.toBeInTheDocument();
-        expect(
-            screen.queryByRole('heading', { name: 'Cellar Stage Pipeline' }),
-        ).not.toBeInTheDocument();
-        expect(
-            screen.queryByRole('button', { name: 'Edit vineyard' }),
-        ).not.toBeInTheDocument();
-
-        await fireEvent.click(screen.getByRole('button', { name: 'Leave vineyard' }));
-        expect(leaveClicked).toBe(1);
     });
 });

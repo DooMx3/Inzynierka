@@ -1,8 +1,5 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import editIcon from "$lib/assets/edit.svg?raw";
-    import closeIcon from "$lib/assets/close.svg?raw";
-    import Button from "$lib/components/buttons/button.svelte";
     import StatusBadge from "$lib/components/statusBadge/statusBadge.svelte";
     import {
         STAGE_LABELS,
@@ -27,13 +24,9 @@
     let {
         organisation,
         logoTimestamp,
-        onEditVineyard,
-        onDeleteVineyard,
     }: {
         organisation: Organisation | null;
         logoTimestamp: number;
-        onEditVineyard: () => void;
-        onDeleteVineyard: () => void;
     } = $props();
 
     let tasks = $state<TaskItem[]>([]);
@@ -46,9 +39,10 @@
     let loading = $state(true);
 
     const managementLinks = [
-        { label: "Reports", href: "/raports" },
-        { label: "QR Codes", href: "/management/qr-codes" },
+        { label: "Vineyard", href: "/management/vineyard" },
         { label: "Offerings", href: "/management/offerings" },
+        { label: "QR Codes", href: "/management/qr-codes" },
+        { label: "Reports", href: "/raports" },
         { label: "Workers", href: "/workers" },
     ] as const;
 
@@ -66,7 +60,7 @@
             getFields().catch(() => []),
             getHarvests().catch(() => []),
             getSprayings().catch(() => []),
-            getOfferings().catch(() => []),
+            getOfferings(organisation?.id || undefined).catch(() => []),
             getBatches().catch(() => []),
         ]);
         tasks = loadedTasks;
@@ -160,66 +154,41 @@
         class="rounded-2xl border border-[#d9cbbd] bg-[#f7f1ea] p-6 shadow-sm"
         aria-label="Vineyard"
     >
-        <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-                {#if organisation?.id && organisation?.logoPath}
-                    <img
-                        src="{getOrganisationLogoByIdUrl(organisation.id)}?t={logoTimestamp}"
-                        alt="Vineyard logo"
-                        class="h-24 w-24 shrink-0 rounded-xl border border-[#e4d8cb] bg-[#fbf7f2] p-1.5 object-contain"
-                        onerror={(e) => {
-                            (e.target as HTMLImageElement).style.display = "none";
-                        }}
-                    />
-                {/if}
-                <div class="flex flex-col gap-1.5">
-                    <div class="flex flex-wrap items-center gap-2.5">
-                        <h2 class="text-2xl font-bold text-[#3f2e22] sm:text-3xl">
-                            {organisation?.name || "Your vineyard"}
-                        </h2>
-                        <StatusBadge label="Owner" tone="dark" />
-                    </div>
-                    <p class="max-w-2xl text-base leading-relaxed text-zinc-700">
-                        {#if organisation?.motto}
-                            {organisation.motto}
-                        {:else}
-                            This vineyard is yours. Keep its name, place and motto current, or close it when the work is done.
-                        {/if}
-                    </p>
-                    {#if addressLine || organisation?.taxId}
-                        <p class="text-xs font-medium text-zinc-500">
-                            {[
-                                addressLine,
-                                organisation?.taxId ? `Tax ID: ${organisation.taxId}` : "",
-                            ]
-                                .filter(Boolean)
-                                .join(" • ")}
-                        </p>
+        <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+            {#if organisation?.id && organisation?.logoPath}
+                <img
+                    src="{getOrganisationLogoByIdUrl(organisation.id)}?t={logoTimestamp}"
+                    alt="Vineyard logo"
+                    class="h-24 w-24 shrink-0 rounded-xl border border-[#e4d8cb] bg-[#fbf7f2] p-1.5 object-contain"
+                    onerror={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                    }}
+                />
+            {/if}
+            <div class="flex flex-col gap-1.5">
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <h2 class="text-2xl font-bold text-[#3f2e22] sm:text-3xl">
+                        {organisation?.name || "Your vineyard"}
+                    </h2>
+                    <StatusBadge label="Owner" tone="dark" />
+                </div>
+                <p class="max-w-2xl text-base leading-relaxed text-zinc-700">
+                    {#if organisation?.motto}
+                        {organisation.motto}
+                    {:else}
+                        Executive overview of your vineyard parcels, cellar batches, team assignments, and wine offerings.
                     {/if}
-                </div>
-            </div>
-
-            <div class="flex flex-wrap items-center gap-3">
-                <div class="w-48">
-                    <Button
-                        svg={editIcon}
-                        text="Edit vineyard"
-                        isFolded={false}
-                        gentle={true}
-                        class="bg-[#6b4f3a] text-white fill-white"
-                        onClick={onEditVineyard}
-                    />
-                </div>
-                <div class="w-48">
-                    <Button
-                        svg={closeIcon}
-                        text="Delete vineyard"
-                        isFolded={false}
-                        gentle={true}
-                        class="bg-[#8f3d32] text-white fill-white"
-                        onClick={onDeleteVineyard}
-                    />
-                </div>
+                </p>
+                {#if addressLine || organisation?.taxId}
+                    <p class="text-xs font-medium text-zinc-500">
+                        {[
+                            addressLine,
+                            organisation?.taxId ? `Tax ID: ${organisation.taxId}` : "",
+                        ]
+                            .filter(Boolean)
+                            .join(" • ")}
+                    </p>
+                {/if}
             </div>
         </div>
 
@@ -290,14 +259,14 @@
 
         <div class="rounded-2xl border border-[#d9cbbd] bg-[#f7f1ea] p-5 shadow-xs">
             <span class="block text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                Public Offerings
+                Vineyard Offerings
             </span>
             <div class="mt-2 flex items-baseline gap-2">
                 <span class="text-3xl font-bold text-[#3f2e22]">{offerings.length}</span>
                 <span class="text-sm font-medium text-[#6b4f3a]">wines</span>
             </div>
             <span class="mt-1 block text-xs text-zinc-600">
-                Active wines on offer for customers
+                Active wines on offer for your vineyard
             </span>
         </div>
     </section>
@@ -438,7 +407,7 @@
                         {:else}
                             <tr>
                                 <td colspan="3" class="px-4 py-6 text-center text-sm text-zinc-500">
-                                    {loading ? "Loading offerings..." : "No public wine offerings published yet."}
+                                    {loading ? "Loading offerings..." : "No wine offerings published yet."}
                                 </td>
                             </tr>
                         {/each}

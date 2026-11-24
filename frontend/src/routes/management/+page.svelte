@@ -1,6 +1,11 @@
 <script lang="ts">
     const modules = [
         {
+            title: "Vineyard Settings",
+            description: "Edit your vineyard name, address, tax ID, motto, and logo, or permanently close the vineyard.",
+            href: "/management/vineyard",
+        },
+        {
             title: "Winery & Vineyard Equipment",
             description: "Manage presses, fermentors, barrels, mixers, and technical inspection dates.",
             href: "/management/equipment",
@@ -17,12 +22,12 @@
         },
         {
             title: "Wine Offerings",
-            description: "Manage public wine offerings, prices, and customer bottle provenance pages.",
+            description: "Manage your vineyard's wine offerings, photos, prices, shareable catalog link, and bottle pages.",
             href: "/management/offerings",
         },
         {
             title: "QR Code Generator",
-            description: "Generate printable QR codes for winery equipment and bottled wine offerings.",
+            description: "Generate printable QR codes for winery equipment, wine bottles, and your vineyard catalog.",
             href: "/management/qr-codes",
         },
     ];

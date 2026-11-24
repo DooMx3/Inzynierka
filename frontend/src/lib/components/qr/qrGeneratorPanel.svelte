@@ -5,14 +5,16 @@
     import { getBatches, type ProductionBatch } from "$lib/api/batches";
     import { getEquipmentList, type Equipment } from "$lib/api/equipment";
     import { getOfferings, type WineOffering } from "$lib/api/offerings";
+    import { getOrganisation, type Organisation } from "$lib/api/organisation";
     import {
         buildBottleQrUrl,
         buildEquipmentQrUrl,
+        buildVineyardOfferingsUrl,
         isWineryEquipmentType,
     } from "$lib/functions/qrRouting";
     import { session } from "$lib/stores/session.svelte";
 
-    type QrCategory = "EQUIPMENT" | "BOTTLE";
+    type QrCategory = "EQUIPMENT" | "BOTTLE" | "VINEYARD";
 
     type TargetOption = {
         value: string;
@@ -23,11 +25,13 @@
     const CATEGORY_OPTIONS: { value: QrCategory; label: string }[] = [
         { value: "EQUIPMENT", label: "Winery equipment" },
         { value: "BOTTLE", label: "Wine bottle / offering" },
+        { value: "VINEYARD", label: "Vineyard offerings catalog" },
     ];
 
     let equipmentList = $state<Equipment[]>([]);
     let offerings = $state<WineOffering[]>([]);
     let bottledBatches = $state<ProductionBatch[]>([]);
+    let organisation = $state<Organisation | null>(null);
     let loading = $state(true);
 
     let category = $state<QrCategory>("EQUIPMENT");
@@ -44,14 +48,15 @@
     const load = async () => {
         loading = true;
         try {
-            const [loadedEquipment, loadedOfferings, loadedBottled] = await Promise.all([
+            const [loadedEquipment, loadedOrg, loadedBottled] = await Promise.all([
                 getEquipmentList().catch(() => []),
-                getOfferings().catch(() => []),
+                getOrganisation().catch(() => null),
                 getBatches("BOTTLED").catch(() => []),
             ]);
             equipmentList = loadedEquipment;
-            offerings = loadedOfferings;
+            organisation = loadedOrg;
             bottledBatches = loadedBottled;
+            offerings = await getOfferings(loadedOrg?.id || undefined).catch(() => []);
         } finally {
             loading = false;
         }
@@ -97,8 +102,24 @@
         return [...offeringOptions, ...unofferedBatchOptions];
     });
 
+    const vineyardTargetOptions = $derived<TargetOption[]>(
+        organisation?.id
+            ? [
+                  {
+                      value: organisation.id,
+                      label: `${organisation.name || "Your vineyard"} (Catalog)`,
+                      subtitle: organisation.name || "Vineyard Wine Offerings",
+                  },
+              ]
+            : [],
+    );
+
     const targetOptions = $derived<TargetOption[]>(
-        category === "EQUIPMENT" ? wineryEquipmentOptions : bottleTargetOptions,
+        category === "EQUIPMENT"
+            ? wineryEquipmentOptions
+            : category === "BOTTLE"
+              ? bottleTargetOptions
+              : vineyardTargetOptions,
     );
 
     let selectedTargetId = $derived(targetOptions[0]?.value ?? "");
@@ -115,10 +136,17 @@
         const targetUrl =
             category === "EQUIPMENT"
                 ? buildEquipmentQrUrl(origin, selectedTarget.value)
-                : buildBottleQrUrl(origin, selectedTarget.value);
+                : category === "BOTTLE"
+                  ? buildBottleQrUrl(origin, selectedTarget.value)
+                  : buildVineyardOfferingsUrl(origin, selectedTarget.value);
 
         activeModal = {
-            title: category === "EQUIPMENT" ? "Equipment QR code" : "Wine bottle QR code",
+            title:
+                category === "EQUIPMENT"
+                    ? "Equipment QR code"
+                    : category === "BOTTLE"
+                      ? "Wine bottle QR code"
+                      : "Vineyard catalog QR code",
             subtitle: selectedTarget.subtitle,
             targetUrl,
             downloadFilename: `qr-${category.toLowerCase()}-${selectedTarget.value}.svg`,
@@ -137,7 +165,7 @@
             <div class="flex flex-col gap-1 border-b border-[#e4d8cb] pb-4">
                 <h2 class="text-xl font-bold text-[#3f2e22]">Generate QR code</h2>
                 <p class="text-sm text-zinc-600">
-                    Create printable SVG labels for winery vessels or customer wine bottles.
+                    Create printable SVG labels for winery vessels, wine bottles, or your vineyard catalog.
                 </p>
             </div>
 
@@ -171,7 +199,9 @@
                             }))}
                             placeholder={category === "EQUIPMENT"
                                 ? "No winery equipment available"
-                                : "No wine offerings or bottled batches available"}
+                                : category === "BOTTLE"
+                                  ? "No wine offerings or bottled batches available"
+                                  : "No vineyard registered yet"}
                             disabled={targetOptions.length === 0}
                             bind:value={selectedTargetId}
                         />
@@ -179,8 +209,10 @@
                             <p class="text-xs text-zinc-600">
                                 {#if category === "EQUIPMENT"}
                                     Add a Press, Fermentor, Barrel, Tank, Mixer, or Bottling line in Equipment management first.
-                                {:else}
+                                {:else if category === "BOTTLE"}
                                     Create a wine offering or bottled wine batch first to generate a bottle QR code.
+                                {:else}
+                                    Your vineyard details could not be loaded.
                                 {/if}
                             </p>
                         {/if}

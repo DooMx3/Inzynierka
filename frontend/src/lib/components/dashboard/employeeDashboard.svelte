@@ -1,8 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import checkIcon from "$lib/assets/check.svg?raw";
-    import closeIcon from "$lib/assets/close.svg?raw";
-    import Button from "$lib/components/buttons/button.svelte";
     import StatusBadge from "$lib/components/statusBadge/statusBadge.svelte";
     import {
         STAGE_LABELS,
@@ -40,12 +38,10 @@
         organisation,
         roles,
         logoTimestamp,
-        onLeaveVineyard,
     }: {
         organisation: Organisation | null;
         roles: string[];
         logoTimestamp: number;
-        onLeaveVineyard: () => void;
     } = $props();
 
     let tasks = $state<TaskItem[]>([]);
@@ -253,22 +249,18 @@
                     {#if organisation?.motto}
                         {organisation.motto}
                     {:else}
-                        The rows, the work and the harvest are open to you. Leave only when you are ready to step away.
+                        Daily field and cellar operations for your assigned vineyard.
                     {/if}
                 </p>
             </div>
         </div>
 
-        <div class="w-full shrink-0 sm:w-48">
-            <Button
-                svg={closeIcon}
-                text="Leave vineyard"
-                isFolded={false}
-                gentle={true}
-                class="bg-[#8f3d32] text-white fill-white"
-                onClick={onLeaveVineyard}
-            />
-        </div>
+        <a
+            href="/profile"
+            class="inline-flex shrink-0 items-center justify-center rounded-lg border border-[#c4b6a6] bg-[#fbf7f2] px-4 py-2 text-xs font-semibold text-[#3f2e22] transition-colors hover:border-[#6b4f3a] hover:bg-white"
+        >
+            Membership settings in Profile →
+        </a>
     </header>
 
     {#if !hasOperationalRole}

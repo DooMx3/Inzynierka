@@ -7,6 +7,7 @@
     let { children }: { children: Snippet } = $props();
 
     const tabs = [
+        { label: "Vineyard", href: "/management/vineyard" },
         { label: "Equipment", href: "/management/equipment" },
         { label: "Fields", href: "/management/fields" },
         { label: "Substances", href: "/management/substances" },
