@@ -49,12 +49,12 @@
                 <p class="text-sm text-zinc-700">
                     Values are automatically estimated from alcohol, residual sugar, and added ingredients. Any row can be adjusted manually.
                 </p>
-                <div class="w-56">
+                <div class="w-fit min-w-56 max-w-full">
                     <Button
                         text="Recalculate automatically"
                         isFolded={false}
                         gentle={true}
-                        class="bg-[#8c735c] text-white"
+                        class="bg-[#8c735c] text-white px-4"
                         onClick={recalculate}
                     />
                 </div>
