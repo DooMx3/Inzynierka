@@ -4,9 +4,9 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"test": "bun test --conditions=browser",
+		"test": "svelte-kit sync && bun test --conditions=browser",
 		"dev": "vite dev",
-		"prebuild": "bun test --conditions=browser",
+		"prebuild": "svelte-kit sync && bun test --conditions=browser",
 		"build": "vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
