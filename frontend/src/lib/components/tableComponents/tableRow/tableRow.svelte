@@ -1,5 +1,9 @@
 <script lang="ts">
     import type { Snippet } from "svelte";
+    import type { Attachment } from "svelte/attachments";
+
+    const INTERACTIVE_SELECTOR =
+        'button, a, input, select, textarea, label, [role="button"]';
 
     let {
         index = 0,
@@ -11,6 +15,9 @@
         expandLabel = "Toggle row details",
         colspan = 99,
         highlighted = false,
+        rowId,
+        expandOnRowClick = false,
+        autoScrollWhenHighlighted = false,
         cells,
         actions,
         details,
@@ -24,25 +31,53 @@
         expandLabel?: string;
         colspan?: number;
         highlighted?: boolean;
+        rowId?: string;
+        expandOnRowClick?: boolean;
+        autoScrollWhenHighlighted?: boolean;
         cells: Snippet;
         actions?: Snippet;
         details?: Snippet;
     } = $props();
 
     const isExpandable = $derived(Boolean(details));
+    const isRowClickExpandable = $derived(expandOnRowClick && isExpandable);
 
     const toggleExpand = () => {
         if (isExpandable) {
             expanded = !expanded;
         }
     };
+
+    const handleRowClick = (event: MouseEvent) => {
+        if (!isRowClickExpandable) return;
+        const target = event.target as Element | null;
+        const element =
+            target && typeof target.closest === "function"
+                ? target
+                : (event.target as Node | null)?.parentElement ?? null;
+        if (element?.closest(INTERACTIVE_SELECTOR)) {
+            return;
+        }
+        toggleExpand();
+    };
+
+    const scrollIntoViewAttachment: Attachment<HTMLTableRowElement> = (node) => {
+        node.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
+    };
 </script>
 
 <tr
+    id={rowId}
+    data-highlighted={highlighted ? "true" : undefined}
+    onclick={isRowClickExpandable ? handleRowClick : undefined}
+    {@attach autoScrollWhenHighlighted && highlighted
+        ? scrollIntoViewAttachment
+        : undefined}
     class={[
         "border-t border-[#e4d8cb] transition-colors",
+        isRowClickExpandable && "cursor-pointer",
         highlighted
-            ? "bg-[#e9dccb]"
+            ? "bg-[#e9dccb] ring-2 ring-inset ring-[#6b4f3a]"
             : index % 2 === 1
               ? "bg-[#efe6dc]"
               : "bg-transparent",

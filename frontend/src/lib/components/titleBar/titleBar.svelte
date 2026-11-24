@@ -1,6 +1,7 @@
 <script lang="ts">
     import logo from "$lib/assets/logo.webp";
     import loginIcon from "$lib/assets/login.svg?raw";
+    import TasksHeaderButton from "../buttons/tasksHeaderButton.svelte";
     import ProfileMenu from "../profileMenu/profileMenu.svelte";
     import SearchField from "../searchField/searchField.svelte";
     import { session } from "$lib/stores/session.svelte";
@@ -13,14 +14,15 @@
 
 <span class="relative z-30 flex items-center justify-center h-24 w-full bg-[#eae0d5]">
     <button
+        type="button"
         class={[
             "flex min-w-0 items-center justify-start cursor-pointer",
             showSearch ? "w-1/3" : "flex-1",
         ]}
         onclick={() => (window.location.href = "/")}
     >
-        <img alt="Logo" src={logo} class="h-24 w-24 shrink-0 mr-2" />
-        <p class={["text-zinc-800 font-semibold text-2xl", !showSearch && "whitespace-nowrap"]}>
+        <img alt="Logo" src={logo} class="h-12 w-12 sm:h-24 sm:w-24 shrink-0 mr-1.5 sm:mr-2" />
+        <p class={["text-zinc-800 font-semibold text-sm sm:text-2xl truncate", !showSearch && "whitespace-nowrap"]}>
             Name goes here
         </p>
     </button>
@@ -33,15 +35,25 @@
             />
         </span>
     {/if}
-    <span class={["flex items-center justify-end shrink-0 pr-4", showSearch && "w-1/3"]}>
+    <span class={["flex items-center justify-end gap-1.5 sm:gap-2 shrink-0 pr-2 sm:pr-4", showSearch && "w-1/3"]}>
+        <a
+            href="/offerings"
+            class="ml-auto rounded-lg border border-[#d9cbbd] bg-[#f7f1ea] px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium text-[#4a3428] transition-colors hover:bg-[#e4d3c0]"
+        >
+            Offerings
+        </a>
         {#if session.user}
-            <ProfileMenu class="ml-auto" />
+            <TasksHeaderButton />
+            <ProfileMenu />
         {:else}
             <a
                 href="/auth"
-                class="sign-in ml-auto flex items-center gap-2 rounded-lg bg-[#e4d3c0] px-3 py-2 text-sm font-medium text-[#4a3428] fill-[#4a3428] stroke-[#4a3428] transition-colors duration-200 hover:bg-[#d4c0a8]"
+                class="sign-in flex items-center gap-1.5 sm:gap-2 whitespace-nowrap rounded-lg bg-[#e4d3c0] px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium text-[#4a3428] fill-[#4a3428] stroke-[#4a3428] transition-colors duration-200 hover:bg-[#d4c0a8]"
             >
-                <span class="shrink-0" role="img" aria-hidden="true">{@html loginIcon}</span>
+                <span class="shrink-0" role="img" aria-hidden="true">
+                    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                    {@html loginIcon}
+                </span>
                 Sign in
             </a>
         {/if}

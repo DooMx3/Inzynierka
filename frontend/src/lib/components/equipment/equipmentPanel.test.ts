@@ -20,6 +20,7 @@ describe('EquipmentPanel', () => {
 
     afterEach(() => {
         globalThis.fetch = originalFetch;
+        window.location.href = 'http://localhost/';
         setUser(null);
     });
 
@@ -71,6 +72,48 @@ describe('EquipmentPanel', () => {
 
         await waitFor(() => {
             expect(screen.getByText('Fermentor #4')).toBeInTheDocument();
+        });
+    });
+
+    it('renders inline QR code button only for winery equipment and opens QrCodeModal', async () => {
+        window.location.href = 'http://localhost/management/equipment';
+        const items = [
+            {
+                id: 'eq-ferm-1',
+                name: 'Fermentor #1',
+                type: 'Fermentor',
+                endOfTechnicalInspection: null,
+                active: true,
+            },
+            {
+                id: 'eq-tractor-1',
+                name: 'Field Tractor',
+                type: 'Tractor',
+                endOfTechnicalInspection: null,
+                active: true,
+            },
+        ];
+
+        globalThis.fetch = (async () =>
+            new Response(JSON.stringify(items), { status: 200 })) as unknown as typeof fetch;
+
+        render(EquipmentPanel);
+
+        await waitFor(() => {
+            expect(screen.getByText('Fermentor #1')).toBeInTheDocument();
+            expect(screen.getByText('Field Tractor')).toBeInTheDocument();
+        });
+
+        const qrButtons = screen.getAllByRole('button', { name: 'QR code' });
+        expect(qrButtons).toHaveLength(1);
+
+        await fireEvent.click(qrButtons[0]!);
+
+        await waitFor(() => {
+            expect(screen.getByText('Equipment QR code')).toBeInTheDocument();
+            expect(
+                screen.getByText('http://localhost/qr/equipment/eq-ferm-1'),
+            ).toBeInTheDocument();
         });
     });
 });

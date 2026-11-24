@@ -8,6 +8,8 @@
     import ConfirmationDialog from "$lib/components/confirmationDialog/confirmationDialog.svelte";
     import InputField from "$lib/components/inputField/inputField.svelte";
     import Button from "$lib/components/buttons/button.svelte";
+    import OwnerDashboard from "$lib/components/dashboard/ownerDashboard.svelte";
+    import EmployeeDashboard from "$lib/components/dashboard/employeeDashboard.svelte";
     import { getUserInfo } from "$lib/functions/getUserInfo";
     import nameIcon from "$lib/assets/name.svg?raw";
     import cityIcon from "$lib/assets/city.svg?raw";
@@ -15,7 +17,6 @@
     import postalCodeIcon from "$lib/assets/postal_code.svg?raw";
     import taxIcon from "$lib/assets/tax.svg?raw";
     import mottoIcon from "$lib/assets/motto.svg?raw";
-    import editIcon from "$lib/assets/edit.svg?raw";
     import closeIcon from "$lib/assets/close.svg?raw";
     import passwordIcon from "$lib/assets/password.svg?raw";
     import {
@@ -27,7 +28,6 @@
         leaveOrganisation,
         updateOrganisation,
         uploadOrganisationLogo,
-        getOrganisationLogoUrl,
         getOrganisationLogoByIdUrl,
         type Organisation,
         type OrganisationInvitation,
@@ -364,7 +364,14 @@
     </div>
 {/snippet}
 
-<div class="flex h-full min-h-full flex-col items-center justify-center overflow-y-auto p-8">
+<div
+    class={[
+        "flex min-h-full w-full flex-col overflow-y-auto",
+        session.user && ready && (isOwner || isMember)
+            ? "items-stretch justify-start p-4 sm:p-6"
+            : "h-full items-center justify-center p-8",
+    ]}
+>
     {#if !session.user}
         <section class="flex min-h-[50vh] items-center justify-center text-zinc-700">
             <p class="text-lg">Sign in to see your menu.</p>
@@ -372,54 +379,19 @@
     {:else if !ready}
         <p class="text-lg text-zinc-700">Loading your vineyard...</p>
     {:else if isOwner}
-        <section class="home-card" aria-label="Vineyard">
-            {#if organisation?.id && organisation?.logoPath}
-                <img
-                    src="{getOrganisationLogoByIdUrl(organisation.id)}?t={logoTimestamp}"
-                    alt="Vineyard logo"
-                    class="org-logo"
-                    onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                />
-            {/if}
-            <h2>{organisation?.name || "Your vineyard"}</h2>
-            <p>
-                {#if organisation?.motto}
-                    {organisation.motto}
-                {:else}
-                    This vineyard is yours. Keep its name, place and motto current, or close it when the work is done.
-                {/if}
-            </p>
-            <div class="flex w-full flex-wrap justify-center gap-3">
-                <div class="w-52">
-                    <Button svg={editIcon} text="Edit vineyard" isFolded={false} gentle={true} class="bg-[#6b4f3a] text-white fill-white" onClick={openEdit} />
-                </div>
-                <div class="w-52">
-                    <Button svg={closeIcon} text="Delete vineyard" isFolded={false} gentle={true} class="bg-[#8f3d32] text-white fill-white" onClick={openDelete} />
-                </div>
-            </div>
-        </section>
+        <OwnerDashboard
+            {organisation}
+            {logoTimestamp}
+            onEditVineyard={openEdit}
+            onDeleteVineyard={openDelete}
+        />
     {:else if isMember}
-        <section class="home-card" aria-label="Vineyard">
-            {#if organisation?.id && organisation?.logoPath}
-                <img
-                    src="{getOrganisationLogoByIdUrl(organisation.id)}?t={logoTimestamp}"
-                    alt="Vineyard logo"
-                    class="org-logo"
-                    onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                />
-            {/if}
-<h2>{organisation?.name || "You are part of the vineyard."}</h2>
-            <p>
-                {#if organisation?.motto}
-                    {organisation.motto}
-                {:else}
-                    The rows, the work and the harvest are open to you. Leave only when you are ready to step away.
-                {/if}
-            </p>
-            <div class="w-56">
-                <Button svg={closeIcon} text="Leave vineyard" isFolded={false} gentle={true} class="bg-[#8f3d32] text-white fill-white" onClick={() => (dialog = "leave")} />
-            </div>
-        </section>
+        <EmployeeDashboard
+            {organisation}
+            {roles}
+            {logoTimestamp}
+            onLeaveVineyard={() => (dialog = "leave")}
+        />
     {:else}
         <section class="flex flex-wrap gap-4" aria-label="User menu">
             <CreateVineyardButton disabled={!ready || isMember} onClick={openCreate} />
@@ -527,34 +499,6 @@
 
 <style>
     @reference "../../../app.css";
-
-    .home-card {
-        display: flex;
-        width: 100%;
-        max-width: 36rem;
-        flex-direction: column;
-        align-items: center;
-        gap: 1.25rem;
-        border-radius: 1.5rem;
-        border: 1px solid #d9cbbd;
-        background: #f7f1ea;
-        padding: 2.5rem 2rem;
-        text-align: center;
-        color: #27272a;
-        box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
-    }
-
-    .home-card h2 {
-        font-size: 1.875rem;
-        line-height: 2.25rem;
-        font-weight: 700;
-        color: #3f2e22;
-    }
-
-    .home-card p {
-        font-size: 1.125rem;
-        line-height: 1.75rem;
-    }
 
     .org-fields {
         display: flex;

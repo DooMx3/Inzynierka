@@ -5,6 +5,7 @@ import ResultsTableHarness from './resultsTable.harness.svelte';
 const rows = [
     { id: '1', name: 'First record' },
     { id: '2', name: 'Second record' },
+    { id: '3', name: 'Third record' },
 ];
 
 describe('Results table', () => {
@@ -15,6 +16,7 @@ describe('Results table', () => {
         expect(screen.getByRole('columnheader', { name: 'Name' })).toBeInTheDocument();
         expect(screen.getByText('First record')).toBeInTheDocument();
         expect(screen.getByText('Second record')).toBeInTheDocument();
+        expect(screen.getByText('Third record')).toBeInTheDocument();
     });
 
     it('pages through records without knowing their columns', async () => {
@@ -26,6 +28,25 @@ describe('Results table', () => {
         await fireEvent.click(screen.getByRole('button', { name: 'Next page' }));
         expect(screen.getByText('Second record')).toBeInTheDocument();
         expect(screen.queryByText('First record')).not.toBeInTheDocument();
+    });
+
+    it('jumps to the page containing highlightedId and still allows manual pagination', async () => {
+        render(ResultsTableHarness, {
+            rows,
+            pageSize: 1,
+            highlightedId: '3',
+        });
+
+        expect(screen.getByText('Third record')).toBeInTheDocument();
+        expect(screen.queryByText('First record')).not.toBeInTheDocument();
+        expect(screen.queryByText('Second record')).not.toBeInTheDocument();
+
+        await fireEvent.click(screen.getByRole('button', { name: 'Previous page' }));
+        expect(screen.getByText('Second record')).toBeInTheDocument();
+        expect(screen.queryByText('Third record')).not.toBeInTheDocument();
+
+        await fireEvent.click(screen.getByRole('button', { name: 'Next page' }));
+        expect(screen.getByText('Third record')).toBeInTheDocument();
     });
 
     it('shows an empty state', () => {

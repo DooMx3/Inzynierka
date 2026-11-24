@@ -25,7 +25,7 @@
 
 <nav
     aria-label={ariaLabel}
-    class="flex flex-wrap items-center gap-2 rounded-xl border border-[#d9cbbd] bg-[#fbf7f2] p-2 shadow-sm"
+    class="flex max-w-full flex-nowrap sm:flex-wrap items-center gap-1.5 sm:gap-2 overflow-x-auto rounded-xl border border-[#d9cbbd] bg-[#fbf7f2] p-1.5 sm:p-2 shadow-sm"
 >
     {#each tabs as tab (tab.href)}
         {@const active = isActive(tab)}
@@ -33,7 +33,7 @@
             href={tab.href}
             aria-current={active ? "page" : undefined}
             class={[
-                "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+                "inline-flex shrink-0 items-center gap-1.5 sm:gap-2 rounded-lg px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium transition-colors",
                 active
                     ? "bg-[#6b4f3a] text-white shadow-sm"
                     : "text-[#3f2e22] hover:bg-[#e4d8cb]",

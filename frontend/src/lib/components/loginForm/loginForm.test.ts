@@ -138,4 +138,53 @@ describe('Login form', () => {
         expect(window.location.href).toBe('/');
         expect(alerts).toEqual([]);
     });
+
+    it('redirects to a safe internal redirectTo path and falls back to / for unsafe URLs', async () => {
+        globalThis.fetch = (async (input: RequestInfo | URL) => {
+            if (String(input) === '/api/user/info') {
+                return new Response(
+                    JSON.stringify({
+                        id: '1',
+                        firstname: 'Jan',
+                        email: 'jan.kowalski@example.com',
+                    }),
+                    { status: 200 },
+                );
+            }
+            return new Response('', { status: 200 });
+        }) as typeof fetch;
+
+        window.location.href = 'http://localhost/auth?redirectTo=%2Fqr%2Fequipment%2Feq-42';
+
+        const firstRender = render(LoginForm);
+        await fireEvent.input(screen.getByLabelText('Email'), {
+            target: { value: 'jan.kowalski@example.com' },
+        });
+        await fireEvent.input(screen.getByLabelText('Password'), {
+            target: { value: 'Superextrasecurepassword1!' },
+        });
+        await fireEvent.click(screen.getByRole('button', { name: 'Login' }));
+
+        await waitFor(() => {
+            expect(window.location.href).toBe('/qr/equipment/eq-42');
+        });
+
+        firstRender.unmount();
+        setUser(null);
+        window.location.href = 'http://localhost/auth?redirectTo=https%3A%2F%2Fevil.com';
+
+        render(LoginForm);
+        await fireEvent.input(screen.getByLabelText('Email'), {
+            target: { value: 'jan.kowalski@example.com' },
+        });
+        await fireEvent.input(screen.getByLabelText('Password'), {
+            target: { value: 'Superextrasecurepassword1!' },
+        });
+        await fireEvent.click(screen.getByRole('button', { name: 'Login' }));
+
+        await waitFor(() => {
+            expect(window.location.href).toBe('/');
+        });
+        expect(alerts).toEqual([]);
+    });
 });

@@ -45,7 +45,7 @@
         class?: string;
     } = $props();
 
-    let remainingSeconds = $state(
+    let remainingSeconds = $derived(
         closeCountdownSeconds != null && closeCountdownSeconds > 0 ? closeCountdownSeconds : 0,
     );
     let countdownProgress = $derived(
@@ -54,39 +54,40 @@
             : 0,
     );
 
-    // Timer + circular progress for auto-close; $effect is the right tool for intervals.
-    $effect(() => {
+    const startCountdown = () => {
         const total = closeCountdownSeconds;
         if (total == null || total <= 0) {
             return;
         }
 
-        remainingSeconds = total;
+        let current = total;
+        remainingSeconds = current;
         const interval = setInterval(() => {
-            if (remainingSeconds <= 1) {
+            if (current <= 1) {
                 clearInterval(interval);
                 remainingSeconds = 0;
                 onClose();
                 return;
             }
-            remainingSeconds -= 1;
+            current -= 1;
+            remainingSeconds = current;
         }, 1000);
 
         return () => clearInterval(interval);
-    });
+    };
 </script>
 
-<div class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+<div class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4" role="dialog" aria-modal="true">
     <GlassBlur id="form-glass" />
     <div
         class={[
-            "relative z-50 flex w-full flex-col overflow-visible rounded-2xl border border-[#d9cbbd] bg-[#f7f1ea] p-6 text-zinc-800 shadow-lg",
+            "relative z-50 flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-2xl border border-[#d9cbbd] bg-[#f7f1ea] p-4 sm:p-6 text-zinc-800 shadow-lg",
             wide ? "max-w-4xl" : "max-w-2xl",
             className,
         ]}
     >
-        <div class="flex items-start justify-between gap-4 border-b border-[#e4d8cb] pb-4">
-            <div class="flex flex-col items-start gap-1">
+        <div class="flex items-start justify-between gap-3 sm:gap-4 border-b border-[#e4d8cb] pb-3 sm:pb-4">
+            <div class="flex min-w-0 flex-col items-start gap-1">
                 {#if showBreadcrumbs}
                     <Breadcrumbs {additionalCrumbs} />
                 {/if}
@@ -95,6 +96,7 @@
 
             {#if closeCountdownSeconds != null && closeCountdownSeconds > 0}
                 <button
+                    {@attach startCountdown}
                     type="button"
                     aria-label="Log out in {remainingSeconds} seconds"
                     onclick={() => onClose()}
@@ -134,24 +136,25 @@
                     class="close-btn flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-[#6b4f3a] transition-colors hover:bg-[#e4d8cb] hover:text-[#3f2e22]"
                 >
                     <span class="h-5 w-5 fill-current stroke-current" role="img" aria-hidden="true">
+                        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                         {@html closeIcon}
                     </span>
                 </button>
             {/if}
         </div>
 
-        <div class="my-6 min-h-0 flex-1 overflow-y-auto px-3">
+        <div class="my-4 sm:my-6 min-h-0 flex-1 overflow-y-auto px-1 sm:px-3">
             {#if children}
                 {@render children()}
             {/if}
         </div>
 
         {#if showActions}
-            <div class="mt-auto border-t border-[#e4d8cb] pt-4">
+            <div class="mt-auto border-t border-[#e4d8cb] pt-3 sm:pt-4">
                 <div
                     class={[
-                        "ml-auto flex items-center justify-end gap-4 p-2",
-                        showCancel ? "w-[calc(50%+0.5rem)]" : "w-full max-w-xs",
+                        "ml-auto flex items-center justify-end gap-2.5 sm:gap-4 p-1 sm:p-2",
+                        showCancel ? "w-full sm:w-[calc(50%+0.5rem)]" : "w-full sm:max-w-xs",
                     ]}
                 >
                     {#if showCancel}

@@ -1,7 +1,14 @@
 <script lang="ts">
     import type { Snippet } from "svelte";
 
-    export type BadgeTone = "primary" | "secondary" | "dark" | "danger" | "neutral" | "outline";
+    export type BadgeTone =
+        | "primary"
+        | "secondary"
+        | "dark"
+        | "danger"
+        | "success"
+        | "neutral"
+        | "outline";
 
     let {
         label,
@@ -21,6 +28,8 @@
                 return "bg-[#3f2e22] text-white";
             case "danger":
                 return "bg-[#8f3d32] text-white";
+            case "success":
+                return "bg-[#3d6b47] text-white";
             case "neutral":
                 return "bg-[#e4d8cb] text-[#3f2e22]";
             case "outline":
