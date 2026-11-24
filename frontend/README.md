@@ -63,7 +63,7 @@ src/ - Contains the source code for the project.
 			↳ favicon.svg
 			↳ filter.svg
 			↳ login.svg
-			↳ logo.webp
+			↳ logo.png
 			↳ new_batch.svg
 			↳ open_menu.svg
 			↳ plus.svg

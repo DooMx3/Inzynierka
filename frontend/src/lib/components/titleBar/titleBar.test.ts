@@ -33,7 +33,7 @@ describe('Title bar', () => {
         const logo = screen.getByAltText('Logo');
         expect(logo).toBeInTheDocument();
         expect(logo).toHaveAttribute('src');
-        expect(logo.getAttribute('src')).not.toBe('../../assets/logo.webp');
+        expect(logo.getAttribute('src')).not.toBe('../../assets/logo.png');
         expect(logo.getAttribute('src')).toMatch(/logo/i);
     });
 
