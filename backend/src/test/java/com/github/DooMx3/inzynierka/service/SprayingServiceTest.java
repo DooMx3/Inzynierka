@@ -157,6 +157,27 @@ class SprayingServiceTest {
   }
 
   @Test
+  void shouldAllowOenologistToUpdateAndDeleteSpraying() {
+    User oenologist =
+        User.builder()
+            .id(UUID.randomUUID())
+            .organisation(organisation)
+            .roles(new HashSet<>(Set.of(RoleName.OENOLOGIST)))
+            .build();
+    when(userRepository.findById(oenologist.getId())).thenReturn(Optional.of(oenologist));
+    stubActiveResources();
+    Spraying spraying = spraying(UUID.randomUUID());
+    when(sprayingRepository.findById(spraying.getId())).thenReturn(Optional.of(spraying));
+    when(sprayingRepository.save(spraying)).thenReturn(spraying);
+
+    service.update(spraying.getId(), request, oenologist);
+    service.delete(spraying.getId(), oenologist);
+
+    verify(sprayingRepository).save(spraying);
+    verify(sprayingRepository).delete(spraying);
+  }
+
+  @Test
   void shouldRejectSprayingFromAnotherOrganisation() {
     Organisation otherOrganisation =
         Organisation.builder().id(UUID.randomUUID()).active(true).build();
@@ -181,7 +202,7 @@ class SprayingServiceTest {
   }
 
   @Test
-  void shouldRejectOenologistTryingToCreateSpraying() {
+  void shouldAllowOenologistToCreateSpraying() {
     User oenologist =
         User.builder()
             .id(UUID.randomUUID())
@@ -189,13 +210,19 @@ class SprayingServiceTest {
             .roles(new HashSet<>(Set.of(RoleName.OENOLOGIST)))
             .build();
     when(userRepository.findById(oenologist.getId())).thenReturn(Optional.of(oenologist));
+    stubActiveResources();
+    when(sprayingRepository.save(any(Spraying.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
 
-    assertThrows(InsufficientPermissionException.class, () -> service.create(request, oenologist));
-    verifyNoInteractions(sprayingRepository);
+    SprayingResponse result = service.create(request, oenologist);
+
+    assertEquals(field.getId(), result.fieldId());
+    verify(sprayingRepository)
+        .save(argThat(savedSpraying -> savedSpraying.getOrganisation() == organisation));
   }
 
   @Test
-  void shouldRejectOenologistTryingToReadSpraying() {
+  void shouldAllowOenologistToReadSpraying() {
     User oenologist =
         User.builder()
             .id(UUID.randomUUID())
@@ -203,8 +230,27 @@ class SprayingServiceTest {
             .roles(new HashSet<>(Set.of(RoleName.OENOLOGIST)))
             .build();
     when(userRepository.findById(oenologist.getId())).thenReturn(Optional.of(oenologist));
+    Spraying spraying = spraying(UUID.randomUUID());
+    when(sprayingRepository.findByOrganisationOrderBySprayingDateDesc(organisation))
+        .thenReturn(List.of(spraying));
+    when(sprayingRepository.findById(spraying.getId())).thenReturn(Optional.of(spraying));
 
-    assertThrows(InsufficientPermissionException.class, () -> service.getAll(oenologist));
+    assertEquals(1, service.getAll(oenologist).size());
+    assertEquals(spraying.getId(), service.getById(spraying.getId(), oenologist).id());
+  }
+
+  @Test
+  void shouldRejectWorkerTryingToManageSpraying() {
+    User worker =
+        User.builder()
+            .id(UUID.randomUUID())
+            .organisation(organisation)
+            .roles(new HashSet<>(Set.of(RoleName.WORKER)))
+            .build();
+    when(userRepository.findById(worker.getId())).thenReturn(Optional.of(worker));
+
+    assertThrows(InsufficientPermissionException.class, () -> service.create(request, worker));
+    assertThrows(InsufficientPermissionException.class, () -> service.getAll(worker));
 
     verifyNoInteractions(sprayingRepository);
   }

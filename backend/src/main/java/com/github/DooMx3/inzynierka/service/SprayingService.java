@@ -36,7 +36,7 @@ public class SprayingService {
 
   @Transactional
   public SprayingResponse create(SprayingRequest request, User user) {
-    Organisation organisation = getActiveOwnedOrganisation(user);
+    Organisation organisation = getActiveManagingOrganisation(user);
     Spraying spraying = new Spraying();
     applyRequest(spraying, request, organisation);
     return SprayingResponse.from(sprayingRepository.save(spraying));
@@ -44,7 +44,7 @@ public class SprayingService {
 
   @Transactional
   public List<SprayingResponse> getAll(User user) {
-    Organisation organisation = getActiveOrganisationForReading(user);
+    Organisation organisation = getActiveManagingOrganisation(user);
     return sprayingRepository.findByOrganisationOrderBySprayingDateDesc(organisation).stream()
         .map(SprayingResponse::from)
         .toList();
@@ -52,12 +52,12 @@ public class SprayingService {
 
   @Transactional
   public SprayingResponse getById(UUID id, User user) {
-    return SprayingResponse.from(getSpraying(id, getActiveOrganisationForReading(user)));
+    return SprayingResponse.from(getSpraying(id, getActiveManagingOrganisation(user)));
   }
 
   @Transactional
   public SprayingResponse update(UUID id, SprayingRequest request, User user) {
-    Organisation organisation = getActiveOwnedOrganisation(user);
+    Organisation organisation = getActiveManagingOrganisation(user);
     Spraying spraying = getSpraying(id, organisation);
     applyRequest(spraying, request, organisation);
     return SprayingResponse.from(sprayingRepository.save(spraying));
@@ -65,7 +65,7 @@ public class SprayingService {
 
   @Transactional
   public void delete(UUID id, User user) {
-    Spraying spraying = getSpraying(id, getActiveOwnedOrganisation(user));
+    Spraying spraying = getSpraying(id, getActiveManagingOrganisation(user));
     sprayingRepository.delete(spraying);
   }
 
@@ -124,24 +124,13 @@ public class SprayingService {
     return substance;
   }
 
-  private Organisation getActiveOwnedOrganisation(User user) {
+  private Organisation getActiveManagingOrganisation(User user) {
     User authenticatedUser = getAuthenticatedUser(user);
     Organisation organisation = getActiveOrganisation(authenticatedUser);
     if (!(authenticatedUser.getRoles().contains(RoleName.OWNER)
-        || authenticatedUser.getRoles().contains(RoleName.WORKER))) {
+        || authenticatedUser.getRoles().contains(RoleName.OENOLOGIST))) {
       throw new InsufficientPermissionException(
-          "Only the organisation owner or worker can manage spraying");
-    }
-    return organisation;
-  }
-
-  private Organisation getActiveOrganisationForReading(User user) {
-    User authenticatedUser = getAuthenticatedUser(user);
-    Organisation organisation = getActiveOrganisation(authenticatedUser);
-    if (!authenticatedUser.getRoles().contains(RoleName.OWNER)
-        && !authenticatedUser.getRoles().contains(RoleName.WORKER)) {
-      throw new InsufficientPermissionException(
-          "Only the organisation owner or worker can access spraying");
+          "Only the organisation owner or oenologist can manage spraying");
     }
     return organisation;
   }

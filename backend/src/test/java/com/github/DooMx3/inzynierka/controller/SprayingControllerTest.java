@@ -140,7 +140,7 @@ class SprayingControllerTest {
     when(sprayingService.getAll(user)).thenReturn(List.of(spraying));
 
     mockMvc
-        .perform(get(BASE_URL).with(authentication(worker())))
+        .perform(get(BASE_URL).with(authentication(oenologist())))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].id").value(sprayingId.toString()));
 
@@ -152,7 +152,7 @@ class SprayingControllerTest {
     when(sprayingService.getById(sprayingId, user)).thenReturn(spraying);
 
     mockMvc
-        .perform(get(BASE_URL + "/" + sprayingId).with(authentication(worker())))
+        .perform(get(BASE_URL + "/" + sprayingId).with(authentication(oenologist())))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.fieldId").value(spraying.fieldId().toString()));
 
@@ -172,6 +172,26 @@ class SprayingControllerTest {
         .andExpect(status().isOk());
 
     verify(sprayingService).update(eq(sprayingId), any(), eq(user));
+  }
+
+  @Test
+  void shouldAllowOenologistToUpdateAndDeleteSpraying() throws Exception {
+    when(sprayingService.update(eq(sprayingId), any(), eq(user))).thenReturn(spraying);
+
+    mockMvc
+        .perform(
+            put(BASE_URL + "/" + sprayingId)
+                .with(authentication(oenologist()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson()))
+        .andExpect(status().isOk());
+
+    mockMvc
+        .perform(delete(BASE_URL + "/" + sprayingId).with(authentication(oenologist())))
+        .andExpect(status().isNoContent());
+
+    verify(sprayingService).update(eq(sprayingId), any(), eq(user));
+    verify(sprayingService).delete(sprayingId, user);
   }
 
   @Test
@@ -197,11 +217,26 @@ class SprayingControllerTest {
   }
 
   @Test
-  void shouldRejectOenologistTryingToCreateSpraying() throws Exception {
+  void shouldAllowOenologistToCreateSpraying() throws Exception {
+    when(sprayingService.create(any(), eq(user))).thenReturn(spraying);
+
     mockMvc
         .perform(
             post(BASE_URL)
                 .with(authentication(oenologist()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson()))
+        .andExpect(status().isOk());
+
+    verify(sprayingService).create(any(), eq(user));
+  }
+
+  @Test
+  void shouldRejectWorkerTryingToCreateSpraying() throws Exception {
+    mockMvc
+        .perform(
+            post(BASE_URL)
+                .with(authentication(worker()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestJson()))
         .andExpect(status().isForbidden());

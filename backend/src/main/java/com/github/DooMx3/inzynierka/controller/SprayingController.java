@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/spraying")
 @RequiredArgsConstructor
-@PreAuthorize("hasAuthority('OWNER') or hasAuthority('WORKER')")
+@PreAuthorize("hasAuthority('OWNER') or hasAuthority('OENOLOGIST')")
 public class SprayingController {
 
   private final SprayingService sprayingService;
@@ -37,7 +37,7 @@ public class SprayingController {
     @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content),
     @ApiResponse(
         responseCode = "403",
-        description = "Organisation owner required",
+        description = "Organisation owner or oenologist required",
         content = @Content)
   })
   @PostMapping
@@ -53,7 +53,7 @@ public class SprayingController {
     @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content),
     @ApiResponse(
         responseCode = "403",
-        description = "Organisation owner, worker, or oenologist required",
+        description = "Organisation owner or oenologist required",
         content = @Content)
   })
   @GetMapping
@@ -68,7 +68,7 @@ public class SprayingController {
     @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content),
     @ApiResponse(
         responseCode = "403",
-        description = "Organisation owner, worker, or oenologist required",
+        description = "Organisation owner or oenologist required",
         content = @Content),
     @ApiResponse(
         responseCode = "404",
@@ -88,7 +88,7 @@ public class SprayingController {
     @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content),
     @ApiResponse(
         responseCode = "403",
-        description = "Organisation owner required",
+        description = "Organisation owner or oenologist required",
         content = @Content),
     @ApiResponse(
         responseCode = "404",
@@ -109,7 +109,7 @@ public class SprayingController {
     @ApiResponse(responseCode = "401", description = "Not authenticated", content = @Content),
     @ApiResponse(
         responseCode = "403",
-        description = "Organisation owner required",
+        description = "Organisation owner or oenologist required",
         content = @Content),
     @ApiResponse(
         responseCode = "404",
