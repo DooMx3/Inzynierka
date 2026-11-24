@@ -44,10 +44,10 @@ describe('Title bar', () => {
         expect(src.startsWith('/') || src.startsWith('data:') || src.startsWith('blob:')).toBe(true);
     });
 
-    it('Check app name is Vinery and links to /', () => {
+    it('Check app name is Dionizos and links to /', () => {
         render(TitleBar);
 
-        const brandName = screen.getByText('Vinery');
+        const brandName = screen.getByText('Dionizos');
         expect(brandName).toBeInTheDocument();
         expect(brandName.closest('a')).toHaveAttribute('href', '/');
     });
@@ -56,7 +56,7 @@ describe('Title bar', () => {
         render(TitleBar);
 
         const logo = screen.getByAltText('Logo');
-        const name = screen.getByText('Vinery');
+        const name = screen.getByText('Dionizos');
         const brandLink = name.closest('a');
 
         expect(brandLink?.firstElementChild).toBe(logo);
@@ -221,7 +221,7 @@ describe('Title bar', () => {
             render(TitleBar);
 
             expect(screen.queryByRole('searchbox', { name: 'Search' })).not.toBeInTheDocument();
-            expect(screen.getByText('Vinery')).toHaveClass('whitespace-nowrap');
+            expect(screen.getByText('Dionizos')).toHaveClass('whitespace-nowrap');
             expect(screen.getByRole('button', { name: 'Profile Dropdown' })).toBeInTheDocument();
         } finally {
             window.matchMedia = original;

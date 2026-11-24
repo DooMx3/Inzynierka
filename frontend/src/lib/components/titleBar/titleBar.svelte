@@ -278,7 +278,7 @@
         >
             <img alt="Logo" src={logo} class="h-11 w-11 sm:h-20 sm:w-20 shrink-0 mr-1.5 sm:mr-2" />
             <p class={["text-zinc-800 font-semibold text-base sm:text-2xl truncate", !showSearch && "whitespace-nowrap"]}>
-                Vinery
+                Dionizos
             </p>
         </a>
     </span>
