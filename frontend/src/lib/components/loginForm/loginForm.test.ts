@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, it, expect, beforeEach, afterEach, spyOn } from 'bun:test';
 import { flushSync } from 'svelte';
+import { gooeyToast } from 'goey-toast-svelte';
 import LoginForm from './loginForm.svelte';
 import { session, setUser } from '$lib/stores/session.svelte';
 
@@ -8,16 +9,14 @@ const fieldOf = (label: string) => screen.getByLabelText(label).parentElement;
 
 describe('Login form', () => {
     const originalFetch = globalThis.fetch;
-    const originalAlert = globalThis.alert;
     const originalLocation = window.location;
-    let alerts: string[];
+    let warningSpy: ReturnType<typeof spyOn<typeof gooeyToast, 'warning'>>;
+    let errorSpy: ReturnType<typeof spyOn<typeof gooeyToast, 'error'>>;
 
     beforeEach(() => {
-        alerts = [];
         setUser(null);
-        globalThis.alert = ((message?: string) => {
-            alerts.push(String(message ?? ''));
-        }) as typeof alert;
+        warningSpy = spyOn(gooeyToast, 'warning');
+        errorSpy = spyOn(gooeyToast, 'error');
         Object.defineProperty(window, 'location', {
             configurable: true,
             writable: true,
@@ -27,7 +26,8 @@ describe('Login form', () => {
 
     afterEach(() => {
         globalThis.fetch = originalFetch;
-        globalThis.alert = originalAlert;
+        warningSpy.mockRestore();
+        errorSpy.mockRestore();
         Object.defineProperty(window, 'location', {
             configurable: true,
             writable: true,
@@ -81,8 +81,10 @@ describe('Login form', () => {
         flushSync();
 
         expect(called).toBe(false);
-        expect(alerts[0]).toContain('Enter a valid email.');
-        expect(alerts[0]).toContain('Enter your password.');
+        expect(warningSpy).toHaveBeenCalledTimes(1);
+        const warningOptions = warningSpy.mock.calls[0]?.[1];
+        expect(warningOptions?.description).toContain('Enter a valid email.');
+        expect(warningOptions?.description).toContain('Enter your password.');
         expect(fieldOf('Email')).toHaveClass('border-red-500', 'text-red-700/80');
         expect(fieldOf('Password')).toHaveClass('border-red-500');
         expect(screen.getByLabelText('Password')).toHaveClass('text-red-700/80');
@@ -100,9 +102,12 @@ describe('Login form', () => {
             target: { value: 'wrong-password' },
         });
         await fireEvent.click(screen.getByRole('button', { name: 'Login' }));
-        flushSync();
 
-        expect(alerts).toEqual(['Invalid credentials']);
+        await waitFor(() => {
+            expect(errorSpy).toHaveBeenCalledWith('Login failed', {
+                description: 'Invalid credentials',
+            });
+        });
         expect(fieldOf('Email')).toHaveClass('border-red-500');
         expect(fieldOf('Password')).toHaveClass('border-red-500', 'text-red-700/80');
         expect(session.user).toBeNull();
@@ -136,7 +141,8 @@ describe('Login form', () => {
             expect(session.user?.firstname).toBe('Jan');
         });
         expect(window.location.href).toBe('/');
-        expect(alerts).toEqual([]);
+        expect(warningSpy).not.toHaveBeenCalled();
+        expect(errorSpy).not.toHaveBeenCalled();
     });
 
     it('redirects to a safe internal redirectTo path and falls back to / for unsafe URLs', async () => {
@@ -185,6 +191,7 @@ describe('Login form', () => {
         await waitFor(() => {
             expect(window.location.href).toBe('/');
         });
-        expect(alerts).toEqual([]);
+        expect(warningSpy).not.toHaveBeenCalled();
+        expect(errorSpy).not.toHaveBeenCalled();
     });
 });

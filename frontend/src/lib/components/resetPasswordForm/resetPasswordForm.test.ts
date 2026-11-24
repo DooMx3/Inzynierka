@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, it, expect, beforeEach, afterEach, spyOn } from 'bun:test';
 import { flushSync } from 'svelte';
+import { gooeyToast } from 'goey-toast-svelte';
 import ResetPasswordForm from './resetPasswordForm.svelte';
 
 const readyPassword = 'Superextrasecurepassword1!';
@@ -15,15 +16,15 @@ const fillPasswords = async (password: string, confirmPassword: string) => {
 
 describe('Reset password form', () => {
     const originalFetch = globalThis.fetch;
-    const originalAlert = globalThis.alert;
     const originalLocation = window.location;
-    let alerts: string[];
+    let warningSpy: ReturnType<typeof spyOn<typeof gooeyToast, 'warning'>>;
+    let errorSpy: ReturnType<typeof spyOn<typeof gooeyToast, 'error'>>;
+    let successSpy: ReturnType<typeof spyOn<typeof gooeyToast, 'success'>>;
 
     beforeEach(() => {
-        alerts = [];
-        globalThis.alert = ((message?: string) => {
-            alerts.push(String(message ?? ''));
-        }) as typeof alert;
+        warningSpy = spyOn(gooeyToast, 'warning');
+        errorSpy = spyOn(gooeyToast, 'error');
+        successSpy = spyOn(gooeyToast, 'success');
         Object.defineProperty(window, 'location', {
             configurable: true,
             writable: true,
@@ -33,7 +34,9 @@ describe('Reset password form', () => {
 
     afterEach(() => {
         globalThis.fetch = originalFetch;
-        globalThis.alert = originalAlert;
+        warningSpy.mockRestore();
+        errorSpy.mockRestore();
+        successSpy.mockRestore();
         Object.defineProperty(window, 'location', {
             configurable: true,
             writable: true,
@@ -77,7 +80,12 @@ describe('Reset password form', () => {
         flushSync();
 
         expect(called).toBe(false);
-        expect(alerts[0]).toContain('Password does not meet the requirements.');
+        expect(warningSpy).toHaveBeenCalledWith(
+            'Check password requirements',
+            expect.objectContaining({
+                description: expect.stringContaining('Password does not meet the requirements.'),
+            }),
+        );
         expect(screen.getByLabelText('New password').parentElement).toHaveClass('border-red-500');
     });
 
@@ -94,7 +102,12 @@ describe('Reset password form', () => {
         flushSync();
 
         expect(called).toBe(false);
-        expect(alerts[0]).toContain('Passwords do not match.');
+        expect(warningSpy).toHaveBeenCalledWith(
+            'Check password requirements',
+            expect.objectContaining({
+                description: expect.stringContaining('Passwords do not match.'),
+            }),
+        );
         expect(screen.getByLabelText('Confirm password').parentElement).toHaveClass('border-red-500');
     });
 
@@ -118,6 +131,10 @@ describe('Reset password form', () => {
             expect(screen.getByText('Password reset successfully.')).toBeInTheDocument();
         });
         expect(screen.queryByLabelText('New password')).not.toBeInTheDocument();
-        expect(alerts).toEqual([]);
+        expect(successSpy).toHaveBeenCalledWith('Password reset', {
+            description: 'Password reset successfully.',
+        });
+        expect(warningSpy).not.toHaveBeenCalled();
+        expect(errorSpy).not.toHaveBeenCalled();
     });
 });

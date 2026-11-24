@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, it, expect, beforeEach, afterEach, spyOn } from 'bun:test';
 import { flushSync } from 'svelte';
+import { gooeyToast } from 'goey-toast-svelte';
 import ChangePasswordForm from './changePasswordForm.svelte';
 
 const readyPassword = 'Superextrasecurepassword1!';
@@ -14,16 +15,16 @@ const fill = async (current: string, password: string, confirm: string) => {
 
 describe('Change password form', () => {
     const originalFetch = globalThis.fetch;
-    const originalAlert = globalThis.alert;
-    let alerts: string[];
     let calls: number;
+    let warningSpy: ReturnType<typeof spyOn<typeof gooeyToast, 'warning'>>;
+    let errorSpy: ReturnType<typeof spyOn<typeof gooeyToast, 'error'>>;
+    let successSpy: ReturnType<typeof spyOn<typeof gooeyToast, 'success'>>;
 
     beforeEach(() => {
-        alerts = [];
         calls = 0;
-        globalThis.alert = ((message?: string) => {
-            alerts.push(String(message ?? ''));
-        }) as typeof alert;
+        warningSpy = spyOn(gooeyToast, 'warning');
+        errorSpy = spyOn(gooeyToast, 'error');
+        successSpy = spyOn(gooeyToast, 'success');
         globalThis.fetch = (async () => {
             calls += 1;
             return new Response(JSON.stringify('Password changed successfully.'), { status: 200 });
@@ -32,7 +33,9 @@ describe('Change password form', () => {
 
     afterEach(() => {
         globalThis.fetch = originalFetch;
-        globalThis.alert = originalAlert;
+        warningSpy.mockRestore();
+        errorSpy.mockRestore();
+        successSpy.mockRestore();
     });
 
     it('asks for the current password and a matching new one', () => {
@@ -51,7 +54,12 @@ describe('Change password form', () => {
         flushSync();
 
         expect(calls).toBe(0);
-        expect(alerts[0]).toContain('Enter your current password.');
+        expect(warningSpy).toHaveBeenCalledWith(
+            'Check password fields',
+            expect.objectContaining({
+                description: expect.stringContaining('Enter your current password.'),
+            }),
+        );
         expect(screen.getByLabelText('Current password').parentElement).toHaveClass('border-red-500');
     });
 
@@ -62,7 +70,12 @@ describe('Change password form', () => {
         flushSync();
 
         expect(calls).toBe(0);
-        expect(alerts[0]).toContain('Password does not meet the requirements.');
+        expect(warningSpy).toHaveBeenCalledWith(
+            'Check password fields',
+            expect.objectContaining({
+                description: expect.stringContaining('Password does not meet the requirements.'),
+            }),
+        );
         expect(screen.getByLabelText('New password').parentElement).toHaveClass('border-red-500');
     });
 
@@ -73,7 +86,12 @@ describe('Change password form', () => {
         flushSync();
 
         expect(calls).toBe(0);
-        expect(alerts[0]).toContain('Passwords do not match.');
+        expect(warningSpy).toHaveBeenCalledWith(
+            'Check password fields',
+            expect.objectContaining({
+                description: expect.stringContaining('Passwords do not match.'),
+            }),
+        );
         expect(screen.getByLabelText('Confirm password').parentElement).toHaveClass('border-red-500');
     });
 
@@ -91,7 +109,9 @@ describe('Change password form', () => {
         await fireEvent.click(screen.getByRole('button', { name: 'Change password' }));
 
         await waitFor(() => {
-            expect(alerts[0]).toBe('Current password is wrong');
+            expect(errorSpy).toHaveBeenCalledWith('Password change failed', {
+                description: 'Current password is wrong',
+            });
         });
         expect(screen.getByLabelText('New password')).toBeInTheDocument();
         expect(calls).toBe(1);
@@ -114,7 +134,9 @@ describe('Change password form', () => {
         await fireEvent.click(screen.getByRole('button', { name: 'Change password' }));
 
         await waitFor(() => {
-            expect(alerts[0]).toBe('Password changed successfully.');
+            expect(successSpy).toHaveBeenCalledWith('Password changed', {
+                description: 'Password changed successfully.',
+            });
         });
         expect(finished).toBe(true);
         expect(calls).toBe(1);

@@ -1,6 +1,7 @@
 import { render, screen, waitFor, fireEvent, within } from '@testing-library/svelte';
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, it, expect, beforeEach, afterEach, spyOn } from 'bun:test';
 import { tick } from 'svelte';
+import { gooeyToast } from 'goey-toast-svelte';
 import UserHome from './userHome.svelte';
 import { session, setUser } from '$lib/stores/session.svelte';
 
@@ -39,13 +40,17 @@ const invitedOrganisation = {
 
 describe('User home', () => {
     const originalFetch = globalThis.fetch;
-    const originalAlert = globalThis.alert;
     const originalLocation = window.location;
     let calls: { url: string; init?: RequestInit }[];
     let invitationPayload: unknown = invitation;
     let membershipStatus = 'NONE';
     let roles: string[] = [];
     let infoOrganisation: unknown = null;
+    let warningSpy: ReturnType<typeof spyOn<typeof gooeyToast, 'warning'>>;
+    let errorSpy: ReturnType<typeof spyOn<typeof gooeyToast, 'error'>>;
+    let successSpy: ReturnType<typeof spyOn<typeof gooeyToast, 'success'>>;
+    let infoSpy: ReturnType<typeof spyOn<typeof gooeyToast, 'info'>>;
+    let promiseSpy: ReturnType<typeof spyOn<typeof gooeyToast, 'promise'>>;
 
     beforeEach(() => {
         calls = [];
@@ -54,6 +59,11 @@ describe('User home', () => {
         roles = [];
         infoOrganisation = null;
         setUser(null);
+        warningSpy = spyOn(gooeyToast, 'warning');
+        errorSpy = spyOn(gooeyToast, 'error');
+        successSpy = spyOn(gooeyToast, 'success');
+        infoSpy = spyOn(gooeyToast, 'info');
+        promiseSpy = spyOn(gooeyToast, 'promise').mockImplementation(() => 'toast-id');
         Object.defineProperty(window, 'location', {
             configurable: true,
             writable: true,
@@ -122,7 +132,11 @@ describe('User home', () => {
     afterEach(() => {
         setUser(null);
         globalThis.fetch = originalFetch;
-        globalThis.alert = originalAlert;
+        warningSpy.mockRestore();
+        errorSpy.mockRestore();
+        successSpy.mockRestore();
+        infoSpy.mockRestore();
+        promiseSpy.mockRestore();
         Object.defineProperty(window, 'location', {
             configurable: true,
             writable: true,
@@ -180,11 +194,6 @@ describe('User home', () => {
     });
 
     it('opens the organisation form over a blurred page', async () => {
-        const alerts: string[] = [];
-        globalThis.alert = ((message?: string) => {
-            alerts.push(String(message ?? ''));
-        }) as typeof alert;
-
         setUser(user);
         await shown();
         await fireEvent.click(screen.getByRole('button', { name: /Create new vineyard/i }));
@@ -196,9 +205,18 @@ describe('User home', () => {
         await fireEvent.click(screen.getByRole('button', { name: 'Create' }));
 
         await waitFor(() => {
-            expect(alerts[0]).toBe('The organisation is ready. You are its owner.');
+            expect(calls.filter((call) => call.url === '/api/user/info').length).toBeGreaterThanOrEqual(2);
         });
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        expect(promiseSpy).toHaveBeenCalledTimes(1);
+        expect(promiseSpy.mock.calls[0]?.[1]).toEqual(
+            expect.objectContaining({
+                success: 'Organisation created',
+                description: {
+                    success: 'The organisation is ready. You are its owner.',
+                },
+            }),
+        );
         expect(session.user?.roles).toContain('OWNER');
         const create = calls.find((call) => call.url === '/api/organisations' && call.init?.method === 'POST');
         expect(create?.init?.body).toBe(
@@ -284,16 +302,14 @@ describe('User home', () => {
     });
 
     it('marks an empty organisation name and city before calling the server', async () => {
-        const alerts: string[] = [];
-        globalThis.alert = ((message?: string) => {
-            alerts.push(String(message ?? ''));
-        }) as typeof alert;
         setUser(user);
         await shown();
         await fireEvent.click(screen.getByRole('button', { name: /Create new vineyard/i }));
         await fireEvent.click(screen.getByRole('button', { name: 'Create' }));
 
-        expect(alerts).toEqual(['Enter the organisation name.\nEnter the city.']);
+        expect(warningSpy).toHaveBeenCalledWith('Check vineyard details', {
+            description: 'Enter the organisation name. Enter the city.',
+        });
         expect(screen.getByLabelText('Name').parentElement).toHaveClass('border-red-500');
         expect(screen.getByLabelText('City').parentElement).toHaveClass('border-red-500');
         expect(screen.getByLabelText('Street').parentElement).not.toHaveClass('border-red-500');
@@ -301,10 +317,6 @@ describe('User home', () => {
     });
 
     it('offers a member a way to leave the vineyard', async () => {
-        const alerts: string[] = [];
-        globalThis.alert = ((message?: string) => {
-            alerts.push(String(message ?? ''));
-        }) as typeof alert;
         membershipStatus = 'MEMBER';
         invitationPayload = null;
         infoOrganisation = organisation;
@@ -319,18 +331,18 @@ describe('User home', () => {
 
         await waitFor(() => {
             expect(screen.getByRole('button', { name: /Create new vineyard/i })).toBeEnabled();
+            expect(infoSpy).toHaveBeenCalledWith('Left vineyard', {
+                description: 'You are no longer a member of this organisation.',
+            });
         });
-        expect(alerts).toEqual([]);
+        expect(warningSpy).not.toHaveBeenCalled();
+        expect(errorSpy).not.toHaveBeenCalled();
         expect(
             calls.some((call) => call.url === '/api/organisations/leave' && call.init?.method === 'DELETE'),
         ).toBe(true);
     });
 
     it('lets the owner edit and delete the vineyard', async () => {
-        const alerts: string[] = [];
-        globalThis.alert = ((message?: string) => {
-            alerts.push(String(message ?? ''));
-        }) as typeof alert;
         membershipStatus = 'MEMBER';
         roles = ['OWNER'];
         invitationPayload = null;
@@ -348,13 +360,18 @@ describe('User home', () => {
         await waitFor(() => {
             expect(screen.getByRole('heading', { name: 'Winnica Nowa' })).toBeInTheDocument();
         });
+        expect(successSpy).toHaveBeenCalledWith('Vineyard updated', {
+            description: 'Organisation details have been saved.',
+        });
         const update = calls.find((call) => call.url === '/api/organisations' && call.init?.method === 'PUT');
         expect(update?.init?.body).toContain('"name":"Winnica Nowa"');
 
         await fireEvent.click(screen.getByRole('button', { name: 'Delete vineyard' }));
         const dialog = screen.getByRole('dialog');
         await fireEvent.click(within(dialog).getByRole('button', { name: 'Delete vineyard' }));
-        expect(alerts).toEqual(['Enter your password.']);
+        expect(warningSpy).toHaveBeenCalledWith('Password required', {
+            description: 'Enter your password.',
+        });
         expect(within(dialog).getByLabelText('Password').parentElement).toHaveClass('border-red-500');
         expect(calls.some((call) => call.url === '/api/organisations' && call.init?.method === 'DELETE')).toBe(false);
 
@@ -365,6 +382,9 @@ describe('User home', () => {
 
         await waitFor(() => {
             expect(screen.getByRole('button', { name: /Create new vineyard/i })).toBeEnabled();
+            expect(infoSpy).toHaveBeenCalledWith('Vineyard deleted', {
+                description: 'The organisation has been permanently removed.',
+            });
         });
         const removal = calls.find((call) => call.url === '/api/organisations' && call.init?.method === 'DELETE');
         expect(removal?.init?.body).toBe(JSON.stringify({ password: 'Superextrasecurepassword1!' }));

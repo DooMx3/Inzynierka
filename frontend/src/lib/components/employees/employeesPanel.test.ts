@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/svelte';
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, it, expect, beforeEach, afterEach, spyOn } from 'bun:test';
+import { gooeyToast } from 'goey-toast-svelte';
 import EmployeesPanel from './employeesPanel.svelte';
 import { setUser } from '$lib/stores/session.svelte';
 
@@ -110,25 +111,23 @@ describe('Employees panel', () => {
     });
 
     it('marks an invalid invitation email before calling the server', async () => {
-        const alerts: string[] = [];
-        const originalAlert = globalThis.alert;
-        globalThis.alert = ((message?: string) => {
-            alerts.push(String(message ?? ''));
-        }) as typeof alert;
+        const warningSpy = spyOn(gooeyToast, 'warning');
+        try {
+            await shown();
+            await fireEvent.click(screen.getByRole('button', { name: 'New employee' }));
+            const dialog = screen.getByRole('dialog');
+            await fireEvent.click(within(dialog).getByRole('button', { name: 'Invite' }));
 
-        await shown();
-        await fireEvent.click(screen.getByRole('button', { name: 'New employee' }));
-        const dialog = screen.getByRole('dialog');
-        await fireEvent.click(within(dialog).getByRole('button', { name: 'Invite' }));
-
-        expect(alerts).toEqual([
-            'Enter a valid email. The person needs an account before they can be invited.',
-        ]);
-        expect(within(dialog).getByLabelText('E-mail').parentElement).toHaveClass('border-red-500');
-        expect(
-            calls.some((call) => call.url === '/api/organisations/invitations' && call.init?.method === 'POST'),
-        ).toBe(false);
-        globalThis.alert = originalAlert;
+            expect(warningSpy).toHaveBeenCalledWith('Invalid email', {
+                description: 'Enter a valid email. The person needs an account before they can be invited.',
+            });
+            expect(within(dialog).getByLabelText('E-mail').parentElement).toHaveClass('border-red-500');
+            expect(
+                calls.some((call) => call.url === '/api/organisations/invitations' && call.init?.method === 'POST'),
+            ).toBe(false);
+        } finally {
+            warningSpy.mockRestore();
+        }
     });
 
     it('removes a role from the change-roles popup', async () => {

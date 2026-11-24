@@ -1,23 +1,26 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, it, expect, beforeEach, afterEach, spyOn } from 'bun:test';
 import { flushSync } from 'svelte';
+import { gooeyToast } from 'goey-toast-svelte';
 import ForgotPasswordForm from './forgotPasswordForm.svelte';
 
 describe('Forgot password form', () => {
     const originalFetch = globalThis.fetch;
-    const originalAlert = globalThis.alert;
-    let alerts: string[];
+    let warningSpy: ReturnType<typeof spyOn<typeof gooeyToast, 'warning'>>;
+    let errorSpy: ReturnType<typeof spyOn<typeof gooeyToast, 'error'>>;
+    let infoSpy: ReturnType<typeof spyOn<typeof gooeyToast, 'info'>>;
 
     beforeEach(() => {
-        alerts = [];
-        globalThis.alert = ((message?: string) => {
-            alerts.push(String(message ?? ''));
-        }) as typeof alert;
+        warningSpy = spyOn(gooeyToast, 'warning');
+        errorSpy = spyOn(gooeyToast, 'error');
+        infoSpy = spyOn(gooeyToast, 'info');
     });
 
     afterEach(() => {
         globalThis.fetch = originalFetch;
-        globalThis.alert = originalAlert;
+        warningSpy.mockRestore();
+        errorSpy.mockRestore();
+        infoSpy.mockRestore();
     });
 
     it('asks for an email and a way back to sign in', () => {
@@ -54,7 +57,12 @@ describe('Forgot password form', () => {
         flushSync();
 
         expect(called).toBe(false);
-        expect(alerts[0]).toContain('Enter a valid email.');
+        expect(warningSpy).toHaveBeenCalledWith(
+            'Invalid email',
+            expect.objectContaining({
+                description: expect.stringContaining('Enter a valid email.'),
+            }),
+        );
         expect(screen.getByLabelText('Email').parentElement).toHaveClass('border-red-500');
     });
 
@@ -80,6 +88,10 @@ describe('Forgot password form', () => {
             ).toBeInTheDocument();
         });
         expect(screen.queryByLabelText('Email')).not.toBeInTheDocument();
-        expect(alerts).toEqual([]);
+        expect(infoSpy).toHaveBeenCalledWith('Reset link requested', {
+            description: 'If an account with that email exists, a reset link has been sent.',
+        });
+        expect(warningSpy).not.toHaveBeenCalled();
+        expect(errorSpy).not.toHaveBeenCalled();
     });
 });
