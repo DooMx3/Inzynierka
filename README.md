@@ -1,10 +1,10 @@
 <div align="center">
 
-  [Logo](./frontend/src/lib/assets/logo.png) 
+![Logo](./frontend/src/lib/assets/logo.png)
 
-  <h1>Dionizos</h1>
+# Dionizos
 
-  <p>Vinary and vineyard management software.</p>
+Winery and vineyard management software.
 
 </div>
 
