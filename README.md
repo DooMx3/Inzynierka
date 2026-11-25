@@ -1,6 +1,8 @@
 <div align="center">
 
-  <h1>TODO</h1>
+  [Logo](./frontend/src/lib/assets/logo.png) 
+
+  <h1>Dionizos</h1>
 
   <p>Vinary and vineyard management software.</p>
 
