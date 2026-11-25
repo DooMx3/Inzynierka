@@ -1,6 +1,6 @@
 <div align="center">
 
-  <h1>TODO</h1>
+  <h1>Dionizos</h1>
 
   <p>Vinary and vineyard management software.</p>
 
